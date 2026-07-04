@@ -238,7 +238,27 @@ int main(int argc, char *argv[])
     sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
 
     vita_log("Framebuffer ready, %dx%d\n", VITA_SCREEN_W, VITA_SCREEN_H);
+    /* ---- Buscar BIOS ---- */
+    const char *bios = find_first_existing(bios_candidates);
+    if (bios) {
+        yinit.biospath = bios;
+        vita_log("BIOS encontrada: %s", bios);
+    } else {
+        yinit.biospath = NULL;  /* BIOS emulada (HLE), menos compatible */
+        vita_log("AVISO: ninguna BIOS encontrada, usando HLE");
+    }
 
+    /* ---- Buscar juego ---- */
+    const char *game = find_first_existing(game_candidates);
+    if (game) {
+        yinit.cdcoretype = CDCORE_ISO;
+        yinit.cdpath = game;
+        vita_log("Juego encontrado: %s", game);
+    } else {
+        yinit.cdcoretype = CDCORE_DUMMY;
+        yinit.cdpath = NULL;
+        vita_log("AVISO: ningun juego encontrado, CD dummy (solo menu de BIOS)");
+    };
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
