@@ -22,7 +22,8 @@
       - Real ISO loading   - CDCORE_DUMMY means no game will actually run;
                               this milestone only proves the BIOS/core boots
 */
-
+#include <stdarg.h>        // para va_start, va_end, va_list
+#include <psp2/io/stat.h>  // para sceIoMkdir
 #include <psp2/kernel/processmgr.h>
 #include <psp2/display.h>
 #include <psp2/kernel/threadmgr.h>
