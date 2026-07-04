@@ -37,7 +37,6 @@
 #include "../cdbase.h"
 #include "../cs2.h"
 #include "../scsp.h"
-#include "../sndcore.h"
 #include "../m68kcore.h"
 
 #define VITA_SCREEN_W 960
