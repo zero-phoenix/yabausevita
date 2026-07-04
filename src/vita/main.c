@@ -28,6 +28,39 @@
 #include <psp2/display.h>
 #include <psp2/kernel/threadmgr.h>
 #include <stdio.h>
+
+#define DATA_DIR "ux0:data/yabausevita/"
+
+/* --- Candidatos de BIOS, en orden de preferencia --- */
+static const char *bios_candidates[] = {
+    DATA_DIR "Sega Saturn BIOS (USA).bin",
+    DATA_DIR "Sega Saturn BIOS (EUR).bin",
+    DATA_DIR "Sega Saturn BIOS v1.01 (JAP).bin",
+    DATA_DIR "Sega Saturn BIOS v1.00 (JAP).bin",
+    NULL
+};
+
+/* --- Candidatos de juego, en orden de preferencia --- */
+/* NOTA: el .chd de Sonic R NO es compatible con este core (solo ISO/CUE+BIN).
+   Conviertelo con: chdman extractcd -i entrada.chd -o salida.cue */
+static const char *game_candidates[] = {
+    DATA_DIR "NiGHTS into Dreams... (USA) (with 3D Control Pad) (RE).cue",
+    DATA_DIR "Sonic R (Europe).cue",   /* funcionara cuando conviertas el CHD */
+    NULL
+};
+
+static const char *find_first_existing(const char **candidates)
+{
+    for (int i = 0; candidates[i] != NULL; i++) {
+        FILE *f = fopen(candidates[i], "rb");
+        if (f) {
+            fclose(f);
+            return candidates[i];
+        }
+        vita_log("No encontrado: %s", candidates[i]);
+    }
+    return NULL;
+}
 #include <string.h>
 
 #include "../yabause.h"
