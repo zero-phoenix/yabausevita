@@ -17,6 +17,7 @@
 */
 #include "peripheral.h"
 #include "scsp.h"
+#include "vdp2.h"
 #include "movie.h"
 #include "cs2.h"
 #include "yabause.h"
