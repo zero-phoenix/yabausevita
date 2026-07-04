@@ -137,7 +137,7 @@ void YuiSwapBuffers(void)
     for (int y = 0; y < srch && (y + offy) < VITA_SCREEN_H; y++)
     {
         uint32_t *dstrow = dst + (y + offy) * VITA_SCREEN_W + offx;
-        uint32_t *srcrow = dispbuffer + y * srcw;
+        u32 *srcrow = dispbuffer + y * srcw;
         int copyw = srcw;
         if (offx + copyw > VITA_SCREEN_W)
             copyw = VITA_SCREEN_W - offx;
