@@ -9,6 +9,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 project(YabauseVita C)
+add_definitions(-DVERSION="0.9.10")
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
