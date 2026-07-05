@@ -38,13 +38,26 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH="$VITASDK/bin:$PATH"
-          mkdir -p build
+          # Limpiar el directorio build para evitar caché de CMake con compiladores incorrectos
+          rm -rf build
+          mkdir build
           cd build
           # Pasamos -DVITASDK explícitamente para que CMakeLists.txt lo encuentre
-          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
+          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DCMAKE_BUILD_TYPE=Release ..
           make -j$(nproc)
 
       - name: Add BIOS and ROMs folders to VPK
         run: |
           cd build
-          # Crear las carpetas y un archivo temporal para que no estén vac
+          # Crear las carpetas y un archivo temporal para que no estén vacías al comprimirlas
+          mkdir -p roms bios
+          touch roms/.keep bios/.keep
+          # Un archivo VPK es básicamente un ZIP. Agregamos las carpetas al VPK generado.
+          zip -r YabauseVita.vpk roms/ bios/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: yabause-vita
+          path: build/YabauseVita.vpk
+          if-no-files-found: error
