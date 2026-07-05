@@ -42,9 +42,12 @@ jobs:
           rm -rf build
           mkdir build
           cd build
-          # Usar el toolchain correcto: vita.toolchain.cmake
+          # Forzamos las rutas absolutas para evitar que CMake use el compilador del PC
           cmake -DVITASDK="/usr/local/vitasdk" \
-                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.toolchain.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.cmake" \
+                -DCMAKE_C_COMPILER="/usr/local/vitasdk/bin/arm-vita-eabi-gcc" \
+                -DCMAKE_CXX_COMPILER="/usr/local/vitasdk/bin/arm-vita-eabi-g++" \
+                -DYAB_PORTS=vita \
                 -DCMAKE_BUILD_TYPE=Release ..
           make -j$(nproc)
 
