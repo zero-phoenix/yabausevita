@@ -1,65 +1,66 @@
-name: Build Yabause Vita
+name: Build YabauseVita (Phase 2)
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VITASDK: /usr/local/vitasdk
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install LLVM 21
+      - name: Install clang 21
         run: curl https://apt.llvm.org/llvm.sh | sudo bash -s -- 21
 
-      - name: Checkout vdpm
+      - name: Checkout vitasdk installer
         uses: actions/checkout@v4
         with:
           repository: vitasdk/vdpm
           path: vdpm
 
-      - name: Install VitaSDK
+      - name: Checkout vitasdk samples (for debugScreen.c/.h)
+        uses: actions/checkout@v4
+        with:
+          repository: vitasdk/samples
+          path: external/vitasdk-samples
+
+      - name: Install vitasdk (full toolchain)
         run: |
-          export VITASDK=/usr/local/vitasdk
-          me/path="$VITASDK/bin:$PATH"
           cd vdpm
           ./bootstrap-vitasdk.sh
           ./install-all.sh
+        env:
+          VITASDK: /usr/local/vitasdk
 
-      - name: Configure and Build
+      - name: Flush filesystem writes before compiling
         run: |
-          export VITASDK=/usr/local/vitasdk
-          export PATH="$VITASDK/bin:$PATH"
-          # Limpiar el directorio build para evitar caché de CMake
-          rm -rf build
+          sync
+          sleep 5
+          test -f /usr/local/vitasdk/arm-vita-eabi/include/psp2/kernel/processmgr.h && echo "OK: header present"
+
+      - name: Configure
+        run: |
           mkdir build
           cd build
-          # Usar el toolchain correcto: vita.toolchain.cmake
-          cmake -DVITASDK="/usr/local/vitasdk" \
-                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.toolchain.cmake" \
-                -DCMAKE_BUILD_TYPE=Release ..
-          make -j$(nproc)
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+        env:
+          VITASDK: /usr/local/vitasdk
 
-      - name: Add BIOS and ROMs folders to VPK
-        run: |
-          cd build
-          # Crear las carpetas y un archivo temporal para que no estén vacías al comprimirlas
-          mkdir -p roms bios
-          touch roms/.keep bios/.keep
-          # Un archivo VPK es básicamente un ZIP. Agregamos las carpetas al VPK generado.
-          zip -r YabauseVita.vpk roms/ bios/
+      - name: Build
+        run: cmake --build build --verbose
+        env:
+          VITASDK: /usr/local/vitasdk
 
-      - name: Upload artifacts
+      - name: Upload VPK
         uses: actions/upload-artifact@v4
         with:
-          name: yabause-vita
+          name: YabauseVita-phase2-vpk
           path: build/YabauseVita.vpk
-          if-no-files-found: error
+
+      - name: Upload build log always (even on failure, for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-directory
+          path: build/
