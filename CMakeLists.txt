@@ -76,6 +76,7 @@ target_link_libraries(${VITA_APP_NAME}
 )
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
+    UNSAFE
     ATTRIBUTE 0
 )
 
