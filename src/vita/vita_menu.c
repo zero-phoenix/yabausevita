@@ -2037,7 +2037,7 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
 
             /* Dibujar */
             vita2d_start_drawing();
-            vita2d_clear_screen(COL_BG_DARK);
+            vita2d_clear_screen();
             update_particles(dt);
             draw_particles();
             draw_loading_screen();
@@ -2057,7 +2057,7 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
                     if (ep & SCE_CTRL_CROSS) error_done = 1;
 
                     vita2d_start_drawing();
-                    vita2d_clear_screen(COL_BG_DARK);
+                    vita2d_clear_screen();
                     update_particles(dt);
                     draw_particles();
                     draw_error_screen();
@@ -2125,7 +2125,7 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
 
         /* ── Dibujar ────────────────────────────────────── */
         vita2d_start_drawing();
-        vita2d_clear_screen(COL_BG_DARK);
+        vita2d_clear_screen();
 
         update_particles(dt);
         draw_particles();
