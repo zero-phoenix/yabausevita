@@ -75,7 +75,9 @@ target_link_libraries(${VITA_APP_NAME}
     m
 )
 
-vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME})
+vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
+    ATTRIBUTE 0
+)
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
