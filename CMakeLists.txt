@@ -1,97 +1,62 @@
 cmake_minimum_required(VERSION 3.10)
-
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{VITASDK})
-        set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
-    else()
-        message(FATAL_ERROR "Please define VITASDK to point to your SDK path!")
-    endif()
-endif()
-
 project(YabauseVita C)
-add_definitions(-DVERSION="0.9.10")
-include("${VITASDK}/share/vita.cmake" REQUIRED)
 
-set(VITA_APP_NAME "YabauseVita")
-set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "00.10")
+# Incluir el toolchain de VitaSDK
+set(CMAKE_C_STANDARD 11)
 
-# -----------------------------------------------------------------------
-# MILESTONE 0 source list.
-# This is the "libyabause_a_SOURCES" list from the original Makefile.am,
-# with the platform-specific pieces removed:
-#   - NO c68k/ or q68/       (not needed: we use M68KCORE_DUMMY)
-#   - NO vidogl.c / ygl.c    (not needed: we use VIDCORE_SOFT, and ygl.c
-#                              pulls in SDL headers we don't want yet)
-#   - NO sndal.c / sndsdl.c  (not needed: we use SNDCORE_DUMMY)
-#   - NO persdljoy.c         (not needed: we use PERCORE_DUMMY)
-# -----------------------------------------------------------------------
-set(YABAUSE_CORE_SOURCES
-    src/bios.c
-    src/cdbase.c
-    src/cheat.c
-    src/coffelf.c
-    src/cs0.c
-    src/cs1.c
-    src/cs2.c
-    src/debug.c
-    src/error.c
-    src/memory.c
-    src/m68kcore.c
-    src/m68kd.c
-    src/movie.c
-    src/netlink.c
-    src/peripheral.c
-    src/profile.c
-    src/scu.c
-    src/sh2core.c
-    src/sh2d.c
-    src/sh2idle.c
-    src/sh2int.c
-    src/smpc.c
-    src/scsp.c
-    src/vdp1.c
-    src/vdp2.c
-    src/vdp2debug.c
-    src/vidshared.c
-    src/vidsoft.c
-    src/yabause.c
+# Buscar paquetes necesarios de VitaSDK
+find_package(VitaGL REQUIRED)
+find_package(vita2d REQUIRED)
+find_package(FT2 REQUIRED)
+
+# Definir los archivos fuente de Yabause (ajusta esto a tu estructura)
+set(YABAUSE_SRC
+    src/main.c
+    src/vita/input_vita.c
+    src/vita/video_vita.c
+    src/vita/audio_vita.c
+    # ... (añade el resto del core de Yabause: sh2core, smpc, vdp1, vdp2, etc.)
 )
 
-set(VITA_PLATFORM_SOURCES
-    src/vita/main.c
+# Añadir ejecutable
+add_executable(yabause_vita ${YABAUSE_SRC})
+
+# Optimizaciones para el CPU Cortex-A9 de PS Vita y activación de NEON
+target_compile_options(yabause_vita PRIVATE -O3 -mfpu=neon -mcpu=cortex-a9 -ftree-vectorize -fno-exceptions)
+
+# Definiciones de compilación para Yabause en Vita
+target_compile_definitions(yabause_vita PRIVATE
+    DYNAREC=1          # Vital para rendimiento de SH-2
+    HAVE_VITA=1
+    HAVE_VITA_GL=1     # Usar GPU para renderizado
+    LOG_LEVEL=3
 )
 
-add_executable(${VITA_APP_NAME}
-    ${YABAUSE_CORE_SOURCES}
-    ${VITA_PLATFORM_SOURCES}
-)
-
-target_include_directories(${VITA_APP_NAME} PRIVATE src)
-
-target_link_libraries(${VITA_APP_NAME}
-    SceDisplay_stub
-    SceCtrl_stub
-    SceAudio_stub
-    SceSysmodule_stub
-    SceGxm_stub
-    SceCommonDialog_stub
-    SceAppMgr_stub
-    SceIofilemgr_stub
+# Enlazar librerías del sistema y de Vita
+target_link_libraries(yabause_vita
+    PRIVATE
+    VitaGL::VitaGL
+    vita2d
+    freetype
     m
+    pthread
+    SceAppMgr_stub
+    SceAudio_stub
+    SceCtrl_stub
+    SceDisplay_stub
+    SceGxm_stub
+    SceSysmodule_stub
+    ScePower_stub
 )
 
-vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME})
-vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
-    VERSION ${VITA_VERSION}
-    NAME ${VITA_APP_NAME}
-)
+# --- SOLUCIÓN AL ERROR DE GITHUB ACTIONS ---
+# 1. Crear el SELF con permisos UNSAFE (para leer ISOs)
+vita_create_self(yabause_vita.self yabause_vita UNSAFE)
 
-vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} ${PROJECT_NAME}.self
-  VERSION ${VITA_VERSION}
-  NAME ${PROJECT_NAME}
-  FILE sce_sys/icon0.png sce_sys/icon0.png
-  FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
-  FILE sce_sys/livearea/contents/startup.png sce_sys/livearea/contents/startup.png
-  FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
+# 2. Crear el VPK sin colisión de nombres
+# Asegúrate de que el Title ID (YABAUSE00) sea único
+vita_create_vpk(YabauseVita.vpk "YABAUSE00" yabause_vita.self
+    NAME "Yabause Vita"
+    FILE resources/param.sfo
+    FILE resources/icon0.png
 )
