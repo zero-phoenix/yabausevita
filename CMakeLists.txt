@@ -1,41 +1,43 @@
 cmake_minimum_required(VERSION 3.10)
 project(YabauseVita C)
 
-# Incluir el toolchain de VitaSDK
+# 1. INCLUSIÓN CRÍTICA DE VITASDK
+# Esto habilita las macros vita_create_self y vita_create_vpk
+if(NOT DEFINED ENV{VITASDK})
+    message(FATAL_ERROR "VITASDK environment variable not set.")
+endif()
+include("$ENV{VITASDK}/share/vita.cmake")
+
 set(CMAKE_C_STANDARD 11)
 
-# Buscar paquetes necesarios de VitaSDK
-find_package(VitaGL REQUIRED)
-find_package(vita2d REQUIRED)
-find_package(FT2 REQUIRED)
-
-# Definir los archivos fuente de Yabause (ajusta esto a tu estructura)
+# 2. DEFINICIÓN DE ARCHIVOS FUENTE
+# Asegúrate de listar aquí todos los archivos .c del core de Yabause y la carpeta vita
 set(YABAUSE_SRC
     src/main.c
     src/vita/input_vita.c
     src/vita/video_vita.c
     src/vita/audio_vita.c
-    # ... (añade el resto del core de Yabause: sh2core, smpc, vdp1, vdp2, etc.)
+    # ... (añade todos los archivos necesarios)
 )
 
-# Añadir ejecutable
+# 3. CREACIÓN DEL EJECUTABLE
 add_executable(yabause_vita ${YABAUSE_SRC})
 
-# Optimizaciones para el CPU Cortex-A9 de PS Vita y activación de NEON
+# 4. OPTIMIZACIONES PARA PS VITA (CPU Cortex-A9 + NEON)
 target_compile_options(yabause_vita PRIVATE -O3 -mfpu=neon -mcpu=cortex-a9 -ftree-vectorize -fno-exceptions)
 
-# Definiciones de compilación para Yabause en Vita
+# 5. DEFINICIONES PARA YABAUSE (Rendimiento Nativo)
 target_compile_definitions(yabause_vita PRIVATE
-    DYNAREC=1          # Vital para rendimiento de SH-2
+    DYNAREC=1          # Vital para la emulación del SH-2 a buena velocidad
     HAVE_VITA=1
-    HAVE_VITA_GL=1     # Usar GPU para renderizado
+    HAVE_VITA_GL=1     # Usa la GPU de Vita via vitaGL
     LOG_LEVEL=3
 )
 
-# Enlazar librerías del sistema y de Vita
+# 6. ENLACE DE LIBRERÍAS (Sin find_package, enlazando directamente)
 target_link_libraries(yabause_vita
     PRIVATE
-    VitaGL::VitaGL
+    VitaGL          # Se enlaza directamente por nombre
     vita2d
     freetype
     m
@@ -49,12 +51,9 @@ target_link_libraries(yabause_vita
     ScePower_stub
 )
 
-# --- SOLUCIÓN AL ERROR DE GITHUB ACTIONS ---
-# 1. Crear el SELF con permisos UNSAFE (para leer ISOs)
+# 7. GENERACIÓN DEL VPK (Sin errores de colisión de targets)
+# Usamos un nombre distinto para el target del VPK y damos permisos UNSAFE al SELF
 vita_create_self(yabause_vita.self yabause_vita UNSAFE)
-
-# 2. Crear el VPK sin colisión de nombres
-# Asegúrate de que el Title ID (YABAUSE00) sea único
 vita_create_vpk(YabauseVita.vpk "YABAUSE00" yabause_vita.self
     NAME "Yabause Vita"
     FILE resources/param.sfo
