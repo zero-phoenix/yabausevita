@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
+# --- Toolchain setup --------------------------------------------------------
+# The VitaSDK ships two CMake files under share/:
+#   vita.toolchain.cmake  -- the actual CMake toolchain (sets CROSS compiler,
+#                           sysroot, target triple, etc.)
+#   vita.cmake             -- helper module loaded via include(); provides
+#                           vita_create_self(), vita_create_vpk(), etc.
+# We must use vita.toolchain.cmake as CMAKE_TOOLCHAIN_FILE so the cross-
+# compiler is selected before any project() call.
+# ---------------------------------------------------------------------------
+
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
@@ -10,6 +20,9 @@ endif()
 
 project(YabauseVita C)
 add_definitions(-DVERSION="0.9.10")
+
+# This pulls in the helper functions (vita_create_self, vita_create_vpk, etc.)
+# and also adds the vita-elf/vita-mksfoex steps automatically.
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
