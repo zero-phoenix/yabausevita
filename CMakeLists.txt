@@ -73,7 +73,6 @@ target_include_directories(${VITA_APP_NAME} PRIVATE src)
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d
-    SceFont_stub
     SceDisplay_stub
     SceCtrl_stub
     SceAudio_stub
