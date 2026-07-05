@@ -1,58 +1,51 @@
-name: Build YabauseVita (Milestone 0)
+name: Build Yabause Vita
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    runs-on: ubuntu-24.04
 
-      - name: Install clang 21
+    env:
+      VITASDK: /usr/local/vitasdk
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install LLVM 21
         run: curl https://apt.llvm.org/llvm.sh | sudo bash -s -- 21
 
-      - name: Checkout vitasdk installer
+      - name: Checkout VitaSDK package manager
         uses: actions/checkout@v4
         with:
           repository: vitasdk/vdpm
           path: vdpm
 
-      - name: Install vitasdk (full toolchain)
+      - name: Install VitaSDK
         run: |
           cd vdpm
           ./bootstrap-vitasdk.sh
           ./install-all.sh
-        env:
-          VITASDK: /usr/local/vitasdk
 
-      - name: Create Build Directory
-        run: mkdir build
-        
       - name: Configure CMake
-        working-directory: build
-        env:
-          VITASDK: /usr/local/vitasdk
-        # Aquí le decimos a CMake que use el compilador de Vita y que compile el puerto de Vita
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/toolchain.cmake -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
-        
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vitasdk.cmake -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
+
       - name: Build
-        working-directory: build
-        env:
-          VITASDK: /usr/local/vitasdk
-        # Compilamos directamente el target del VPK
-        run: make yabause_vita.vpk
+        run: |
+          cd build
+          make -j$(nproc)
 
-      - name: Upload VPK
+      - name: Upload VPK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YabauseVita-milestone0-vpk
-          path: build/YabauseVita.vpk
-
-      - name: Upload build log always (even on failure, for debugging)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-directory
-          path: build/
+          name: YabauseVita-vpk
+          path: build/*.vpk
+          if-no-files-found: warn
