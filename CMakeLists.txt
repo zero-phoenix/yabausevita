@@ -16,7 +16,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.00")
+set(VITA_VERSION  "00.20")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c
@@ -64,7 +64,6 @@ target_include_directories(${VITA_APP_NAME} PRIVATE src)
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d
-    SceFont_stub
     SceDisplay_stub
     SceCtrl_stub
     SceAudio_stub
@@ -76,9 +75,7 @@ target_link_libraries(${VITA_APP_NAME}
     m
 )
 
-vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
-    ATTRIBUTE 0
-)
+vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME})
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
