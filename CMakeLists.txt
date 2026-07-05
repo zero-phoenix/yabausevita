@@ -1,15 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-# --- Toolchain setup --------------------------------------------------------
-# The VitaSDK ships two CMake files under share/:
-#   vita.toolchain.cmake  -- the actual CMake toolchain (sets CROSS compiler,
-#                           sysroot, target triple, etc.)
-#   vita.cmake             -- helper module loaded via include(); provides
-#                           vita_create_self(), vita_create_vpk(), etc.
-# We must use vita.toolchain.cmake as CMAKE_TOOLCHAIN_FILE so the cross-
-# compiler is selected before any project() call.
-# ---------------------------------------------------------------------------
-
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
@@ -19,25 +9,15 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 project(YabauseVita C)
-add_definitions(-DVERSION="0.9.10")
-
-# This pulls in the helper functions (vita_create_self, vita_create_vpk, etc.)
-# and also adds the vita-elf/vita-mksfoex steps automatically.
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "00.10")
+set(VITA_VERSION  "00.20")
 
 # -----------------------------------------------------------------------
-# MILESTONE 0 source list.
-# This is the "libyabause_a_SOURCES" list from the original Makefile.am,
-# with the platform-specific pieces removed:
-#   - NO c68k/ or q68/       (not needed: we use M68KCORE_DUMMY)
-#   - NO vidogl.c / ygl.c    (not needed: we use VIDCORE_SOFT, and ygl.c
-#                              pulls in SDL headers we don't want yet)
-#   - NO sndal.c / sndsdl.c  (not needed: we use SNDCORE_DUMMY)
-#   - NO persdljoy.c         (not needed: we use PERCORE_DUMMY)
+# Portable Yabause core sources (no PSP/MIPS-specific code, no platform
+# GL/SDL dependencies -- see PORTING_NOTES.md for the full reasoning).
 # -----------------------------------------------------------------------
 set(YABAUSE_CORE_SOURCES
     src/bios.c
@@ -71,8 +51,17 @@ set(YABAUSE_CORE_SOURCES
     src/yabause.c
 )
 
+# -----------------------------------------------------------------------
+# debugScreen.c/.h come from the REAL vitasdk/samples repo (cloned by
+# the CI workflow into external/vitasdk-samples/common/) instead of
+# being hand-typed here -- it's a fairly intricate font/ANSI-sequence
+# implementation and transcribing it by hand is how bugs sneak in.
+# -----------------------------------------------------------------------
+set(DEBUGSCREEN_DIR "${CMAKE_SOURCE_DIR}/external/vitasdk-samples/common")
+
 set(VITA_PLATFORM_SOURCES
     src/vita/main.c
+    ${DEBUGSCREEN_DIR}/debugScreen.c
 )
 
 add_executable(${VITA_APP_NAME}
@@ -80,7 +69,10 @@ add_executable(${VITA_APP_NAME}
     ${VITA_PLATFORM_SOURCES}
 )
 
-target_include_directories(${VITA_APP_NAME} PRIVATE src)
+target_include_directories(${VITA_APP_NAME} PRIVATE
+    src
+    ${DEBUGSCREEN_DIR}
+)
 
 target_link_libraries(${VITA_APP_NAME}
     SceDisplay_stub
