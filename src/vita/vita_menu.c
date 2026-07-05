@@ -220,14 +220,18 @@ static int create_font_texture(void) {
     int h = FONT_CHAR_H;
     g_font_tex = vita2d_create_empty_texture(w, h);
     if (!g_font_tex) return -1;
+
+    unsigned int *pixels = (unsigned int *)vita2d_texture_get_datap(g_font_tex);
+    unsigned int stride = vita2d_texture_get_stride(g_font_tex);
+    unsigned int stride_pix = stride / 4;
+
     for (int c = 0; c < FONT_CHARS; c++) {
         for (int row = 0; row < FONT_CHAR_H; row++) {
             unsigned char bits = g_font_data[c][row];
             for (int col = 0; col < FONT_CHAR_W; col++) {
                 unsigned int alpha = (bits & (0x80 >> col)) ? 255 : 0;
-                vita2d_texture_set_pixel(g_font_tex,
-                    c * FONT_CHAR_W + col, row,
-                    RGBA8(255, 255, 255, alpha));
+                pixels[row * stride_pix + c * FONT_CHAR_W + col] =
+                    RGBA8(255, 255, 255, alpha);
             }
         }
     }
