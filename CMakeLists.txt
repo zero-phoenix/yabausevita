@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-# --- Toolchain setup --------------------------------------------------------
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
@@ -19,9 +18,6 @@ set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
 set(VITA_VERSION  "01.00")
 
-# -----------------------------------------------------------------------
-# Portable Yabause core sources
-# -----------------------------------------------------------------------
 set(YABAUSE_CORE_SOURCES
     src/bios.c
     src/cdbase.c
@@ -54,9 +50,6 @@ set(YABAUSE_CORE_SOURCES
     src/yabause.c
 )
 
-# -----------------------------------------------------------------------
-# Vita platform sources: vita_menu contains the full tabbed UI
-# -----------------------------------------------------------------------
 set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
@@ -71,28 +64,25 @@ target_include_directories(${VITA_APP_NAME} PRIVATE src)
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d
-    SceLibc_stub
-    ScePower_stub
+    SceFont_stub
     SceDisplay_stub
     SceCtrl_stub
     SceAudio_stub
     SceSysmodule_stub
     SceGxm_stub
     SceCommonDialog_stub
+    SceAppMgr_stub
     SceIofilemgr_stub
     m
 )
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     ATTRIBUTE 0
-    CATEGORY "gd"
-    APP_VER ${VITA_VERSION}
 )
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
     NAME ${VITA_APP_NAME}
-    TITLE ${VITA_APP_NAME}
     FILE sce_sys/icon0.png                              sce_sys/icon0.png
     FILE sce_sys/bg0.png                                sce_sys/bg0.png
     FILE sce_sys/startup.png                            sce_sys/startup.png
