@@ -42,8 +42,13 @@ jobs:
           rm -rf build
           mkdir build
           cd build
-          # Pasamos -DVITASDK y -DYAB_PORTS=vita explícitamente para que use el toolchain de Vita
-          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
+          # Forzamos las rutas absolutas para evitar que CMake use el compilador del PC
+          cmake -DVITASDK="/usr/local/vitasdk" \
+                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.cmake" \
+                -DCMAKE_C_COMPILER="/usr/local/vitasdk/bin/arm-vita-eabi-gcc" \
+                -DCMAKE_CXX_COMPILER="/usr/local/vitasdk/bin/arm-vita-eabi-g++" \
+                -DYAB_PORTS=vita \
+                -DCMAKE_BUILD_TYPE=Release ..
           make -j$(nproc)
 
       - name: Add BIOS and ROMs folders to VPK
