@@ -1,64 +1,80 @@
-name: Build YabauseVita (Phase 2)
+name: Build YabauseVita
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITASDK: /usr/local/vitasdk
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install clang 21
         run: curl https://apt.llvm.org/llvm.sh | sudo bash -s -- 21
 
-      - name: Checkout vitasdk installer
+      - name: Checkout vdpm (vitasdk package manager)
         uses: actions/checkout@v4
         with:
           repository: vitasdk/vdpm
           path: vdpm
 
-      - name: Checkout vitasdk samples (for debugScreen.c/.h)
-        uses: actions/checkout@v4
-        with:
-          repository: vitasdk/samples
-          path: external/vitasdk-samples
-
-      - name: Install vitasdk (full toolchain)
+      - name: Install VitaSDK (full toolchain + libraries)
         run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="$VITASDK/bin:$PATH"
           cd vdpm
           ./bootstrap-vitasdk.sh
+          # install-all.sh pulls in the standard library set, which includes
+          # vita2d (needed by src/vita/vita_ui.c for the splash + tabbed UI).
           ./install-all.sh
-        env:
-          VITASDK: /usr/local/vitasdk
 
-      - name: Flush filesystem writes before compiling
+      - name: Verify vita2d is installed
         run: |
           sync
-          sleep 5
-          test -f /usr/local/vitasdk/arm-vita-eabi/include/psp2/kernel/processmgr.h && echo "OK: header present"
+          sleep 3
+          ls -la /usr/local/vitasdk/arm-vita-eabi/lib/libvita2d.a || true
+          test -f /usr/local/vitasdk/arm-vita-eabi/include/vita2d.h && echo "OK: vita2d.h present" || echo "WARN: vita2d.h missing"
+          test -f /usr/local/vitasdk/arm-vita-eabi/include/psp2/kernel/processmgr.h && echo "OK: processmgr.h present"
 
-      - name: Configure
+      - name: Configure (CMake)
         run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="$VITASDK/bin:$PATH"
+          rm -rf build
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-        env:
-          VITASDK: /usr/local/vitasdk
+          cmake -DVITASDK="/usr/local/vitasdk" \
+                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.toolchain.cmake" \
+                -DCMAKE_BUILD_TYPE=Release ..
 
       - name: Build
-        run: cmake --build build --verbose
-        env:
-          VITASDK: /usr/local/vitasdk
+        run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="$VITASDK/bin:$PATH"
+          cmake --build build --verbose -- -j$(nproc)
 
-      - name: Upload VPK
+      - name: Verify VPK was built with assets
+        run: |
+          test -f build/YabauseVita.vpk && echo "OK: VPK exists"
+          # List VPK contents to confirm icon + livearea assets are embedded
+          unzip -l build/YabauseVita.vpk || true
+
+      - name: Upload VPK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YabauseVita-phase2-vpk
+          name: YabauseVita-vpk
           path: build/YabauseVita.vpk
+          if-no-files-found: error
 
-      - name: Upload build log always (even on failure, for debugging)
+      - name: Upload build directory (for debugging on failure)
         if: always()
         uses: actions/upload-artifact@v4
         with:
