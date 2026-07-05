@@ -38,12 +38,12 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH="$VITASDK/bin:$PATH"
-          # Limpiar el directorio build para evitar caché de CMake con compiladores incorrectos
+          # Limpiar el directorio build para evitar caché de CMake
           rm -rf build
           mkdir build
           cd build
-          # Pasamos -DVITASDK explícitamente para que CMakeLists.txt lo encuentre
-          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DCMAKE_BUILD_TYPE=Release ..
+          # Pasamos -DVITASDK y -DYAB_PORTS=vita explícitamente para que use el toolchain de Vita
+          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
           make -j$(nproc)
 
       - name: Add BIOS and ROMs folders to VPK
