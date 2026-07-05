@@ -92,6 +92,9 @@ typedef struct {
     int  show_fps;
     int  borderless;
 
+    int  rom_region;        /* region auto-detectada de la ROM seleccionada */
+    int  bios_region;       /* región del BIOS emparejado */
+
     char recent_games[VMENU_MAX_RECENT][VMENU_MAX_PATH];
     int  recent_count;
 } VitaMenuConfig;

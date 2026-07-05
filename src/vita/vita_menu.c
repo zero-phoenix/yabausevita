@@ -234,6 +234,24 @@ static void format_size(SceUInt64 bytes, char *out, int out_size) {
     }
 }
 
+/* Helper: leer una línea de texto desde un archivo (como fgets).
+   Retorna la longitud de la línea (sin el \\n), 0 en EOF, o negativo en error. */
+static int sceIoReadLine(SceUID fd, char *buf, int buf_size) {
+    if (!buf || buf_size <= 0) return -1;
+    int total = 0;
+    char c;
+    while (total < buf_size - 1) {
+        int ret = sceIoRead(fd, &c, 1);
+        if (ret < 0) return -1;
+        if (ret == 0) break;
+        if (c == '\n') break;
+        if (c == '\r') continue;
+        buf[total++] = c;
+    }
+    buf[total] = '\0';
+    return total;
+}
+
 static void set_status(const char *msg) {
     if (!msg) return;
     safe_strcpy(g_status_msg, msg, sizeof(g_status_msg));
@@ -1133,10 +1151,12 @@ static int handle_roms_input(VitaMenuConfig *cfg, SceCtrlData *pad,
             /* Verificar BIOS */
             if (cfg->auto_bios) {
                 int rom_region = detect_rom_region(fe->path, fe->format);
+                cfg->rom_region = rom_region;
                 int bios_idx = find_bios_for_region(rom_region);
                 if (bios_idx >= 0) {
                     safe_strcpy(cfg->bios_path, g_bios[bios_idx].path,
                                 VMENU_MAX_PATH);
+                    cfg->bios_region = g_bios[bios_idx].region;
                     char msg[VMENU_MAX_MSG];
                     snprintf(msg, sizeof(msg),
                              "BIOS auto: %s [%s]",
@@ -1298,12 +1318,13 @@ static void handle_bios_input(VitaMenuConfig *cfg, SceCtrlData *pad,
     if (visible < 1) visible = 1;
 
     /* X: Seleccionar BIOS manualmente (si auto_bios está OFF) */
-    if (pressed & SCE_CTRL_CROSS) {
-        if (!cfg->auto_bios && g_bios_count > 0 && g_bios_sel < g_bios_count) {
-            BiosEntry *be = &g_bios[g_bios_sel];
-            if (be->valid) {
-                safe_strcpy(cfg->bios_path, be->path, VMENU_MAX_PATH);
-                char msg[VMENU_MAX_MSG];
+        if (pressed & SCE_CTRL_CROSS) {
+            if (!cfg->auto_bios && g_bios_count > 0 && g_bios_sel < g_bios_count) {
+                BiosEntry *be = &g_bios[g_bios_sel];
+                if (be->valid) {
+                    safe_strcpy(cfg->bios_path, be->path, VMENU_MAX_PATH);
+                    cfg->bios_region = be->region;
+                    char msg[VMENU_MAX_MSG];
                 snprintf(msg, sizeof(msg), "BIOS seleccionado: %s [%s]",
                          be->name, region_code(be->region));
                 set_status(msg);
