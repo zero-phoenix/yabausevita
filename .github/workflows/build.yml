@@ -40,7 +40,8 @@ jobs:
           export PATH="$VITASDK/bin:$PATH"
           mkdir -p build
           cd build
-          cmake -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
+          # Pasamos -DVITASDK explícitamente para que CMakeLists.txt lo encuentre en la línea 13
+          cmake -DVITASDK="$VITASDK" -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.cmake" -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
           make -j$(nproc)
 
       - name: Upload artifacts
