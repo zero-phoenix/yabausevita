@@ -21,47 +21,19 @@
       - Audio (sceAudio)   - SNDCORE_DUMMY means silence
       - Real ISO loading   - CDCORE_DUMMY means no game will actually run;
                               this milestone only proves the BIOS/core boots
+
+    v3 fixes: added <stdarg.h> (va_start/va_end need it), removed the
+    sceIoMkdir call (its header path was fighting us and a subdirectory
+    isn't essential for milestone 0 -- we log straight into ux0:data/,
+    which always exists already).
 */
-#include <stdarg.h>        // para va_start, va_end, va_list
-#include <psp2/io/stat.h>  // para sceIoMkdir
+
 #include <psp2/kernel/processmgr.h>
 #include <psp2/display.h>
 #include <psp2/kernel/threadmgr.h>
 #include <stdio.h>
-
-#define DATA_DIR "ux0:data/yabausevita/"
-
-/* --- Candidatos de BIOS, en orden de preferencia --- */
-static const char *bios_candidates[] = {
-    DATA_DIR "Sega Saturn BIOS (USA).bin",
-    DATA_DIR "Sega Saturn BIOS (EUR).bin",
-    DATA_DIR "Sega Saturn BIOS v1.01 (JAP).bin",
-    DATA_DIR "Sega Saturn BIOS v1.00 (JAP).bin",
-    NULL
-};
-
-/* --- Candidatos de juego, en orden de preferencia --- */
-/* NOTA: el .chd de Sonic R NO es compatible con este core (solo ISO/CUE+BIN).
-   Conviertelo con: chdman extractcd -i entrada.chd -o salida.cue */
-static const char *game_candidates[] = {
-    DATA_DIR "NiGHTS into Dreams... (USA) (with 3D Control Pad) (RE).cue",
-    DATA_DIR "Sonic R (Europe).cue",   /* funcionara cuando conviertas el CHD */
-    NULL
-};
-
-static const char *find_first_existing(const char **candidates)
-{
-    for (int i = 0; candidates[i] != NULL; i++) {
-        FILE *f = fopen(candidates[i], "rb");
-        if (f) {
-            fclose(f);
-            return candidates[i];
-        }
-        vita_log("No encontrado: %s", candidates[i]);
-    }
-    return NULL;
-}
 #include <string.h>
+#include <stdarg.h>
 
 #include "../yabause.h"
 #include "../sh2core.h"
@@ -188,8 +160,9 @@ void YuiSwapBuffers(void)
     sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
 }
 
-/* ---- tiny logger: writes to ux0:data/yabausevita/log.txt so we can
-   see what happened even though there's no debugger attached ---- */
+/* ---- tiny logger: writes to ux0:data/yabausevita_log.txt so we can
+   see what happened even though there's no debugger attached. Lives
+   directly in ux0:data/ (always exists) so we don't need sceIoMkdir. ---- */
 
 static FILE *g_logfile = NULL;
 
@@ -209,8 +182,7 @@ int vita_log(const char *fmt, ...)
 
 int main(int argc, char *argv[])
 {
-    sceIoMkdir("ux0:data/yabausevita", 0777);
-    g_logfile = fopen("ux0:data/yabausevita/log.txt", "w");
+    g_logfile = fopen("ux0:data/yabausevita_log.txt", "w");
     vita_log("YabauseVita milestone 0 starting\n");
 
     /* solid dark-blue framebuffer so we can SEE something even before
@@ -238,27 +210,7 @@ int main(int argc, char *argv[])
     sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
 
     vita_log("Framebuffer ready, %dx%d\n", VITA_SCREEN_W, VITA_SCREEN_H);
-    /* ---- Buscar BIOS ---- */
-    const char *bios = find_first_existing(bios_candidates);
-    if (bios) {
-        yinit.biospath = bios;
-        vita_log("BIOS encontrada: %s", bios);
-    } else {
-        yinit.biospath = NULL;  /* BIOS emulada (HLE), menos compatible */
-        vita_log("AVISO: ninguna BIOS encontrada, usando HLE");
-    }
 
-    /* ---- Buscar juego ---- */
-    const char *game = find_first_existing(game_candidates);
-    if (game) {
-        yinit.cdcoretype = CDCORE_ISO;
-        yinit.cdpath = game;
-        vita_log("Juego encontrado: %s", game);
-    } else {
-        yinit.cdcoretype = CDCORE_DUMMY;
-        yinit.cdpath = NULL;
-        vita_log("AVISO: ningun juego encontrado, CD dummy (solo menu de BIOS)");
-    };
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
