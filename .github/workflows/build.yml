@@ -27,18 +27,22 @@ jobs:
         env:
           VITASDK: /usr/local/vitasdk
 
-      - name: Configure
-        run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
+      - name: Create Build Directory
+        run: mkdir build
+        
+      - name: Configure CMake
+        working-directory: build
         env:
           VITASDK: /usr/local/vitasdk
-
+        # Aquí le decimos a CMake que use el compilador de Vita y que compile el puerto de Vita
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/toolchain.cmake -DYAB_PORTS=vita -DCMAKE_BUILD_TYPE=Release ..
+        
       - name: Build
-        run: cmake --build build --verbose
+        working-directory: build
         env:
           VITASDK: /usr/local/vitasdk
+        # Compilamos directamente el target del VPK
+        run: make yabause_vita.vpk
 
       - name: Upload VPK
         uses: actions/upload-artifact@v4
