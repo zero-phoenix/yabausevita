@@ -27,7 +27,7 @@
 
 SH2_struct *MSH2=NULL;
 SH2_struct *SSH2=NULL;
-static SH2_struct *CurrentSH2;
+SH2_struct *CurrentSH2;
 SH2Interface_struct *SH2Core=NULL;
 extern SH2Interface_struct *SH2CoreList[];
 
@@ -362,6 +362,7 @@ void SH2ClearCodeBreakpoints(SH2_struct *context) {
 //////////////////////////////////////////////////////////////////////////////
 
 u8 FASTCALL SH2MemoryBreakpointReadByte(u32 addr) {
+   if (!CurrentSH2) return 0;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -397,6 +398,7 @@ u8 FASTCALL SH2MemoryBreakpointReadByte(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 u16 FASTCALL SH2MemoryBreakpointReadWord(u32 addr) {
+   if (!CurrentSH2) return 0;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -432,6 +434,7 @@ u16 FASTCALL SH2MemoryBreakpointReadWord(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 u32 FASTCALL SH2MemoryBreakpointReadLong(u32 addr) {
+   if (!CurrentSH2) return 0;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -467,6 +470,7 @@ u32 FASTCALL SH2MemoryBreakpointReadLong(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL SH2MemoryBreakpointWriteByte(u32 addr, u8 val) {
+   if (!CurrentSH2) return;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -507,6 +511,7 @@ void FASTCALL SH2MemoryBreakpointWriteByte(u32 addr, u8 val) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL SH2MemoryBreakpointWriteWord(u32 addr, u16 val) {
+   if (!CurrentSH2) return;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -547,6 +552,7 @@ void FASTCALL SH2MemoryBreakpointWriteWord(u32 addr, u16 val) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL SH2MemoryBreakpointWriteLong(u32 addr, u32 val) {
+   if (!CurrentSH2) return;
    int i;
 
    for (i = 0; i < CurrentSH2->bp.nummemorybreakpoints; i++)
@@ -872,6 +878,7 @@ void OnchipReset(SH2_struct *context) {
 //////////////////////////////////////////////////////////////////////////////
 
 u8 FASTCALL OnchipReadByte(u32 addr) {
+   if (!CurrentSH2) return 0;
    switch(addr)
    {
       case 0x000:
@@ -934,6 +941,7 @@ u8 FASTCALL OnchipReadByte(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 u16 FASTCALL OnchipReadWord(u32 addr) {
+   if (!CurrentSH2) return 0;
    switch(addr)
    {
       case 0x060:
@@ -953,6 +961,7 @@ u16 FASTCALL OnchipReadWord(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 u32 FASTCALL OnchipReadLong(u32 addr) {
+   if (!CurrentSH2) return 0;
    switch(addr)
    {
       case 0x100:
@@ -998,6 +1007,7 @@ u32 FASTCALL OnchipReadLong(u32 addr) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL OnchipWriteByte(u32 addr, u8 val) {
+   if (!CurrentSH2) return;
    switch(addr) {
       case 0x000:
 //         LOG("Serial Mode Register write: %02X\n", val);
@@ -1145,6 +1155,7 @@ void FASTCALL OnchipWriteByte(u32 addr, u8 val) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL OnchipWriteWord(u32 addr, u16 val) {
+   if (!CurrentSH2) return;
    switch(addr)
    {
       case 0x060:
@@ -1232,6 +1243,7 @@ void FASTCALL OnchipWriteWord(u32 addr, u16 val) {
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL OnchipWriteLong(u32 addr, u32 val)  {
+   if (!CurrentSH2) return;
    switch (addr)
    {
       case 0x100:
@@ -1440,48 +1452,56 @@ void FASTCALL OnchipWriteLong(u32 addr, u32 val)  {
 //////////////////////////////////////////////////////////////////////////////
 
 u32 FASTCALL AddressArrayReadLong(u32 addr) {
+   if (!CurrentSH2 || !CurrentSH2->AddressArray) return 0;
    return CurrentSH2->AddressArray[(addr & 0x3FC) >> 2];
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL AddressArrayWriteLong(u32 addr, u32 val)  {
+   if (!CurrentSH2 || !CurrentSH2->AddressArray) return;
    CurrentSH2->AddressArray[(addr & 0x3FC) >> 2] = val;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 u8 FASTCALL DataArrayReadByte(u32 addr) {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return 0;
    return T2ReadByte(CurrentSH2->DataArray, addr & 0xFFF);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 u16 FASTCALL DataArrayReadWord(u32 addr) {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return 0;
    return T2ReadWord(CurrentSH2->DataArray, addr & 0xFFF);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 u32 FASTCALL DataArrayReadLong(u32 addr) {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return 0;
    return T2ReadLong(CurrentSH2->DataArray, addr & 0xFFF);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL DataArrayWriteByte(u32 addr, u8 val)  {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return;
    T2WriteByte(CurrentSH2->DataArray, addr & 0xFFF, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL DataArrayWriteWord(u32 addr, u16 val)  {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return;
    T2WriteWord(CurrentSH2->DataArray, addr & 0xFFF, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void FASTCALL DataArrayWriteLong(u32 addr, u32 val)  {
+   if (!CurrentSH2 || !CurrentSH2->DataArray) return;
    T2WriteLong(CurrentSH2->DataArray, addr & 0xFFF, val);
 }
 
@@ -1493,6 +1513,7 @@ void FRTExec(u32 cycles)
 void FRTExec(UNUSED u32 cycles)
 #endif
 {
+   if (!CurrentSH2) return;
    u32 frcold;
    u32 frctemp;
 
@@ -1553,6 +1574,7 @@ void FRTExec(UNUSED u32 cycles)
 //////////////////////////////////////////////////////////////////////////////
 
 void WDTExec(u32 cycles) {
+   if (!CurrentSH2) return;
    u32 wdttemp;
 
    if (!CurrentSH2->wdt.isenable || CurrentSH2->onchip.WTCSR & 0x80 || CurrentSH2->onchip.RSTCSR & 0x80)

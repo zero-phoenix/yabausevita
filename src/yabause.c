@@ -109,18 +109,18 @@ void YabauseChangeTiming(int freqtype) {
    {
       case CLKTYPE_26MHZ:
          if (!yabsys.IsPal)
-            yabsys.DecilineStop = 26846587 / 263 / 10 / 60; // I'm guessing this is wrong
+            yabsys.DecilineStop = (26846587 / 263 / 10 / 60) / 2;
          else
-            yabsys.DecilineStop = 26846587 / 312 / 10 / 50; // I'm guessing this is wrong
+            yabsys.DecilineStop = (26846587 / 312 / 10 / 50) / 2;
 
          yabsys.Duf = 26846587 / 100000;
 
          break;
       case CLKTYPE_28MHZ:
          if (!yabsys.IsPal)
-            yabsys.DecilineStop = 28636360 / 263 / 10 / 60; // I'm guessing this is wrong
+            yabsys.DecilineStop = (28636360 / 263 / 10 / 60) / 2;
          else
-            yabsys.DecilineStop = 28636360 / 312 / 10 / 50; // I'm guessing this is wrong
+            yabsys.DecilineStop = (28636360 / 312 / 10 / 50) / 2;
 
          yabsys.Duf = 28636360 / 100000;
          break;

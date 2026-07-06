@@ -91,6 +91,7 @@ typedef struct {
 
     int  show_fps;
     int  borderless;
+    int  auto_frameskip;
 
     int  rom_region;        /* region auto-detectada de la ROM seleccionada */
     int  bios_region;       /* región del BIOS emparejado */
@@ -107,6 +108,12 @@ typedef int (*VitaMenuLoadCallback)(const VitaMenuConfig *config,
 int  vita_menu_init(void);
 int  vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb);
 void vita_menu_cleanup(void);
+
+/* ── Utilidades exportadas ─────────────────────────────────── */
+void load_config_file(VitaMenuConfig *cfg);
+void safe_strcpy(char *dst, const char *src, int max);
+void safe_strcat(char *dst, const char *src, int max);
+void to_lower(char *s);
 
 #ifdef __cplusplus
 }

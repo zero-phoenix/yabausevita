@@ -301,13 +301,13 @@ static SceUInt64  g_status_time = 0;
 /* ══════════════════════════════════════════════════════════════
    SECCIÓN 4 — UTILIDADES DE CADENAS Y RUTAS
    ══════════════════════════════════════════════════════════════ */
-static void safe_strcpy(char *dst, const char *src, int max) {
+void safe_strcpy(char *dst, const char *src, int max) {
     if (!dst || !src || max <= 0) return;
     strncpy(dst, src, max - 1);
     dst[max - 1] = '\0';
 }
 
-static void safe_strcat(char *dst, const char *src, int max) {
+void safe_strcat(char *dst, const char *src, int max) {
     if (!dst || !src || max <= 0) return;
     int len = (int)strlen(dst);
     if (len < max - 1) {
@@ -316,7 +316,7 @@ static void safe_strcat(char *dst, const char *src, int max) {
     }
 }
 
-static void to_lower(char *s) {
+void to_lower(char *s) {
     if (!s) return;
     for (; *s; s++) *s = (char)tolower((unsigned char)*s);
 }
@@ -1020,7 +1020,7 @@ static int read_chd_info(const char *path, ChdInfo *info) {
 /* ══════════════════════════════════════════════════════════════
    SECCIÓN 10 — GUARDAR/CARGAR CONFIGURACIÓN
    ══════════════════════════════════════════════════════════════ */
-static void load_config_file(VitaMenuConfig *cfg) {
+void load_config_file(VitaMenuConfig *cfg) {
     if (!cfg) return;
 
     /* Valores por defecto */
@@ -1034,6 +1034,7 @@ static void load_config_file(VitaMenuConfig *cfg) {
     cfg->audio_volume = 80;
     cfg->cpu_mode = VMENU_CPU_RECOMP;
     cfg->frame_skip = 0;
+    cfg->auto_frameskip = 1;
     cfg->sh2_sync = 1;
     cfg->show_fps = 0;
     cfg->borderless = 0;
@@ -1067,6 +1068,8 @@ static void load_config_file(VitaMenuConfig *cfg) {
             cfg->cpu_mode = atoi(val);
         else if (strcmp(key, "frame_skip") == 0)
             cfg->frame_skip = atoi(val);
+        else if (strcmp(key, "auto_frameskip") == 0)
+            cfg->auto_frameskip = atoi(val);
         else if (strcmp(key, "sh2_sync") == 0)
             cfg->sh2_sync = atoi(val);
         else if (strcmp(key, "show_fps") == 0)
@@ -1114,6 +1117,8 @@ static void save_config_file(const VitaMenuConfig *cfg) {
     snprintf(buf, sizeof(buf), "cpu_mode=%d\n", cfg->cpu_mode);
     sceIoWrite(fd, buf, strlen(buf));
     snprintf(buf, sizeof(buf), "frame_skip=%d\n", cfg->frame_skip);
+    sceIoWrite(fd, buf, strlen(buf));
+    snprintf(buf, sizeof(buf), "auto_frameskip=%d\n", cfg->auto_frameskip);
     sceIoWrite(fd, buf, strlen(buf));
     snprintf(buf, sizeof(buf), "sh2_sync=%d\n", cfg->sh2_sync);
     sceIoWrite(fd, buf, strlen(buf));
@@ -1534,6 +1539,7 @@ typedef enum {
     CFG_SECTION_EMU,
     CFG_OPT_CPU,
     CFG_OPT_FRAMESKIP,
+    CFG_OPT_AUTO_FRAMESKIP,
     CFG_OPT_SH2SYNC,
     CFG_SECTION_DISPLAY,
     CFG_OPT_FPS,
@@ -1555,6 +1561,7 @@ static const char *cfg_labels[CFG_COUNT] = {
     "-- EMULACION --",      /* SECTION */
     "Modo de CPU",
     "Frame Skip",
+    "Auto Frame Skip",
     "Sincronia SH2",
     "-- PANTALLA --",       /* SECTION */
     "Mostrar FPS",
@@ -1567,7 +1574,7 @@ static const char *cfg_labels[CFG_COUNT] = {
 static int cfg_is_section[CFG_COUNT] = {
     1, 0, 0, 0,
     1, 0, 0,
-    1, 0, 0, 0,
+    1, 0, 0, 0, 0,
     1, 0, 0,
     1, 0, 0
 };
@@ -1673,6 +1680,10 @@ static void draw_config_tab(VitaMenuConfig *cfg) {
                     safe_strcpy(val_str, "OFF", sizeof(val_str));
                 else
                     snprintf(val_str, sizeof(val_str), "%d", cfg->frame_skip);
+                break;
+            case CFG_OPT_AUTO_FRAMESKIP:
+                safe_strcpy(val_str, cfg->auto_frameskip ? "ON" : "OFF", sizeof(val_str));
+                val_color = cfg->auto_frameskip ? COL_SUCCESS : COL_ERROR;
                 break;
             case CFG_OPT_SH2SYNC:
                 safe_strcpy(val_str, cfg->sh2_sync ? "ON" : "OFF", sizeof(val_str));
@@ -1821,6 +1832,9 @@ static void handle_config_input(VitaMenuConfig *cfg, SceCtrlData *pad,
                 if (cfg->frame_skip < 0) cfg->frame_skip = 4;
                 if (cfg->frame_skip > 4) cfg->frame_skip = 0;
                 break;
+            case CFG_OPT_AUTO_FRAMESKIP:
+                cfg->auto_frameskip = !cfg->auto_frameskip;
+                break;
             case CFG_OPT_SH2SYNC:
                 cfg->sh2_sync = !cfg->sh2_sync;
                 break;
@@ -1839,11 +1853,12 @@ static void handle_config_input(VitaMenuConfig *cfg, SceCtrlData *pad,
     /* X: Toggle para opciones booleanas */
     if (pressed & SCE_CTRL_CROSS) {
         switch (g_cfg_sel) {
-            case CFG_OPT_VSYNC:      cfg->vsync = !cfg->vsync; break;
-            case CFG_OPT_AUDIO_EN:   cfg->audio_enabled = !cfg->audio_enabled; break;
-            case CFG_OPT_SH2SYNC:    cfg->sh2_sync = !cfg->sh2_sync; break;
-            case CFG_OPT_FPS:        cfg->show_fps = !cfg->show_fps; break;
-            case CFG_OPT_BORDERLESS: cfg->borderless = !cfg->borderless; break;
+            case CFG_OPT_VSYNC:         cfg->vsync = !cfg->vsync; break;
+            case CFG_OPT_AUDIO_EN:      cfg->audio_enabled = !cfg->audio_enabled; break;
+            case CFG_OPT_AUTO_FRAMESKIP: cfg->auto_frameskip = !cfg->auto_frameskip; break;
+            case CFG_OPT_SH2SYNC:       cfg->sh2_sync = !cfg->sh2_sync; break;
+            case CFG_OPT_FPS:           cfg->show_fps = !cfg->show_fps; break;
+            case CFG_OPT_BORDERLESS:    cfg->borderless = !cfg->borderless; break;
             default: break;
         }
         save_config_file(cfg);

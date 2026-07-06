@@ -28,6 +28,7 @@
 
 #include "memory.h"
 #include "coffelf.h"
+#include "sh2core.h"
 #include "cs0.h"
 #include "cs1.h"
 #include "cs2.h"
@@ -515,35 +516,28 @@ u8 FASTCALL MappedMemoryReadByte(u32 addr)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         return ReadByteList[(addr >> 16) & 0xFFF](addr);
+         readbytefunc func = ReadByteList[(addr >> 16) & 0xFFF];
+         if (func) return func(addr);
+         return UnhandledMemoryReadByte(addr);
       }
-/*
-      case 0x2:
-      {
-         // Purge Area
-         break;
-      }
-*/
       case 0x4:
       case 0x6:
-         // Data Array
-         return DataArrayReadByte(addr);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+            return DataArrayReadByte(addr);
+         return UnhandledMemoryReadByte(addr);
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return 0;
             addr &= 0x1FF;
             return OnchipReadByte(addr);
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          break;
       }
@@ -566,35 +560,28 @@ u16 FASTCALL MappedMemoryReadWord(u32 addr)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         return ReadWordList[(addr >> 16) & 0xFFF](addr);
+         readwordfunc func = ReadWordList[(addr >> 16) & 0xFFF];
+         if (func) return func(addr);
+         return UnhandledMemoryReadWord(addr);
       }
-/*
-      case 0x2:
-      {
-         // Purge Area
-         break;
-      }
-*/
       case 0x4:
       case 0x6:
-         // Data Array
-         return DataArrayReadWord(addr);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+            return DataArrayReadWord(addr);
+         return UnhandledMemoryReadWord(addr);
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return 0;
             addr &= 0x1FF;
             return OnchipReadWord(addr);
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          break;
       }
@@ -617,40 +604,34 @@ u32 FASTCALL MappedMemoryReadLong(u32 addr)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         return ReadLongList[(addr >> 16) & 0xFFF](addr);
+         readlongfunc func = ReadLongList[(addr >> 16) & 0xFFF];
+         if (func) return func(addr);
+         return UnhandledMemoryReadLong(addr);
       }
-/*
-      case 0x2:
-      {
-         // Purge Area
-         break;
-      }
-*/
       case 0x3:
       {
-         // Address Array
-         return AddressArrayReadLong(addr);
+         if (CurrentSH2 && CurrentSH2->AddressArray)
+            return AddressArrayReadLong(addr);
+         return UnhandledMemoryReadLong(addr);
       }
       case 0x4:
       case 0x6:
-         // Data Array
-         return DataArrayReadLong(addr);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+            return DataArrayReadLong(addr);
+         return UnhandledMemoryReadLong(addr);
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return 0;
             addr &= 0x1FF;
             return OnchipReadLong(addr);
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          break;
       }
@@ -672,38 +653,33 @@ void FASTCALL MappedMemoryWriteByte(u32 addr, u8 val)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         WriteByteList[(addr >> 16) & 0xFFF](addr, val);
+         writebytefunc func = WriteByteList[(addr >> 16) & 0xFFF];
+         if (func) { func(addr, val); return; }
+         UnhandledMemoryWriteByte(addr, val);
          return;
       }
-/*
-      case 0x2:
-      {
-         // Purge Area
-         return;
-      }
-*/
       case 0x4:
       case 0x6:
-         // Data Array
-         DataArrayWriteByte(addr, val);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+         {
+            DataArrayWriteByte(addr, val);
+            return;
+         }
          return;
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return;
             addr &= 0x1FF;
             OnchipWriteByte(addr, val);
             return; 
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          return;
       }
@@ -725,38 +701,33 @@ void FASTCALL MappedMemoryWriteWord(u32 addr, u16 val)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         WriteWordList[(addr >> 16) & 0xFFF](addr, val);
+         writewordfunc func = WriteWordList[(addr >> 16) & 0xFFF];
+         if (func) { func(addr, val); return; }
+         UnhandledMemoryWriteWord(addr, val);
          return;
       }
-/*
-      case 0x2:
-      {
-         // Purge Area
-         return;
-      }
-*/
       case 0x4:
       case 0x6:
-         // Data Array
-         DataArrayWriteWord(addr, val);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+         {
+            DataArrayWriteWord(addr, val);
+            return;
+         }
          return;
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return;
             addr &= 0x1FF;
             OnchipWriteWord(addr, val);
             return;
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          return;
       }
@@ -778,42 +749,46 @@ void FASTCALL MappedMemoryWriteLong(u32 addr, u32 val)
       case 0x1:
       case 0x5:
       {
-         // Cache/Non-Cached
-         WriteLongList[(addr >> 16) & 0xFFF](addr, val);
+         writelongfunc func = WriteLongList[(addr >> 16) & 0xFFF];
+         if (func) { func(addr, val); return; }
+         UnhandledMemoryWriteLong(addr, val);
          return;
       }
       case 0x2:
       {
-         // Purge Area
          return;
       }
       case 0x3:
       {
-         // Address Array
-         AddressArrayWriteLong(addr, val);
+         if (CurrentSH2 && CurrentSH2->AddressArray)
+         {
+            AddressArrayWriteLong(addr, val);
+            return;
+         }
          return;
       }
       case 0x4:
       case 0x6:
-         // Data Array
-         DataArrayWriteLong(addr, val);
+         if (CurrentSH2 && CurrentSH2->DataArray)
+         {
+            DataArrayWriteLong(addr, val);
+            return;
+         }
          return;
       case 0x7:
       {
          if (addr >= 0xFFFFFE00)
          {
-            // Onchip modules
+            if (!CurrentSH2) return;
             addr &= 0x1FF;
             OnchipWriteLong(addr, val);
             return;
          }
          else if (addr >= 0xFFFF8000 && addr < 0xFFFFC000)
          {
-            // ???
          }
          else
          {
-            // Garbage data
          }
          return;
       }

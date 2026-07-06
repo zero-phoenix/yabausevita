@@ -106,10 +106,15 @@ void FASTCALL SH2delay(SH2_struct * sh, u32 addr)
 #endif
 
    // Fetch Instruction
-   sh->instruction = fetchlist[(addr >> 20) & 0x0FF](addr);
+   fetchfunc fetcher = fetchlist[(addr >> 20) & 0x0FF];
+   if (fetcher)
+      sh->instruction = fetcher(addr);
+   else
+      sh->instruction = 0xFFFF;
 
    // Execute it
-   opcodes[sh->instruction](sh);
+   if (opcodes[sh->instruction])
+      opcodes[sh->instruction](sh);
    sh->regs.PC -= 2;
 }
 
@@ -2681,13 +2686,14 @@ static INLINE void SH2UBCInterrupt(SH2_struct *context, u32 flag)
 
 FASTCALL void SH2DebugInterpreterExec(SH2_struct *context, u32 cycles)
 {
+   if (!context) return;
    
    while(context->cycles < cycles)
    {
 #ifdef EMULATEUBC   	   
       int ubcinterrupt=0, ubcflag=0;
 #endif
-	
+ 	
       SH2HandleBreakpoints(context);
 
 #ifdef SH2_TRACE
@@ -2695,37 +2701,33 @@ FASTCALL void SH2DebugInterpreterExec(SH2_struct *context, u32 cycles)
 #endif
 
 #ifdef EMULATEUBC
-      if (context->onchip.BBRA & (BBR_CPA_CPU | BBR_IDA_INST | BBR_RWA_READ)) // Break on cpu, instruction, read cycles
+      if (context->onchip.BBRA & (BBR_CPA_CPU | BBR_IDA_INST | BBR_RWA_READ))
       {
          if (context->onchip.BARA.all == (context->regs.PC & (~context->onchip.BAMRA.all)))
          {
             LOG("Trigger UBC A interrupt: PC = %08X\n", context->regs.PC);
             if (!(context->onchip.BRCR & BRCR_PCBA))
             {
-               // Break before instruction fetch
-	           SH2UBCInterrupt(context, BRCR_CMFCA);
+               SH2UBCInterrupt(context, BRCR_CMFCA);
             }
             else
             {
-            	// Break after instruction fetch
                ubcinterrupt=1;
                ubcflag = BRCR_CMFCA;
             }
          }
       }
-      else if(context->onchip.BBRB & (BBR_CPA_CPU | BBR_IDA_INST | BBR_RWA_READ)) // Break on cpu, instruction, read cycles
+      else if(context->onchip.BBRB & (BBR_CPA_CPU | BBR_IDA_INST | BBR_RWA_READ))
       {
          if (context->onchip.BARB.all == (context->regs.PC & (~context->onchip.BAMRB.all)))
          {
             LOG("Trigger UBC B interrupt: PC = %08X\n", context->regs.PC);
             if (!(context->onchip.BRCR & BRCR_PCBB))
             {
-          	   // Break before instruction fetch
-       	       SH2UBCInterrupt(context, BRCR_CMFCB);
+               SH2UBCInterrupt(context, BRCR_CMFCB);
             }
             else
             {
-               // Break after instruction fetch
                ubcinterrupt=1;
                ubcflag = BRCR_CMFCB;
             }
@@ -2734,10 +2736,18 @@ FASTCALL void SH2DebugInterpreterExec(SH2_struct *context, u32 cycles)
 #endif
 
       // Fetch Instruction
-      context->instruction = fetchlist[(context->regs.PC >> 20) & 0x0FF](context->regs.PC);
+      fetchfunc fetcher = fetchlist[(context->regs.PC >> 20) & 0x0FF];
+      if (fetcher)
+         context->instruction = fetcher(context->regs.PC);
+      else
+         context->instruction = 0xFFFF;
 
       // Execute it
-      opcodes[context->instruction](context);
+      if (opcodes[context->instruction])
+         opcodes[context->instruction](context);
+      else
+         context->regs.PC += 2;
+      context->cycles++;
 
 #ifdef EMULATEUBC
 	  if (ubcinterrupt)
@@ -2754,6 +2764,7 @@ FASTCALL void SH2DebugInterpreterExec(SH2_struct *context, u32 cycles)
 
 FASTCALL void SH2InterpreterExec(SH2_struct *context, u32 cycles)
 {
+   if (!context) return;
    if (context->isIdle)
       SH2idleParse(context, cycles);
    else
@@ -2762,10 +2773,18 @@ FASTCALL void SH2InterpreterExec(SH2_struct *context, u32 cycles)
    while(context->cycles < cycles)
    {
       // Fetch Instruction
-      context->instruction = fetchlist[(context->regs.PC >> 20) & 0x0FF](context->regs.PC);
+      fetchfunc fetcher = fetchlist[(context->regs.PC >> 20) & 0x0FF];
+      if (fetcher)
+         context->instruction = fetcher(context->regs.PC);
+      else
+         context->instruction = 0xFFFF;
 
       // Execute it
-      opcodes[context->instruction](context);
+      if (opcodes[context->instruction])
+         opcodes[context->instruction](context);
+      else
+         context->regs.PC += 2;
+      context->cycles++;
    }
 }
 

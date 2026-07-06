@@ -22,8 +22,14 @@
 
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
+#define TARGET_FRAME_MS 50
+#define MAX_SKIP_FRAMES 10
 
 static void *vita_fb = NULL;
+static int g_auto_frameskip = 1;
+static int g_frame_skip = 0;
+static int g_show_fps = 0;
+static int g_vsync = 1;
 
 int vita_log(const char *fmt, ...);
 
@@ -141,15 +147,27 @@ static int map_region(int vmenu_region)
     }
 }
 
-static void draw_splash(void)
+// Swap .chd path to .bin if the .bin file exists alongside
+static void chd_to_bin_path(char *path, int max_len)
 {
-    vita2d_start_drawing();
-    vita2d_clear_screen();
-    vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(6, 6, 14, 255));
-    vita2d_draw_rectangle(0, 220, 960, 110, RGBA8(0, 85, 255, 255));
-    vita2d_end_drawing();
-    vita2d_swap_buffers();
-    sceDisplayWaitVblankStart();
+    char ext[16];
+    const char *dot = strrchr(path, '.');
+    if (!dot) return;
+    safe_strcpy(ext, dot + 1, sizeof(ext));
+    to_lower(ext);
+    if (strcmp(ext, "chd") != 0) return;
+
+    char bin_path[VMENU_MAX_PATH];
+    safe_strcpy(bin_path, path, sizeof(bin_path));
+    int len = (int)(dot - path);
+    bin_path[len] = '\0';
+    safe_strcat(bin_path, ".bin", sizeof(bin_path));
+
+    if (sceIoGetstat(bin_path, NULL) >= 0)
+    {
+        safe_strcpy(path, bin_path, max_len);
+        vita_log("CHD->BIN swap: %s\n", bin_path);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -157,7 +175,7 @@ int main(int argc, char *argv[])
     (void)argc; (void)argv;
 
     g_logfile = fopen("ux0:data/yabausevita_log.txt", "w");
-    vita_log("YabauseVita starting (vita_menu UI)\n");
+    vita_log("YabauseVita starting\n");
 
     vita_fb = malloc((size_t)VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
     if (vita_fb == NULL)
@@ -167,46 +185,52 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    vita_log("Initializing menu...\n");
+    // ── Init vita2d menu (dark blue/black UI) ──────────────
     if (vita_menu_init() != 0)
     {
         vita_log("FATAL: vita_menu_init failed\n");
         sceKernelExitProcess(0);
         return 0;
     }
+    vita_log("Menu initialized\n");
 
-    draw_splash();
+    // ── Load config, then show menu ─────────────────────────
+    VitaMenuConfig config;
+    load_config_file(&config);
+    config.show_fps = 1;
+    config.auto_frameskip = 1;
 
-    VitaMenuConfig cfg;
-    memset(&cfg, 0, sizeof(cfg));
-    cfg.auto_bios = 1;
-    cfg.video_filter = VMENU_FILTER_BILINEAR;
-    cfg.aspect_ratio = VMENU_ASPECT_4_3;
-    cfg.vsync = 1;
-    cfg.audio_enabled = 1;
-    cfg.audio_volume = 80;
-    cfg.cpu_mode = VMENU_CPU_INTERP;
-    cfg.frame_skip = 0;
-    cfg.sh2_sync = 1;
-    cfg.show_fps = 0;
-    cfg.borderless = 0;
+    int menu_result = vita_menu_run(&config, NULL);
+    vita_log("Menu returned: %d (rom_path=%s, bios_path=%s)\n",
+             menu_result, config.rom_path, config.bios_path);
 
-    vita_log("Entering menu...\n");
-    int ret = vita_menu_run(&cfg, NULL);
-
-    if (ret != 0 || cfg.rom_path[0] == '\0')
+    // User pressed Circle on ROMs tab — exit
+    if (menu_result != 0 || config.rom_path[0] == '\0')
     {
-        vita_log("User exited without launching. Quitting.\n");
-        vita_menu_cleanup();
+        vita_log("No game selected, exiting.\n");
         if (g_logfile) fclose(g_logfile);
         sceKernelExitProcess(0);
         return 0;
     }
 
-    vita_log("ROM: %s\n", cfg.rom_path);
-    vita_log("BIOS: %s\n", cfg.bios_path[0] ? cfg.bios_path : "(HLE)");
+    // ── Prepare YabauseInit with selected game ──────────────
+    char rompath[VMENU_MAX_PATH];
+    safe_strcpy(rompath, config.rom_path, sizeof(rompath));
+    chd_to_bin_path(rompath, sizeof(rompath));
 
-    vita_menu_cleanup();
+    char biospath[VMENU_MAX_PATH];
+    if (config.bios_path[0])
+        safe_strcpy(biospath, config.bios_path, sizeof(biospath));
+    else
+        safe_strcpy(biospath, "ux0:data/yabause/bios/saturn_bios.bin", sizeof(biospath));
+
+    int rom_region = config.rom_region;
+
+    vita_log("ROM: %s\n", rompath);
+    vita_log("BIOS: %s\n", biospath);
+
+    // ── Skip cleanup (vita2d_fini crashes in Vita3K) ────────
+    // vita_menu_cleanup();
     clear_framebuffer(0xFF100820);
 
     yabauseinit_struct yinit;
@@ -217,16 +241,16 @@ int main(int argc, char *argv[])
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
     yinit.cdcoretype    = CDCORE_ISO;
-    yinit.cdpath        = cfg.rom_path;
-    yinit.biospath      = cfg.bios_path[0] ? cfg.bios_path : NULL;
+    yinit.cdpath        = rompath;
+    yinit.biospath      = biospath;
     yinit.carttype      = 0;
-    yinit.regionid      = (u8)map_region(cfg.rom_region);
+    yinit.regionid      = (u8)map_region(rom_region);
     yinit.buppath       = NULL;
     yinit.mpegpath      = NULL;
     yinit.cartpath      = NULL;
     yinit.netlinksetting = NULL;
     yinit.flags         = 0;
-    yinit.frameskip     = cfg.frame_skip;
+    yinit.frameskip     = 0;
 
     vita_log("Calling YabauseInit (cdcore=CDCORE_ISO, cdpath=%s, biospath=%s, region=%d)...\n",
              yinit.cdpath ? yinit.cdpath : "(null)",
@@ -245,23 +269,117 @@ int main(int argc, char *argv[])
 
     vita_log("Boot OK. Entering emulation loop.\n");
 
-    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG_WIDE);
+    PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
+    vita_log("Saturn pad %s\n", saturn_pad ? "added" : "FAILED");
 
-    int frame = 0;
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG_WIDE);
     int running = 1;
+    int frame_count = 0;
+    int frames_skipped = 0;
+    int skip_counter = 0;
+    float fps = 0.0f;
+    SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
+    SceUInt64 next_frame_time = sceKernelGetProcessTimeWide();
+    unsigned int last_buttons = 0;
+
     while (running)
     {
         YabauseExec();
-        frame++;
+        frame_count++;
+        SceUInt64 now = sceKernelGetProcessTimeWide();
+        if (now - fps_timer >= 1000000ULL)
+        {
+            fps = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
+            if (g_show_fps)
+                vita_log("FPS: %.1f (skipped: %d)\n", fps, frames_skipped);
+            frame_count = 0;
+            frames_skipped = 0;
+            fps_timer = now;
+        }
 
+        int skip = 0;
+        if (g_auto_frameskip && now < next_frame_time)
+        {
+            skip = 1;
+            frames_skipped++;
+        }
+        if (g_frame_skip > 0 && !g_auto_frameskip)
+        {
+            skip_counter++;
+            if (skip_counter > g_frame_skip)
+                skip_counter = 0;
+            skip = (skip_counter != 0);
+        }
+
+        if (!skip)
+        {
+            YuiSwapBuffers();
+            next_frame_time = sceKernelGetProcessTimeWide() + (SceUInt64)TARGET_FRAME_MS * 1000ULL;
+        }
+
+        // Poll input every iteration
         SceCtrlData pad;
         memset(&pad, 0, sizeof(pad));
         sceCtrlPeekBufferPositive(0, &pad, 1);
-        if (pad.buttons & SCE_CTRL_START)
+
+        // Map Vita buttons to Saturn pad
+        unsigned int cur = pad.buttons;
+        unsigned int changed = cur ^ last_buttons;
+        if (changed && saturn_pad)
+        {
+            if (changed & SCE_CTRL_UP) {
+                if (cur & SCE_CTRL_UP) PerPadUpPressed(saturn_pad);
+                else PerPadUpReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_DOWN) {
+                if (cur & SCE_CTRL_DOWN) PerPadDownPressed(saturn_pad);
+                else PerPadDownReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_LEFT) {
+                if (cur & SCE_CTRL_LEFT) PerPadLeftPressed(saturn_pad);
+                else PerPadLeftReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_RIGHT) {
+                if (cur & SCE_CTRL_RIGHT) PerPadRightPressed(saturn_pad);
+                else PerPadRightReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_CROSS) {
+                if (cur & SCE_CTRL_CROSS) PerPadAPressed(saturn_pad);
+                else PerPadAReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_CIRCLE) {
+                if (cur & SCE_CTRL_CIRCLE) PerPadBPressed(saturn_pad);
+                else PerPadBReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_SQUARE) {
+                if (cur & SCE_CTRL_SQUARE) PerPadCPressed(saturn_pad);
+                else PerPadCReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_TRIANGLE) {
+                if (cur & SCE_CTRL_TRIANGLE) PerPadXPressed(saturn_pad);
+                else PerPadXReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_LTRIGGER) {
+                if (cur & SCE_CTRL_LTRIGGER) PerPadLTriggerPressed(saturn_pad);
+                else PerPadLTriggerReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_RTRIGGER) {
+                if (cur & SCE_CTRL_RTRIGGER) PerPadRTriggerPressed(saturn_pad);
+                else PerPadRTriggerReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_START) {
+                if (cur & SCE_CTRL_START) PerPadStartPressed(saturn_pad);
+                else PerPadStartReleased(saturn_pad);
+            }
+            if (changed & SCE_CTRL_SELECT) {
+                if (cur & SCE_CTRL_SELECT) PerPadYPressed(saturn_pad);
+                else PerPadYReleased(saturn_pad);
+            }
+        }
+        if (cur & SCE_CTRL_START)
             running = 0;
 
-        if (frame % 300 == 0)
-            vita_log("frame %d\n", frame);
+        last_buttons = cur;
     }
 
     vita_log("Emulation stopped by user.\n");

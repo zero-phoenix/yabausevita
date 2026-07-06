@@ -413,6 +413,7 @@ typedef struct
 
 extern SH2_struct *MSH2;
 extern SH2_struct *SSH2;
+extern SH2_struct *CurrentSH2;
 
 int SH2Init(int coreid);
 void SH2DeInit();
