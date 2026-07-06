@@ -11,7 +11,7 @@ endif()
 project(YabauseVita C)
 
 add_definitions(-DVERSION="0.9.10")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto -O3")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
@@ -74,12 +74,13 @@ target_link_libraries(${VITA_APP_NAME}
     SceCommonDialog_stub
     SceAppMgr_stub
     SceIofilemgr_stub
+    ScePower_stub
     m
 )
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
-    UNSAFE
     ATTRIBUTE 0
+    MEMSIZE 64
 )
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
@@ -90,4 +91,3 @@ vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     FILE sce_sys/startup.png                            sce_sys/startup.png
     FILE sce_sys/livearea/contents/template.xml         sce_sys/livearea/contents/template.xml
 )
-

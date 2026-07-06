@@ -279,6 +279,9 @@ static volatile int   g_load_state = VMENU_LOAD_IDLE;
 static SceUInt64      g_load_start = 0;
 #define LOAD_TIMEOUT_SEC 45
 
+/* ── Auto-launch flag ──────────────────────────────────────── */
+static int g_auto_launch_pending = 0;
+
 /* ── Mensaje de estado general ─────────────────────────────── */
 static char       g_status_msg[VMENU_MAX_MSG] = "";
 static SceUInt64  g_status_time = 0;
@@ -433,8 +436,10 @@ static void draw_particles(void) {
     for (int i = 0; i < PARTICLE_COUNT; i++) {
         unsigned int a = (unsigned int)g_particles[i].alpha;
         unsigned int c = RGBA8(40, 120, 255, a);
-        vita2d_draw_fill_circle(g_particles[i].x, g_particles[i].y,
-                                g_particles[i].radius, c);
+        float r = g_particles[i].radius;
+        if (r < 1.0f) r = 1.0f;
+        vita2d_draw_rectangle(g_particles[i].x - r, g_particles[i].y - r,
+                              r * 2.0f, r * 2.0f, c);
     }
 }
 
@@ -488,15 +493,8 @@ static void draw_text_clipped(float x, float y, float max_w, const char *text,
 
 static void draw_rounded_rect(float x, float y, float w, float h,
                                unsigned int color, float r) {
-    if (r > w * 0.5f) r = w * 0.5f;
-    if (r > h * 0.5f) r = h * 0.5f;
-    if (r < 0.0f) r = 0.0f;
-    vita2d_draw_rectangle(x + r, y, w - 2.0f * r, h, color);
-    vita2d_draw_rectangle(x, y + r, w, h - 2.0f * r, color);
-    vita2d_draw_fill_circle(x + r, y + r, r, color);
-    vita2d_draw_fill_circle(x + w - r, y + r, r, color);
-    vita2d_draw_fill_circle(x + r, y + h - r, r, color);
-    vita2d_draw_fill_circle(x + w - r, y + h - r, r, color);
+    (void)r;
+    vita2d_draw_rectangle(x, y, w, h, color);
 }
 
 static void draw_scrollbar(int x, int y, int w, int h,
@@ -556,14 +554,8 @@ static void draw_gradient_v(int x, int y, int w, int h,
 }
 
 static void draw_spinner(float cx, float cy, float radius, float angle) {
-    for (int i = 0; i < 12; i++) {
-        float a = angle + (float)i * (M_PI * 2.0f / 12.0f);
-        int alpha = 255 - i * 21;
-        if (alpha < 0) alpha = 0;
-        float px = cx + cosf(a) * radius;
-        float py = cy + sinf(a) * radius;
-        vita2d_draw_fill_circle(px, py, 4.0f, RGBA8(55, 135, 255, (unsigned)alpha));
-    }
+    (void)angle;
+    vita2d_draw_rectangle(cx - radius, cy - 4.0f, radius * 2.0f, 8.0f, RGBA8(55, 135, 255, 200));
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -619,6 +611,9 @@ static void scan_directory(const char *path) {
         }
     }
     sceIoDclose(dfd);
+
+    FILE *vdbg2 = fopen("ux0:data/yabause/vmenu_dbg.txt", "a");
+    if (vdbg2) { fprintf(vdbg2, "scan_dir: %d files, sorting\n", g_file_count); fclose(vdbg2); }
 
     qsort(g_files, (size_t)g_file_count, sizeof(FileEntry), file_cmp);
 
@@ -2152,16 +2147,27 @@ static void draw_hints_bar(int tab) {
 int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
     if (!config) return -1;
 
+    FILE *vdbg = fopen("ux0:data/yabause/vmenu_dbg.txt", "w");
+    if (vdbg) fprintf(vdbg, "menu_run: start\n");
+
     SceCtrlData pad, old_pad;
     memset(&pad, 0, sizeof(pad));
     memset(&old_pad, 0, sizeof(old_pad));
 
-    /* Escanear BIOS al iniciar */
-    scan_bios_directory();
+    if (vdbg) fprintf(vdbg, "menu_run: loading config\n");
+    load_config_file(config);
+    if (vdbg) fprintf(vdbg, "menu_run: config loaded\n");
 
-    /* Escanear directorio de ROMs */
+    scan_bios_directory();
+    if (vdbg) fprintf(vdbg, "menu_run: bios scanned\n");
+
     safe_strcpy(g_current_dir, VMENU_ROM_DIR, sizeof(g_current_dir));
     scan_directory(g_current_dir);
+    if (vdbg) fprintf(vdbg, "menu_run: roms scanned\n");
+
+    if (config->recent_count > 0 && config->recent_games[0][0]) {
+        if (vdbg) fprintf(vdbg, "menu_run: recent nav: %s\n", config->recent_games[0]);
+    }
 
     /* Si hay ROM reciente, navegar a su directorio */
     if (config->recent_count > 0 && config->recent_games[0][0]) {
@@ -2170,10 +2176,11 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
         char *slash = strrchr(recent_dir, '/');
         if (slash) {
             *slash = '\0';
-            if (sceIoGetstat(recent_dir, NULL) >= 0) {
+            SceIoStat tmp_stat;
+            memset(&tmp_stat, 0, sizeof(tmp_stat));
+            if (sceIoGetstat(recent_dir, &tmp_stat) >= 0) {
                 safe_strcpy(g_current_dir, recent_dir, sizeof(g_current_dir));
                 scan_directory(g_current_dir);
-                /* Seleccionar el archivo reciente */
                 for (int i = 0; i < g_file_count; i++) {
                     if (strcmp(g_files[i].path, config->recent_games[0]) == 0) {
                         g_file_sel = i;
@@ -2187,16 +2194,34 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
     int result = -1;
     int running = 1;
     SceUInt64 last_time = sceKernelGetProcessTimeWide();
+    float auto_launch_timer = 0.0f;
+    int has_recent_game = (config->recent_count > 0 && config->recent_games[0][0] && g_file_count > 0 && g_file_sel >= 0 && g_file_sel < g_file_count);
+
+    if (vdbg) { fclose(vdbg); vdbg = NULL; }
+    FILE *dbg = fopen("ux0:data/yabause/vmenu_dbg.txt", "a");
+    if (dbg) fprintf(dbg, "menu_run: entering loop, has_recent=%d, file_sel=%d\n", has_recent_game, g_file_sel);
 
     while (running) {
+        /* ── Check auto-launch flag at start of frame ── */
+        if (dbg) { fprintf(dbg, "TOP LOOP: g_auto_launch_pending=%d\n", g_auto_launch_pending); fflush(dbg); }
+        if (g_auto_launch_pending) {
+            if (dbg) { fprintf(dbg, "Auto-launch pending: exiting menu\n"); fflush(dbg); }
+            g_auto_launch_pending = 0;
+            result = 0;
+            running = 0;
+            break;
+        }
+
         SceUInt64 now = sceKernelGetProcessTimeWide();
         float dt = (float)(now - last_time) / 1000000.0f;
-        if (dt > 0.1f) dt = 0.1f; /* Cap delta time */
+        if (dt > 0.1f) dt = 0.1f;
         last_time = now;
 
-        /* Leer input */
+        if (dbg) fprintf(dbg, "A: dt=%.2f\n", dt);
+
         memset(&pad, 0, sizeof(pad));
         sceCtrlPeekBufferPositive(0, &pad, 1);
+        if (dbg) fprintf(dbg, "B: pad=%04x\n", pad.buttons);
 
         /* ── Estado de carga ─────────────────────────────── */
         if (g_load_state == VMENU_LOAD_RUNNING) {
@@ -2241,6 +2266,8 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
         /* ── Cambio de pestañas (L1/R1 en estado normal) ── */
         int pressed = pad.buttons & ~old_pad.buttons;
 
+        if (dbg) { fprintf(dbg, "After tab switch: pressed=%04x\n", pressed); fflush(dbg); }
+
         if (!(pad.buttons & (SCE_CTRL_L1 | SCE_CTRL_R1))) {
             /* Solo cambiar pestaña si no estamos en la lista */
             /* (L1/R1 se usan para paginación dentro de pestañas) */
@@ -2271,19 +2298,41 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
                 break;
         }
 
+/* ── Auto-launch recent game after 2s if no input ── */
+        if (has_recent_game && g_active_tab == VMENU_TAB_ROMS && g_load_state == VMENU_LOAD_IDLE) {
+            int any_input = pad.buttons != 0;
+            if (any_input) {
+                auto_launch_timer = 0.0f;
+            } else {
+                auto_launch_timer += dt;
+                if (dbg) fprintf(dbg, "AutoLaunch timer: %.2f\n", auto_launch_timer);
+if (auto_launch_timer >= 2.0f) {
+                    if (dbg) { fprintf(dbg, "Auto-launching recent game!\n"); fflush(dbg); }
+                    auto_launch_timer = 0.0f;
+                    g_auto_launch_pending = 1;
+                    if (dbg) { fprintf(dbg, "SET g_auto_launch_pending = 1\n"); fflush(dbg); }
+                }
+            }
+        }
+
         /* O en pestaña ROMs: salir del menú */
+        if (dbg) { fprintf(dbg, "Before Circle check: running=%d, should_load=%d, load_cb=%p\n", running, should_load, load_cb); fflush(dbg); }
         if (g_active_tab == VMENU_TAB_ROMS && (pressed & SCE_CTRL_CIRCLE)) {
+            if (dbg) { fprintf(dbg, "Circle pressed - exiting menu\n"); fflush(dbg); }
             result = -1;
             running = 0;
             break;
         }
 
         /* Iniciar carga si se solicitó */
+        if (dbg) { fprintf(dbg, "should_load check: should_load=%d, load_cb=%p\n", should_load, load_cb); fflush(dbg); }
         if (should_load && load_cb) {
+            if (dbg) { fprintf(dbg, "Starting loading with callback\n"); fflush(dbg); }
             start_loading(config, load_cb);
             memcpy(&old_pad, &pad, sizeof(pad));
             continue;
         } else if (should_load && !load_cb) {
+            if (dbg) { fprintf(dbg, "Auto-launch: exiting menu with result=0\n"); fflush(dbg); }
             /* Sin callback: retornar directamente */
             result = 0;
             running = 0;
@@ -2291,7 +2340,9 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
         }
 
         /* ── Dibujar ────────────────────────────────────── */
+        if (dbg) fprintf(dbg, "C: drawing\n");
         vita2d_start_drawing();
+        if (dbg) fprintf(dbg, "D: cleared\n");
         vita2d_clear_screen();
 
         update_particles(dt);
@@ -2309,11 +2360,15 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
         draw_status_bar();
         draw_hints_bar(g_active_tab);
 
+        if (dbg) fprintf(dbg, "E: end_drawing\n");
         vita2d_end_drawing();
+        if (dbg) fprintf(dbg, "F: swap\n");
         vita2d_swap_buffers();
 
         memcpy(&old_pad, &pad, sizeof(pad));
     }
+
+    if (dbg) { fclose(dbg); dbg = NULL; }
 
     /* Guardar configuración al salir */
     save_config_file(config);
@@ -2329,11 +2384,8 @@ int vita_menu_init(void) {
     vita2d_init_advanced(0x800000);
     vita2d_set_clear_color(COL_BG_DARK);
 
-    /* Crear textura de fuente bitmap embebida */
-    if (create_font_texture() != 0) {
-        vita2d_fini();
-        return -1;
-    }
+    /* Crear textura de fuente bitmap embebida (no crítica) */
+    create_font_texture();
 
     /* Iniciar controlador */
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG_WIDE);
