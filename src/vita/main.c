@@ -170,6 +170,13 @@ static void chd_to_bin_path(char *path, int max_len)
     }
 }
 
+// Callback when menu selects/auto-launches a game
+static int vita_menu_load_callback(const VitaMenuConfig *cfg, char *error, int error_size)
+{
+    (void)cfg; (void)error; (void)error_size;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     (void)argc; (void)argv;
@@ -200,7 +207,7 @@ int main(int argc, char *argv[])
     config.show_fps = 1;
     config.auto_frameskip = 1;
 
-    int menu_result = vita_menu_run(&config, NULL);
+    int menu_result = vita_menu_run(&config, vita_menu_load_callback);
     vita_log("Menu returned: %d (rom_path=%s, bios_path=%s)\n",
              menu_result, config.rom_path, config.bios_path);
 

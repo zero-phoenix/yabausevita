@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<apps-cache cache_version="1" sys_lang="1">
+	<sources>
+		<source title_id="TPLNKVITA" param_sfo_write_time="1783325474" icon_write_time="1783315106" />
+		<source title_id="YABA00001" param_sfo_write_time="1783302764" icon_write_time="1783280450" />
+	</sources>
+	<apps>
+		<app app_ver="0.00" category="gd" content_id="" addcont="TPLNKVITA" savedata="TPLNKVITA" parental_level="0" stitle="tp-vita" title="tp-vita" title_id="TPLNKVITA" path="TPLNKVITA" />
+		<app app_ver="1.00" category="gd" content_id="" addcont="YABA00001" savedata="YABA00001" parental_level="0" stitle="YabauseVita" title="YabauseVita" title_id="YABA00001" path="YABA00001" />
+	</apps>
+</apps-cache>

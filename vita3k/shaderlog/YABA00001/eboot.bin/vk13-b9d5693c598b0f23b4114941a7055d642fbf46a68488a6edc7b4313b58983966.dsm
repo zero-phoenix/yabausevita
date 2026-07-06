@@ -1,0 +1,3 @@
+40840d7ea0198002: VPCKF16F32 sa0.xyzw (sa0.xyzw sa2.xyzw) [noscale]
+fa44070000000000: PHAS
+38800422c5000000: VMOV.f16 pa0.xyzw sa0.xyzw 

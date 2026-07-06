@@ -1,0 +1,9 @@
+fa44070000000000: PHAS
+38800d2183080080: VMOV.f32 o4.xy pa4.xy 
+40c00d9caf818002: VPCKF32F32 i0.xyz (pa0.xyz pa2.xyzw) [noscale]
+40c00dbcffb9860e: VPCKF32F32 i1.xyzw (sa12.xyzw sa14.xyzw) [noscale]
+18b18f80cf411100: VMAD i1.xyzw i0.xxxx sa0.xyzw i1.xyzw
+18b18f80cf451102: VMAD i1.xyzw i0.yyyy sa4.xyzw i1.xyzw
+18b18181c0091104: VMAD o0.xy i0.zz sa8.xy i1.xy
+18b18181c04ad105: VMAD o2.xy i0.zz sa10.xy i1.zw
+fb275000a0200000: SPEC category: 2, special: false

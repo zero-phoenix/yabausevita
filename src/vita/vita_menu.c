@@ -279,9 +279,6 @@ static volatile int   g_load_state = VMENU_LOAD_IDLE;
 static SceUInt64      g_load_start = 0;
 #define LOAD_TIMEOUT_SEC 45
 
-/* ── Auto-launch flag ──────────────────────────────────────── */
-static int g_auto_launch_pending = 0;
-
 /* ── Mensaje de estado general ─────────────────────────────── */
 static char       g_status_msg[VMENU_MAX_MSG] = "";
 static SceUInt64  g_status_time = 0;
@@ -2202,17 +2199,7 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
     if (dbg) fprintf(dbg, "menu_run: entering loop, has_recent=%d, file_sel=%d\n", has_recent_game, g_file_sel);
 
     while (running) {
-        /* ── Check auto-launch flag at start of frame ── */
-        if (dbg) { fprintf(dbg, "TOP LOOP: g_auto_launch_pending=%d\n", g_auto_launch_pending); fflush(dbg); }
-        if (g_auto_launch_pending) {
-            if (dbg) { fprintf(dbg, "Auto-launch pending: exiting menu\n"); fflush(dbg); }
-            g_auto_launch_pending = 0;
-            result = 0;
-            running = 0;
-            break;
-        }
-
-        SceUInt64 now = sceKernelGetProcessTimeWide();
+         SceUInt64 now = sceKernelGetProcessTimeWide();
         float dt = (float)(now - last_time) / 1000000.0f;
         if (dt > 0.1f) dt = 0.1f;
         last_time = now;
@@ -2306,11 +2293,10 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
             } else {
                 auto_launch_timer += dt;
                 if (dbg) fprintf(dbg, "AutoLaunch timer: %.2f\n", auto_launch_timer);
-if (auto_launch_timer >= 2.0f) {
-                    if (dbg) { fprintf(dbg, "Auto-launching recent game!\n"); fflush(dbg); }
+                if (auto_launch_timer >= 2.0f) {
+                    if (dbg) { fprintf(dbg, "Auto-launching recent game - triggering load\n"); fflush(dbg); }
                     auto_launch_timer = 0.0f;
-                    g_auto_launch_pending = 1;
-                    if (dbg) { fprintf(dbg, "SET g_auto_launch_pending = 1\n"); fflush(dbg); }
+                    should_load = 1;
                 }
             }
         }

@@ -1,0 +1,5 @@
+fa44070000000000: PHAS
+f800094000000000: NOP
+40c00dbcaf998002: VPCKF32F32 i0.xyzw (pa0.xyzw pa2.xyzw) [noscale]
+08a44784cf04003c: VMUL i0.xyzw sa0.xyzw i0.xyzw
+40810d7e2019bc00: VPCKF16F32 pa0.xyzw i0.xyzw [noscale]
