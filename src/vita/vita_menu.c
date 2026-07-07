@@ -2287,9 +2287,12 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
 
 /* ── Auto-launch recent game after 2s if no input ── */
         if (has_recent_game && g_active_tab == VMENU_TAB_ROMS && g_load_state == VMENU_LOAD_IDLE) {
-            int any_input = pad.buttons != 0;
-            if (any_input) {
+            int directional = pad.buttons & (SCE_CTRL_UP | SCE_CTRL_DOWN | SCE_CTRL_LEFT | SCE_CTRL_RIGHT |
+                                             SCE_CTRL_CROSS | SCE_CTRL_CIRCLE | SCE_CTRL_SQUARE | SCE_CTRL_TRIANGLE |
+                                             SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER);
+            if (directional) {
                 auto_launch_timer = 0.0f;
+                if (dbg) fprintf(dbg, "AutoLaunch reset: directional=%04x\n", directional);
             } else {
                 auto_launch_timer += dt;
                 if (dbg) fprintf(dbg, "AutoLaunch timer: %.2f\n", auto_launch_timer);
