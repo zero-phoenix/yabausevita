@@ -2294,9 +2294,10 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
                 auto_launch_timer += dt;
                 if (dbg) fprintf(dbg, "AutoLaunch timer: %.2f\n", auto_launch_timer);
                 if (auto_launch_timer >= 2.0f) {
-                    if (dbg) { fprintf(dbg, "Auto-launching recent game - triggering load\n"); fflush(dbg); }
-                    auto_launch_timer = 0.0f;
-                    should_load = 1;
+                    if (dbg) { fprintf(dbg, "Auto-launching recent game - EXITING MENU NOW\n"); fflush(dbg); }
+                    result = 0;
+                    running = 0;
+                    break;
                 }
             }
         }

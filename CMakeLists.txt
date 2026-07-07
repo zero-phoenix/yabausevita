@@ -75,15 +75,11 @@ target_link_libraries(${VITA_APP_NAME}
     SceAppMgr_stub
     SceIofilemgr_stub
     ScePower_stub
-    SceSysmem_stub
-    SceKernelThreadMgr_stub
-    SceKernelModulemgr_stub
-    SceLibKernel_stub
-    SceLibc_stub
     m
 )
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
+    UNSAFE
     ATTRIBUTE 0
     MEMSIZE 64
 )
