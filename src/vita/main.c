@@ -234,6 +234,10 @@ int main(int argc, char *argv[])
     YabauseExec();
     vita_log("YabauseExec returned\n");
 
+    vita_log("Calling YuiSwapBuffers...\n");
+    YuiSwapBuffers();
+    vita_log("YuiSwapBuffers returned\n");
+
     vita_log("Test complete, exiting cleanly.\n");
 
     if (g_logfile) fclose(g_logfile);
