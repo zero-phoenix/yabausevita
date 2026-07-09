@@ -22,7 +22,7 @@
 
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
-#define TARGET_FRAME_MS 50
+#define TARGET_FRAME_MS 16
 #define MAX_SKIP_FRAMES 10
 
 static void *vita_fb = NULL;
@@ -224,15 +224,15 @@ int main(int argc, char *argv[])
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = SH2CORE_INTERPRETER;
+    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? SH2CORE_DEBUGINTERPRETER : SH2CORE_INTERPRETER;
     yinit.vidcoretype   = VIDCORE_SOFT;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
     yinit.cdcoretype    = CDCORE_ISO;
     yinit.cdpath        = cdpath;
-    yinit.biospath      = cfg.bios_path;
+    yinit.biospath      = "";
     yinit.carttype      = 0;
-    yinit.regionid      = map_region(cfg.rom_region);
+    yinit.regionid      = (cfg.rom_region != VMENU_REGION_UNKNOWN && cfg.rom_region != VMENU_REGION_AUTO) ? map_region(cfg.rom_region) : REGION_AUTODETECT;
     yinit.buppath       = NULL;
     yinit.mpegpath      = NULL;
     yinit.cartpath      = NULL;
@@ -252,6 +252,10 @@ int main(int argc, char *argv[])
     vita_log("Adding per-pad\n");
     PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
     vita_log("pad=%s\n", saturn_pad ? "OK" : "FAIL");
+
+    g_show_fps = cfg.show_fps;
+    g_auto_frameskip = cfg.auto_frameskip;
+    g_frame_skip = cfg.frame_skip;
 
     int frame_count = 0, frames_skipped = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
