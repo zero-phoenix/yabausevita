@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     yinit.m68kcoretype  = 0;
     yinit.cdcoretype    = CDCORE_ISO;
     yinit.cdpath        = cdpath;
-    yinit.biospath      = "";
+    yinit.biospath      = cfg.bios_path;
     yinit.carttype      = 0;
     yinit.regionid      = (cfg.rom_region != VMENU_REGION_UNKNOWN && cfg.rom_region != VMENU_REGION_AUTO) ? map_region(cfg.rom_region) : REGION_AUTODETECT;
     yinit.buppath       = NULL;
@@ -246,6 +246,16 @@ int main(int argc, char *argv[])
     if (init_ret != 0)
     {
         vita_log("FATAL: YabauseInit failed\n");
+        while (1) sceDisplayWaitVblankStart();
+    }
+
+    vita_log("QuickLoading game\n");
+    int ql_ret = YabauseQuickLoadGame();
+    vita_log("YabauseQuickLoadGame returned %d\n", ql_ret);
+
+    if (ql_ret != 0)
+    {
+        vita_log("FATAL: QuickLoad failed\n");
         while (1) sceDisplayWaitVblankStart();
     }
 
