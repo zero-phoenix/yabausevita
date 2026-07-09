@@ -257,57 +257,67 @@ int main(int argc, char *argv[])
     g_auto_frameskip = cfg.auto_frameskip;
     g_frame_skip = cfg.frame_skip;
 
-    int frame_count = 0, frames_skipped = 0;
+    int frame_count = 0, display_count = 0, skip_counter = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
     SceUInt64 next_frame = sceKernelGetProcessTimeWide();
     unsigned int last_buttons = 0;
+    int skip = g_frame_skip;
+    if (skip < 0) skip = 0;
+    if (skip > 4) skip = 4;
 
-    vita_log("Entering emulation loop\n");
+    vita_log("Entering emulation loop, frame_skip=%d\n", skip);
 
     for (;;)
     {
         YabauseExec();
         frame_count++;
-        SceUInt64 now = sceKernelGetProcessTimeWide();
-        if (now - fps_timer >= 1000000ULL)
-        {
-            float fps = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
-            vita_log("FPS: %.1f\n", fps);
-            frame_count = 0;
-            frames_skipped = 0;
-            fps_timer = now;
-        }
 
-        if (now < next_frame)
-            frames_skipped++;
-        else
-        {
-            YuiSwapBuffers();
-            next_frame = now + TARGET_FRAME_MS * 1000ULL;
-        }
+        int display_this = (skip == 0) ? 1 : (skip_counter == 0);
+        skip_counter = (skip_counter + 1) % (skip + 1);
 
-        SceCtrlData pad;
-        sceCtrlPeekBufferPositive(0, &pad, 1);
-        unsigned int cur = pad.buttons;
-        unsigned int changed = cur ^ last_buttons;
-        if (changed && saturn_pad)
+        if (display_this)
         {
-            if (changed & SCE_CTRL_UP)       { if (cur & SCE_CTRL_UP) PerPadUpPressed(saturn_pad); else PerPadUpReleased(saturn_pad); }
-            if (changed & SCE_CTRL_DOWN)     { if (cur & SCE_CTRL_DOWN) PerPadDownPressed(saturn_pad); else PerPadDownReleased(saturn_pad); }
-            if (changed & SCE_CTRL_LEFT)     { if (cur & SCE_CTRL_LEFT) PerPadLeftPressed(saturn_pad); else PerPadLeftReleased(saturn_pad); }
-            if (changed & SCE_CTRL_RIGHT)    { if (cur & SCE_CTRL_RIGHT) PerPadRightPressed(saturn_pad); else PerPadRightReleased(saturn_pad); }
-            if (changed & SCE_CTRL_CROSS)    { if (cur & SCE_CTRL_CROSS) PerPadAPressed(saturn_pad); else PerPadAReleased(saturn_pad); }
-            if (changed & SCE_CTRL_CIRCLE)   { if (cur & SCE_CTRL_CIRCLE) PerPadBPressed(saturn_pad); else PerPadBReleased(saturn_pad); }
-            if (changed & SCE_CTRL_SQUARE)   { if (cur & SCE_CTRL_SQUARE) PerPadCPressed(saturn_pad); else PerPadCReleased(saturn_pad); }
-            if (changed & SCE_CTRL_TRIANGLE) { if (cur & SCE_CTRL_TRIANGLE) PerPadXPressed(saturn_pad); else PerPadXReleased(saturn_pad); }
-            if (changed & SCE_CTRL_LTRIGGER) { if (cur & SCE_CTRL_LTRIGGER) PerPadLTriggerPressed(saturn_pad); else PerPadLTriggerReleased(saturn_pad); }
-            if (changed & SCE_CTRL_RTRIGGER) { if (cur & SCE_CTRL_RTRIGGER) PerPadRTriggerPressed(saturn_pad); else PerPadRTriggerReleased(saturn_pad); }
-            if (changed & SCE_CTRL_START)    { if (cur & SCE_CTRL_START) PerPadStartPressed(saturn_pad); else PerPadStartReleased(saturn_pad); }
-            if (changed & SCE_CTRL_SELECT)   { if (cur & SCE_CTRL_SELECT) PerPadYPressed(saturn_pad); else PerPadYReleased(saturn_pad); }
+            display_count++;
+
+            SceUInt64 now = sceKernelGetProcessTimeWide();
+            if (now - fps_timer >= 1000000ULL)
+            {
+                float fps = (float)display_count * 1000000.0f / (float)(now - fps_timer);
+                vita_log("FPS: %.1f (emu %d)\n", fps, frame_count);
+                display_count = 0;
+                frame_count = 0;
+                fps_timer = now;
+            }
+
+            if (now >= next_frame)
+            {
+                YuiSwapBuffers();
+                next_frame = now + TARGET_FRAME_MS * 1000ULL;
+            }
+
+            SceCtrlData pad;
+            sceCtrlPeekBufferPositive(0, &pad, 1);
+            unsigned int cur = pad.buttons;
+            unsigned int changed = cur ^ last_buttons;
+            if (changed && saturn_pad)
+            {
+                if (changed & SCE_CTRL_UP)       { if (cur & SCE_CTRL_UP) PerPadUpPressed(saturn_pad); else PerPadUpReleased(saturn_pad); }
+                if (changed & SCE_CTRL_DOWN)     { if (cur & SCE_CTRL_DOWN) PerPadDownPressed(saturn_pad); else PerPadDownReleased(saturn_pad); }
+                if (changed & SCE_CTRL_LEFT)     { if (cur & SCE_CTRL_LEFT) PerPadLeftPressed(saturn_pad); else PerPadLeftReleased(saturn_pad); }
+                if (changed & SCE_CTRL_RIGHT)    { if (cur & SCE_CTRL_RIGHT) PerPadRightPressed(saturn_pad); else PerPadRightReleased(saturn_pad); }
+                if (changed & SCE_CTRL_CROSS)    { if (cur & SCE_CTRL_CROSS) PerPadAPressed(saturn_pad); else PerPadAReleased(saturn_pad); }
+                if (changed & SCE_CTRL_CIRCLE)   { if (cur & SCE_CTRL_CIRCLE) PerPadBPressed(saturn_pad); else PerPadBReleased(saturn_pad); }
+                if (changed & SCE_CTRL_SQUARE)   { if (cur & SCE_CTRL_SQUARE) PerPadCPressed(saturn_pad); else PerPadCReleased(saturn_pad); }
+                if (changed & SCE_CTRL_TRIANGLE) { if (cur & SCE_CTRL_TRIANGLE) PerPadXPressed(saturn_pad); else PerPadXReleased(saturn_pad); }
+                if (changed & SCE_CTRL_LTRIGGER) { if (cur & SCE_CTRL_LTRIGGER) PerPadLTriggerPressed(saturn_pad); else PerPadLTriggerReleased(saturn_pad); }
+                if (changed & SCE_CTRL_RTRIGGER) { if (cur & SCE_CTRL_RTRIGGER) PerPadRTriggerPressed(saturn_pad); else PerPadRTriggerReleased(saturn_pad); }
+                if (changed & SCE_CTRL_START)    { if (cur & SCE_CTRL_START) PerPadStartPressed(saturn_pad); else PerPadStartReleased(saturn_pad); }
+                if (changed & SCE_CTRL_SELECT)   { if (cur & SCE_CTRL_SELECT) PerPadYPressed(saturn_pad); else PerPadYReleased(saturn_pad); }
+            }
+            if (cur & SCE_CTRL_START)
+                break;
+            last_buttons = cur;
         }
-        if (cur & SCE_CTRL_START)
-            break;
-        last_buttons = cur;
     }
 
     vita_log("Emulation stopped\n");
