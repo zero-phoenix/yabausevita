@@ -133,27 +133,14 @@ void YabauseChangeTiming(int freqtype) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-static void ylog(FILE *f, const char *msg)
-{
-   if (!f) return;
-   fprintf(f, "%s\n", msg);
-   fflush(f);
-}
-
-extern FILE *g_logfile;
-#define yi_log(fmt, ...) do { if (g_logfile) { fprintf(g_logfile, fmt "\n", ##__VA_ARGS__); fflush(g_logfile); } } while(0)
-
 int YabauseInit(yabauseinit_struct *init)
 {
-   yi_log("YI SH2Init(%d)", init->sh2coretype);
    if (SH2Init(init->sh2coretype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("SH2"));
       return -1;
    }
-   yi_log("YI SH2 OK");
 
-   yi_log("YI MemInit");
    if ((BiosRom = T2MemoryInit(0x80000)) == NULL)
       return -1;
    if ((HighWram = T2MemoryInit(0x100000)) == NULL)
@@ -162,112 +149,85 @@ int YabauseInit(yabauseinit_struct *init)
       return -1;
    if ((BupRam = T1MemoryInit(0x10000)) == NULL)
       return -1;
-   yi_log("YI Mem OK");
 
    if (LoadBackupRam(init->buppath) != 0)
       FormatBackupRam(BupRam, 0x10000);
    bupfilename = init->buppath;
 
-   yi_log("YI VideoInit(%d)", init->vidcoretype);
    if (VideoInit(init->vidcoretype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("Video"));
       return -1;
    }
-   yi_log("YI Video OK");
 
-   yi_log("YI PerInit(%d)", init->percoretype);
    if (PerInit(init->percoretype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("Peripheral"));
       return -1;
    }
-   yi_log("YI Per OK");
 
-   yi_log("YI CartInit");
    if (CartInit(init->cartpath, init->carttype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("Cartridge"));
       return -1;
    }
-   yi_log("YI Cart OK");
 
-   yi_log("YI Cs2Init");
    if (Cs2Init(init->carttype, init->cdcoretype, init->cdpath, init->mpegpath, init->netlinksetting) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("CS2"));
       return -1;
    }
-   yi_log("YI Cs2 OK");
 
-   yi_log("YI ScuInit");
    if (ScuInit() != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("SCU"));
       return -1;
    }
-   yi_log("YI Scu OK");
 
-   yi_log("YI M68KInit(%d)", init->m68kcoretype);
    if (M68KInit(init->m68kcoretype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("M68K"));
       return -1;
    }
-   yi_log("YI M68K OK");
 
-   yi_log("YI ScspInit(%d)", init->sndcoretype);
    if (ScspInit(init->sndcoretype) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("SCSP/M68K"));
       return -1;
    }
-   yi_log("YI Scsp OK");
 
-   yi_log("YI Vdp1Init");
    if (Vdp1Init() != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("VDP1"));
       return -1;
    }
-   yi_log("YI Vdp1 OK");
 
-   yi_log("YI Vdp2Init");
    if (Vdp2Init() != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("VDP2"));
       return -1;
    }
-   yi_log("YI Vdp2 OK");
 
-   yi_log("YI SmpcInit(%d)", init->regionid);
    if (SmpcInit(init->regionid) != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("SMPC"));
       return -1;
    }
-   yi_log("YI Smpc OK");
 
-   yi_log("YI CheatInit");
    if (CheatInit() != 0)
    {
       YabSetError(YAB_ERR_CANNOTINIT, _("Cheat System"));
       return -1;
    }
-   yi_log("YI Cheat OK");
 
-   yi_log("YI MappedMemoryInit");
    MappedMemoryInit();
-   yi_log("YI MappedMem OK");
 
-   yi_log("YI SetVideoFormat");
    YabauseSetVideoFormat(init->flags & 0x1);
    YabauseChangeTiming(CLKTYPE_26MHZ);
 
    if (init->frameskip)
        EnableAutoFrameSkip();
 
-   yi_log("YI LoadBios");
    if (init->biospath != NULL && strlen(init->biospath))
    {
       if (LoadBios(init->biospath) != 0)
@@ -279,16 +239,13 @@ int YabauseInit(yabauseinit_struct *init)
    }
    else
       yabsys.emulatebios = 1;
-   yi_log("YI Bios OK (%d)", yabsys.emulatebios);
 
    yabsys.usequickload = 0;
 
-   yi_log("YI ResetNoLoad");
    YabauseResetNoLoad();
 
    if (yabsys.usequickload || yabsys.emulatebios)
    {
-      yi_log("YI QuickLoadGame");
       if (YabauseQuickLoadGame() != 0)
       {
          if (yabsys.emulatebios)
@@ -301,7 +258,6 @@ int YabauseInit(yabauseinit_struct *init)
       }
    }
 
-   yi_log("YI DONE");
    return 0;
 }
 

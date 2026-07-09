@@ -64,6 +64,10 @@ add_executable(${VITA_APP_NAME}
 
 target_include_directories(${VITA_APP_NAME} PRIVATE src)
 
+# Disable LTO for main.c to prevent aggressive optimizer reordering
+# of code before unbounded while loops
+set_source_files_properties(src/vita/main.c PROPERTIES COMPILE_FLAGS "-fno-lto")
+
 target_link_libraries(${VITA_APP_NAME}
     vita2d
     SceDisplay_stub
