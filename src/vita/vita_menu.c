@@ -1031,6 +1031,7 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->show_fps = 0;
     cfg->borderless = 0;
     cfg->recent_count = 0;
+    set_default_mapping(cfg);
 
     SceUID fd = sceIoOpen(VMENU_CONFIG_PATH, SCE_O_RDONLY, 0);
     if (fd < 0) return;
@@ -1068,7 +1069,27 @@ void load_config_file(VitaMenuConfig *cfg) {
             cfg->show_fps = atoi(val);
         else if (strcmp(key, "borderless") == 0)
             cfg->borderless = atoi(val);
-        else if (strncmp(key, "recent_", 7) == 0) {
+        else if (strncmp(key, "map_", 4) == 0) {
+            const char *map_key = key + 4;
+            int map_idx = -1;
+            if (strcmp(map_key, "up") == 0) map_idx = MAP_UP;
+            else if (strcmp(map_key, "down") == 0) map_idx = MAP_DOWN;
+            else if (strcmp(map_key, "left") == 0) map_idx = MAP_LEFT;
+            else if (strcmp(map_key, "right") == 0) map_idx = MAP_RIGHT;
+            else if (strcmp(map_key, "cross") == 0) map_idx = MAP_CROSS;
+            else if (strcmp(map_key, "circle") == 0) map_idx = MAP_CIRCLE;
+            else if (strcmp(map_key, "square") == 0) map_idx = MAP_SQUARE;
+            else if (strcmp(map_key, "triangle") == 0) map_idx = MAP_TRIANGLE;
+            else if (strcmp(map_key, "l") == 0) map_idx = MAP_L;
+            else if (strcmp(map_key, "r") == 0) map_idx = MAP_R;
+            else if (strcmp(map_key, "start") == 0) map_idx = MAP_START;
+            else if (strcmp(map_key, "select") == 0) map_idx = MAP_SELECT;
+            if (map_idx >= 0 && map_idx < MAP_COUNT) {
+                int v = atoi(val);
+                if (v >= 0 && v < SAT_COUNT)
+                    cfg->mapping[map_idx] = (unsigned char)v;
+            }
+        } else if (strncmp(key, "recent_", 7) == 0) {
             int idx = atoi(key + 7);
             if (idx >= 0 && idx < VMENU_MAX_RECENT) {
                 safe_strcpy(cfg->recent_games[idx], val, VMENU_MAX_PATH);
@@ -1119,6 +1140,14 @@ static void save_config_file(const VitaMenuConfig *cfg) {
     snprintf(buf, sizeof(buf), "borderless=%d\n", cfg->borderless);
     sceIoWrite(fd, buf, strlen(buf));
 
+    static const char *map_keys[MAP_COUNT] = {
+        "up","down","left","right","cross","circle","square","triangle","l","r","start","select"
+    };
+    for (int i = 0; i < MAP_COUNT; i++) {
+        snprintf(buf, sizeof(buf), "map_%s=%d\n", map_keys[i], cfg->mapping[i]);
+        sceIoWrite(fd, buf, strlen(buf));
+    }
+
     for (int i = 0; i < cfg->recent_count && i < VMENU_MAX_RECENT; i++) {
         char key[32];
         snprintf(key, sizeof(key), "recent_%d", i);
@@ -1127,6 +1156,22 @@ static void save_config_file(const VitaMenuConfig *cfg) {
 
     #undef WRITE_KV
     sceIoClose(fd);
+}
+
+void set_default_mapping(VitaMenuConfig *cfg) {
+    if (!cfg) return;
+    cfg->mapping[MAP_UP]      = SAT_UP;
+    cfg->mapping[MAP_DOWN]    = SAT_DOWN;
+    cfg->mapping[MAP_LEFT]    = SAT_LEFT;
+    cfg->mapping[MAP_RIGHT]   = SAT_RIGHT;
+    cfg->mapping[MAP_CROSS]   = SAT_A;
+    cfg->mapping[MAP_CIRCLE]  = SAT_B;
+    cfg->mapping[MAP_SQUARE]  = SAT_C;
+    cfg->mapping[MAP_TRIANGLE]= SAT_X;
+    cfg->mapping[MAP_L]       = SAT_L;
+    cfg->mapping[MAP_R]       = SAT_R;
+    cfg->mapping[MAP_START]   = SAT_START;
+    cfg->mapping[MAP_SELECT]  = SAT_Y;
 }
 
 /* Agregar juego a recientes */
@@ -1536,11 +1581,36 @@ typedef enum {
     CFG_SECTION_DISPLAY,
     CFG_OPT_FPS,
     CFG_OPT_BORDERLESS,
+    CFG_SECTION_CONTROLS,
+    CFG_OPT_MAP_UP,
+    CFG_OPT_MAP_DOWN,
+    CFG_OPT_MAP_LEFT,
+    CFG_OPT_MAP_RIGHT,
+    CFG_OPT_MAP_CROSS,
+    CFG_OPT_MAP_CIRCLE,
+    CFG_OPT_MAP_SQUARE,
+    CFG_OPT_MAP_TRIANGLE,
+    CFG_OPT_MAP_L,
+    CFG_OPT_MAP_R,
+    CFG_OPT_MAP_START,
+    CFG_OPT_MAP_SELECT,
     CFG_SECTION_INFO,
     CFG_OPT_CHD_INFO,
     CFG_OPT_BIOS_PATH,
     CFG_COUNT
 } CfgOption;
+
+static const char *vita_btn_names[MAP_COUNT] = {
+    "Arriba", "Abajo", "Izquierda", "Derecha",
+    "Cruz", "Circulo", "Cuadrado", "Triangulo",
+    "L", "R", "Start", "Select"
+};
+
+static const char *saturn_btn_names[SAT_COUNT] = {
+    "Arriba", "Abajo", "Izquierda", "Derecha",
+    "A", "B", "C", "X", "Y", "Z",
+    "L", "R", "Start"
+};
 
 static const char *cfg_labels[CFG_COUNT] = {
     "-- VIDEO --",          /* SECTION */
@@ -1558,6 +1628,19 @@ static const char *cfg_labels[CFG_COUNT] = {
     "-- PANTALLA --",       /* SECTION */
     "Mostrar FPS",
     "Sin bordes",
+    "-- CONTROLES --",      /* SECTION */
+    "Arriba",               /* MAP_UP */
+    "Abajo",                /* MAP_DOWN */
+    "Izquierda",            /* MAP_LEFT */
+    "Derecha",              /* MAP_RIGHT */
+    "Cruz",                 /* MAP_CROSS */
+    "Circulo",              /* MAP_CIRCLE */
+    "Cuadrado",             /* MAP_SQUARE */
+    "Triangulo",            /* MAP_TRIANGLE */
+    "L",                    /* MAP_L */
+    "R",                    /* MAP_R */
+    "Start",                /* MAP_START */
+    "Select",               /* MAP_SELECT */
     "-- INFORMACION --",    /* SECTION */
     "Info CHD seleccionado",
     "Ruta BIOS actual"
@@ -1568,6 +1651,7 @@ static int cfg_is_section[CFG_COUNT] = {
     1, 0, 0,
     1, 0, 0, 0, 0,
     1, 0, 0,
+    1, 0,0,0,0,0,0,0,0,0,0,0,0,
     1, 0, 0
 };
 
@@ -1708,7 +1792,6 @@ static void draw_config_tab(VitaMenuConfig *cfg) {
                 break;
             case CFG_OPT_BIOS_PATH:
                 if (cfg->bios_path[0]) {
-                    /* Mostrar solo el nombre del archivo */
                     const char *slash = strrchr(cfg->bios_path, '/');
                     const char *bname = slash ? slash + 1 : cfg->bios_path;
                     safe_strcpy(val_str, bname, sizeof(val_str));
@@ -1718,7 +1801,16 @@ static void draw_config_tab(VitaMenuConfig *cfg) {
                 }
                 break;
             default:
-                safe_strcpy(val_str, "", sizeof(val_str));
+                if (idx >= CFG_OPT_MAP_UP && idx <= CFG_OPT_MAP_SELECT) {
+                    int m = idx - CFG_OPT_MAP_UP;
+                    int s = cfg->mapping[m];
+                    if (s >= 0 && s < SAT_COUNT)
+                        safe_strcpy(val_str, saturn_btn_names[s], sizeof(val_str));
+                    else
+                        safe_strcpy(val_str, "?", sizeof(val_str));
+                } else {
+                    safe_strcpy(val_str, "", sizeof(val_str));
+                }
                 break;
         }
 
@@ -1837,6 +1929,10 @@ static void handle_config_input(VitaMenuConfig *cfg, SceCtrlData *pad,
                 cfg->borderless = !cfg->borderless;
                 break;
             default:
+                if (g_cfg_sel >= CFG_OPT_MAP_UP && g_cfg_sel <= CFG_OPT_MAP_SELECT) {
+                    int m = g_cfg_sel - CFG_OPT_MAP_UP;
+                    cfg->mapping[m] = (unsigned char)((cfg->mapping[m] + dir + SAT_COUNT) % SAT_COUNT);
+                }
                 break;
         }
         save_config_file(cfg);

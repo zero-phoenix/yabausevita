@@ -72,6 +72,36 @@ extern "C" {
 #define VMENU_FMT_CCD        5
 #define VMENU_FMT_UNKNOWN    6
 
+/* ── Mapeo de controles ────────────────────────────────────── */
+#define MAP_UP       0
+#define MAP_DOWN     1
+#define MAP_LEFT     2
+#define MAP_RIGHT    3
+#define MAP_CROSS    4
+#define MAP_CIRCLE   5
+#define MAP_SQUARE   6
+#define MAP_TRIANGLE 7
+#define MAP_L        8
+#define MAP_R        9
+#define MAP_START   10
+#define MAP_SELECT  11
+#define MAP_COUNT   12
+
+#define SAT_UP      0
+#define SAT_DOWN    1
+#define SAT_LEFT    2
+#define SAT_RIGHT   3
+#define SAT_A       4
+#define SAT_B       5
+#define SAT_C       6
+#define SAT_X       7
+#define SAT_Y       8
+#define SAT_Z       9
+#define SAT_L       10
+#define SAT_R       11
+#define SAT_START   12
+#define SAT_COUNT   13
+
 /* ── Estructura de configuración ───────────────────────────── */
 typedef struct {
     char rom_path[VMENU_MAX_PATH];
@@ -96,6 +126,8 @@ typedef struct {
     int  rom_region;        /* region auto-detectada de la ROM seleccionada */
     int  bios_region;       /* región del BIOS emparejado */
 
+    unsigned char mapping[MAP_COUNT]; /* MAP_* → SAT_* */
+
     char recent_games[VMENU_MAX_RECENT][VMENU_MAX_PATH];
     int  recent_count;
 } VitaMenuConfig;
@@ -111,6 +143,7 @@ void vita_menu_cleanup(void);
 
 /* ── Utilidades exportadas ─────────────────────────────────── */
 void load_config_file(VitaMenuConfig *cfg);
+void set_default_mapping(VitaMenuConfig *cfg);
 void safe_strcpy(char *dst, const char *src, int max);
 void safe_strcat(char *dst, const char *src, int max);
 void to_lower(char *s);

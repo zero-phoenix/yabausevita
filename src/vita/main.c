@@ -119,6 +119,32 @@ int vita_log(const char *fmt, ...)
     return r;
 }
 
+static const unsigned int vita_btn_bits[MAP_COUNT] = {
+    SCE_CTRL_UP,       SCE_CTRL_DOWN,    SCE_CTRL_LEFT,   SCE_CTRL_RIGHT,
+    SCE_CTRL_CROSS,    SCE_CTRL_CIRCLE,  SCE_CTRL_SQUARE, SCE_CTRL_TRIANGLE,
+    SCE_CTRL_LTRIGGER, SCE_CTRL_RTRIGGER,SCE_CTRL_START,  SCE_CTRL_SELECT
+};
+
+static void apply_saturn_btn(PerPad_struct *pad, int btn, int press)
+{
+    switch (btn)
+    {
+        case SAT_UP:     if(press) PerPadUpPressed(pad);    else PerPadUpReleased(pad);    break;
+        case SAT_DOWN:   if(press) PerPadDownPressed(pad);  else PerPadDownReleased(pad);  break;
+        case SAT_LEFT:   if(press) PerPadLeftPressed(pad);  else PerPadLeftReleased(pad);  break;
+        case SAT_RIGHT:  if(press) PerPadRightPressed(pad); else PerPadRightReleased(pad); break;
+        case SAT_A:      if(press) PerPadAPressed(pad);     else PerPadAReleased(pad);     break;
+        case SAT_B:      if(press) PerPadBPressed(pad);     else PerPadBReleased(pad);     break;
+        case SAT_C:      if(press) PerPadCPressed(pad);     else PerPadCReleased(pad);     break;
+        case SAT_X:      if(press) PerPadXPressed(pad);     else PerPadXReleased(pad);     break;
+        case SAT_Y:      if(press) PerPadYPressed(pad);     else PerPadYReleased(pad);     break;
+        case SAT_Z:      if(press) PerPadZPressed(pad);     else PerPadZReleased(pad);     break;
+        case SAT_L:      if(press) PerPadLTriggerPressed(pad);  else PerPadLTriggerReleased(pad);  break;
+        case SAT_R:      if(press) PerPadRTriggerPressed(pad);  else PerPadRTriggerReleased(pad);  break;
+        case SAT_START:  if(press) PerPadStartPressed(pad); else PerPadStartReleased(pad); break;
+    }
+}
+
 static void clear_fb(void)
 {
     if (!vita_fb) return;
@@ -313,18 +339,12 @@ int main(int argc, char *argv[])
         unsigned int changed = cur ^ last_buttons;
         if (changed && saturn_pad)
         {
-            if (changed & SCE_CTRL_UP)       { if (cur & SCE_CTRL_UP) PerPadUpPressed(saturn_pad); else PerPadUpReleased(saturn_pad); }
-            if (changed & SCE_CTRL_DOWN)     { if (cur & SCE_CTRL_DOWN) PerPadDownPressed(saturn_pad); else PerPadDownReleased(saturn_pad); }
-            if (changed & SCE_CTRL_LEFT)     { if (cur & SCE_CTRL_LEFT) PerPadLeftPressed(saturn_pad); else PerPadLeftReleased(saturn_pad); }
-            if (changed & SCE_CTRL_RIGHT)    { if (cur & SCE_CTRL_RIGHT) PerPadRightPressed(saturn_pad); else PerPadRightReleased(saturn_pad); }
-            if (changed & SCE_CTRL_CROSS)    { if (cur & SCE_CTRL_CROSS) PerPadAPressed(saturn_pad); else PerPadAReleased(saturn_pad); }
-            if (changed & SCE_CTRL_CIRCLE)   { if (cur & SCE_CTRL_CIRCLE) PerPadBPressed(saturn_pad); else PerPadBReleased(saturn_pad); }
-            if (changed & SCE_CTRL_SQUARE)   { if (cur & SCE_CTRL_SQUARE) PerPadCPressed(saturn_pad); else PerPadCReleased(saturn_pad); }
-            if (changed & SCE_CTRL_TRIANGLE) { if (cur & SCE_CTRL_TRIANGLE) PerPadXPressed(saturn_pad); else PerPadXReleased(saturn_pad); }
-            if (changed & SCE_CTRL_LTRIGGER) { if (cur & SCE_CTRL_LTRIGGER) PerPadLTriggerPressed(saturn_pad); else PerPadLTriggerReleased(saturn_pad); }
-            if (changed & SCE_CTRL_RTRIGGER) { if (cur & SCE_CTRL_RTRIGGER) PerPadRTriggerPressed(saturn_pad); else PerPadRTriggerReleased(saturn_pad); }
-            if (changed & SCE_CTRL_START)    { if (cur & SCE_CTRL_START) PerPadStartPressed(saturn_pad); else PerPadStartReleased(saturn_pad); }
-            if (changed & SCE_CTRL_SELECT)   { if (cur & SCE_CTRL_SELECT) PerPadYPressed(saturn_pad); else PerPadYReleased(saturn_pad); }
+            for (int m = 0; m < MAP_COUNT; m++)
+            {
+                unsigned int bit = vita_btn_bits[m];
+                if (changed & bit)
+                    apply_saturn_btn(saturn_pad, cfg.mapping[m], cur & bit);
+            }
         }
         if (cur & SCE_CTRL_START)
             break;
