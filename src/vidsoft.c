@@ -2767,12 +2767,14 @@ void VIDSoftVdp2DrawStart(void)
 
 //////////////////////////////////////////////////////////////////////////////
 
+static INLINE void write_vdp2only_pixel(u32 *restrict dst, u32 *restrict src)
+{
+    dst[0] = 0xFF000000 | src[0];
+}
+
 void VIDSoftVdp2DrawEnd(void)
 {
    int i, i2;
-   u16 pixel;
-   u8 prioritytable[8];
-   u32 vdp1coloroffset;
    int colormode = Vdp2Regs->SPCTL & 0x20;
    vdp2draw_struct info;
    u32 *dst=dispbuffer;
@@ -2782,195 +2784,277 @@ void VIDSoftVdp2DrawEnd(void)
    u32 linewnd0addr, linewnd1addr;
    int wctl;
 
-   // Figure out whether to draw vdp1 framebuffer or vdp2 framebuffer pixels
-   // based on priority
-   if (Vdp1Regs->disptoggle)
+   if (!Vdp1Regs->disptoggle)
    {
-      prioritytable[0] = Vdp2Regs->PRISA & 0x7;
-      prioritytable[1] = (Vdp2Regs->PRISA >> 8) & 0x7;
-      prioritytable[2] = Vdp2Regs->PRISB & 0x7;
-      prioritytable[3] = (Vdp2Regs->PRISB >> 8) & 0x7;
-      prioritytable[4] = Vdp2Regs->PRISC & 0x7;
-      prioritytable[5] = (Vdp2Regs->PRISC >> 8) & 0x7;
-      prioritytable[6] = Vdp2Regs->PRISD & 0x7;
-      prioritytable[7] = (Vdp2Regs->PRISD >> 8) & 0x7;
+      int n = vdp2width * vdp2height;
+      for (i = 0; i < n; i++)
+         dispbuffer[i] = 0xFF000000 | vdp2framebuffer[i];
+      VIDSoftVdp1SwapFrameBuffer();
+      YuiSwapBuffers();
+      return;
+   }
 
-      vdp1coloroffset = (Vdp2Regs->CRAOFB & 0x70) << 4;
-      vdp1spritetype = Vdp2Regs->SPCTL & 0xF;
+   u8 prioritytable[8];
+   u32 vdp1coloroffset;
+   prioritytable[0] = Vdp2Regs->PRISA & 0x7;
+   prioritytable[1] = (Vdp2Regs->PRISA >> 8) & 0x7;
+   prioritytable[2] = Vdp2Regs->PRISB & 0x7;
+   prioritytable[3] = (Vdp2Regs->PRISB >> 8) & 0x7;
+   prioritytable[4] = Vdp2Regs->PRISC & 0x7;
+   prioritytable[5] = (Vdp2Regs->PRISC >> 8) & 0x7;
+   prioritytable[6] = Vdp2Regs->PRISD & 0x7;
+   prioritytable[7] = (Vdp2Regs->PRISD >> 8) & 0x7;
 
-      if (Vdp2Regs->CLOFEN & 0x40)
+   vdp1coloroffset = (Vdp2Regs->CRAOFB & 0x70) << 4;
+   vdp1spritetype = Vdp2Regs->SPCTL & 0xF;
+
+   if (Vdp2Regs->CLOFEN & 0x40)
+   {
+      if (Vdp2Regs->CLOFSL & 0x40)
       {
-         // color offset enable
-         if (Vdp2Regs->CLOFSL & 0x40)
-         {
-            // color offset B
-            info.cor = Vdp2Regs->COBR & 0xFF;
-            if (Vdp2Regs->COBR & 0x100)
-               info.cor |= 0xFFFFFF00;
-
-            info.cog = Vdp2Regs->COBG & 0xFF;
-            if (Vdp2Regs->COBG & 0x100)
-               info.cog |= 0xFFFFFF00;
-
-            info.cob = Vdp2Regs->COBB & 0xFF;
-            if (Vdp2Regs->COBB & 0x100)
-               info.cob |= 0xFFFFFF00;
-         }
-         else
-         {
-            // color offset A
-            info.cor = Vdp2Regs->COAR & 0xFF;
-            if (Vdp2Regs->COAR & 0x100)
-               info.cor |= 0xFFFFFF00;
-
-            info.cog = Vdp2Regs->COAG & 0xFF;
-            if (Vdp2Regs->COAG & 0x100)
-               info.cog |= 0xFFFFFF00;
-
-            info.cob = Vdp2Regs->COAB & 0xFF;
-            if (Vdp2Regs->COAB & 0x100)
-               info.cob |= 0xFFFFFF00;
-         }
-
-         if (info.cor == 0 && info.cog == 0 && info.cob == 0)
-         {
-            if (Vdp2Regs->CCCTL & 0x40)
-               info.PostPixelFetchCalc = &DoColorCalc;
-            else
-               info.PostPixelFetchCalc = &DoNothing;
-         }
-         else
-         {
-            if (Vdp2Regs->CCCTL & 0x40)
-               info.PostPixelFetchCalc = &DoColorCalcWithColorOffset;
-            else
-               info.PostPixelFetchCalc = &DoColorOffset;
-         }
+         info.cor = Vdp2Regs->COBR & 0xFF;
+         if (Vdp2Regs->COBR & 0x100) info.cor |= 0xFFFFFF00;
+         info.cog = Vdp2Regs->COBG & 0xFF;
+         if (Vdp2Regs->COBG & 0x100) info.cog |= 0xFFFFFF00;
+         info.cob = Vdp2Regs->COBB & 0xFF;
+         if (Vdp2Regs->COBB & 0x100) info.cob |= 0xFFFFFF00;
       }
-      else // color offset disable
+      else
       {
-         if (Vdp2Regs->CCCTL & 0x40)
-            info.PostPixelFetchCalc = &DoColorCalc;
-         else
-            info.PostPixelFetchCalc = &DoNothing;
+         info.cor = Vdp2Regs->COAR & 0xFF;
+         if (Vdp2Regs->COAR & 0x100) info.cor |= 0xFFFFFF00;
+         info.cog = Vdp2Regs->COAG & 0xFF;
+         if (Vdp2Regs->COAG & 0x100) info.cog |= 0xFFFFFF00;
+         info.cob = Vdp2Regs->COAB & 0xFF;
+         if (Vdp2Regs->COAB & 0x100) info.cob |= 0xFFFFFF00;
       }
+      if (info.cor == 0 && info.cog == 0 && info.cob == 0)
+         info.PostPixelFetchCalc = (Vdp2Regs->CCCTL & 0x40) ? &DoColorCalc : &DoNothing;
+      else
+         info.PostPixelFetchCalc = (Vdp2Regs->CCCTL & 0x40) ? &DoColorCalcWithColorOffset : &DoColorOffset;
+   }
+   else
+   {
+      info.PostPixelFetchCalc = (Vdp2Regs->CCCTL & 0x40) ? &DoColorCalc : &DoNothing;
+   }
 
-      wctl = Vdp2Regs->WCTLC >> 8;
-      clip[0].xstart = clip[0].ystart = clip[0].xend = clip[0].yend = 0;
-      clip[1].xstart = clip[1].ystart = clip[1].xend = clip[1].yend = 0;
-      ReadWindowData(wctl, clip);
-      linewnd0addr = linewnd1addr = 0;
-      ReadLineWindowData(&islinewindow, wctl, &linewnd0addr, &linewnd1addr);
+   wctl = Vdp2Regs->WCTLC >> 8;
+   clip[0].xstart = clip[0].ystart = clip[0].xend = clip[0].yend = 0;
+   clip[1].xstart = clip[1].ystart = clip[1].xend = clip[1].yend = 0;
+   ReadWindowData(wctl, clip);
+   linewnd0addr = linewnd1addr = 0;
+   ReadLineWindowData(&islinewindow, wctl, &linewnd0addr, &linewnd1addr);
 
-      for (i2 = 0; i2 < vdp2height; i2++)
+   int has_windows = (islinewindow || (wctl & 0x0A));
+   int is16bit = (vdp1pixelsize == 2);
+   u32 (*postfunc)(void*, u32) = info.PostPixelFetchCalc;
+   int post_is_nothing = (postfunc == &DoNothing);
+
+   if (is16bit)
+   {
+      if (post_is_nothing)
       {
-         ReadLineWindowClip(islinewindow, clip, &linewnd0addr, &linewnd1addr);
-
-         for (i = 0; i < vdp2width; i++)
+         for (i2 = 0; i2 < vdp2height; i2++)
          {
-            // See if screen position is clipped, if it isn't, continue
-            // Window 0
-            if (!TestWindow(wctl, 0x2, 0x1, &clip[0], i, i2))
-            {
-               dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
-               vdp2src++;
-               dst++;
-               continue;
-            }
+            u16 *vdp1_row = (u16 *)vdp1frontframebuffer + i2 * vdp1width;
+            ReadLineWindowClip(islinewindow, clip, &linewnd0addr, &linewnd1addr);
 
-            // Window 1
-            if (!TestWindow(wctl, 0x8, 0x4, &clip[1], i, i2))
+            if (!has_windows)
             {
-               vdp2src++;
-               dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
-               dst++;
-               continue;
-            }
-
-            if (vdp1pixelsize == 2)
-            {
-               // 16-bit pixel size
-               pixel = ((u16 *)vdp1frontframebuffer)[(i2 * vdp1width) + i];
-
-               if (pixel == 0)
-                  dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
-               else if (pixel & 0x8000 && colormode)
+               for (i = 0; i < vdp2width; i++)
                {
-                  // 16 BPP               
-                  if (prioritytable[0] >= Vdp2GetPixelPriority(vdp2src[0]))
+                  u16 pixel = vdp1_row[i];
+                  if (pixel == 0)
+                     dst[0] = 0xFF000000 | vdp2src[0];
+                  else if (pixel & 0x8000 && colormode)
                   {
-                     // if pixel is 0x8000, only draw pixel if sprite window
-                     // is disabled/sprite type 2-7. sprite types 0 and 1 are
-                     // -always- drawn and sprite types 8-F are always
-                     // transparent.
                      if (pixel != 0x8000 || vdp1spritetype < 2 || (vdp1spritetype < 8 && !(Vdp2Regs->SPCTL & 0x10)))
-                        dst[0] = info.PostPixelFetchCalc(&info, COLSAT2YAB16(0xFF, pixel));
+                        dst[0] = COLSAT2YAB16(0xFF, pixel);
                      else
-                        dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
+                        dst[0] = 0xFF000000 | vdp2src[0];
                   }
-                  else               
-                     dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
-               }
-               else
-               {
-                  // Color bank
-		  int priority;
-		  int shadow;
-		  int colorcalc;
-		  priority = 0;  // Avoid compiler warning
-                  Vdp1ProcessSpritePixel(vdp1spritetype, &pixel, &shadow, &priority, &colorcalc);
-                  if (prioritytable[priority] >= Vdp2GetPixelPriority(vdp2src[0]))
-                     dst[0] = info.PostPixelFetchCalc(&info, COLSAT2YAB32(0xFF, Vdp2ColorRamGetColor(vdp1coloroffset + pixel)));
-                  else               
-                     dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
+                  else
+                  {
+                     int priority = 0, shadow = 0, colorcalc = 0;
+                     Vdp1ProcessSpritePixel(vdp1spritetype, &pixel, &shadow, &priority, &colorcalc);
+                     if (prioritytable[priority] >= Vdp2GetPixelPriority(vdp2src[0]))
+                        dst[0] = COLSAT2YAB32(0xFF, Vdp2ColorRamGetColor(vdp1coloroffset + pixel));
+                     else
+                        dst[0] = 0xFF000000 | vdp2src[0];
+                  }
+                  dst++;
+                  vdp2src++;
                }
             }
             else
             {
-               // 8-bit pixel size
-               pixel = vdp1frontframebuffer[(i2 * vdp1width) + i];
-
-               if (pixel == 0)
-                  dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
-               else
+               for (i = 0; i < vdp2width; i++)
                {
-                  // Color bank(fix me)
-                  LOG("8-bit Color Bank draw - %02X\n", pixel);
-                  dst[0] = COLSATSTRIPPRIORITY(vdp2src[0]);
+                  if (TestWindow(wctl, 0x2, 0x1, &clip[0], i, i2))
+                     goto winpass16_0;
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; vdp2src++; continue;
+winpass16_0:
+                  if (TestWindow(wctl, 0x8, 0x4, &clip[1], i, i2))
+                     goto winpass16_1;
+                  vdp2src++;
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; continue;
+winpass16_1:
+                  {
+                     u16 pixel = vdp1_row[i];
+                     if (pixel == 0)
+                        dst[0] = 0xFF000000 | vdp2src[0];
+                     else if (pixel & 0x8000 && colormode)
+                     {
+                        if (pixel != 0x8000 || vdp1spritetype < 2 || (vdp1spritetype < 8 && !(Vdp2Regs->SPCTL & 0x10)))
+                           dst[0] = COLSAT2YAB16(0xFF, pixel);
+                        else
+                           dst[0] = 0xFF000000 | vdp2src[0];
+                     }
+                     else
+                     {
+                        int priority = 0, shadow = 0, colorcalc = 0;
+                        Vdp1ProcessSpritePixel(vdp1spritetype, &pixel, &shadow, &priority, &colorcalc);
+                        if (prioritytable[priority] >= Vdp2GetPixelPriority(vdp2src[0]))
+                           dst[0] = COLSAT2YAB32(0xFF, Vdp2ColorRamGetColor(vdp1coloroffset + pixel));
+                        else
+                           dst[0] = 0xFF000000 | vdp2src[0];
+                     }
+                     dst++;
+                     vdp2src++;
+                  }
                }
             }
-            vdp2src++;
-            dst++;
+         }
+      }
+      else
+      {
+         for (i2 = 0; i2 < vdp2height; i2++)
+         {
+            u16 *vdp1_row = (u16 *)vdp1frontframebuffer + i2 * vdp1width;
+            ReadLineWindowClip(islinewindow, clip, &linewnd0addr, &linewnd1addr);
+
+            if (!has_windows)
+            {
+               for (i = 0; i < vdp2width; i++)
+               {
+                  u16 pixel = vdp1_row[i];
+                  if (pixel == 0)
+                     dst[0] = 0xFF000000 | vdp2src[0];
+                  else if (pixel & 0x8000 && colormode)
+                  {
+                     if (pixel != 0x8000 || vdp1spritetype < 2 || (vdp1spritetype < 8 && !(Vdp2Regs->SPCTL & 0x10)))
+                        dst[0] = postfunc(&info, COLSAT2YAB16(0xFF, pixel));
+                     else
+                        dst[0] = 0xFF000000 | vdp2src[0];
+                  }
+                  else
+                  {
+                     int priority = 0, shadow = 0, colorcalc = 0;
+                     Vdp1ProcessSpritePixel(vdp1spritetype, &pixel, &shadow, &priority, &colorcalc);
+                     if (prioritytable[priority] >= Vdp2GetPixelPriority(vdp2src[0]))
+                        dst[0] = postfunc(&info, COLSAT2YAB32(0xFF, Vdp2ColorRamGetColor(vdp1coloroffset + pixel)));
+                     else
+                        dst[0] = 0xFF000000 | vdp2src[0];
+                  }
+                  dst++;
+                  vdp2src++;
+               }
+            }
+            else
+            {
+               for (i = 0; i < vdp2width; i++)
+               {
+                  if (TestWindow(wctl, 0x2, 0x1, &clip[0], i, i2))
+                     goto winpass16b_0;
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; vdp2src++; continue;
+winpass16b_0:
+                  if (TestWindow(wctl, 0x8, 0x4, &clip[1], i, i2))
+                     goto winpass16b_1;
+                  vdp2src++;
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; continue;
+winpass16b_1:
+                  {
+                     u16 pixel = vdp1_row[i];
+                     if (pixel == 0)
+                        dst[0] = 0xFF000000 | vdp2src[0];
+                     else if (pixel & 0x8000 && colormode)
+                     {
+                        if (pixel != 0x8000 || vdp1spritetype < 2 || (vdp1spritetype < 8 && !(Vdp2Regs->SPCTL & 0x10)))
+                           dst[0] = postfunc(&info, COLSAT2YAB16(0xFF, pixel));
+                        else
+                           dst[0] = 0xFF000000 | vdp2src[0];
+                     }
+                     else
+                     {
+                        int priority = 0, shadow = 0, colorcalc = 0;
+                        Vdp1ProcessSpritePixel(vdp1spritetype, &pixel, &shadow, &priority, &colorcalc);
+                        if (prioritytable[priority] >= Vdp2GetPixelPriority(vdp2src[0]))
+                           dst[0] = postfunc(&info, COLSAT2YAB32(0xFF, Vdp2ColorRamGetColor(vdp1coloroffset + pixel)));
+                        else
+                           dst[0] = 0xFF000000 | vdp2src[0];
+                     }
+                     dst++;
+                     vdp2src++;
+                  }
+               }
+            }
          }
       }
    }
    else
    {
-      // Render VDP2 only
-      for (i = 0; i < (vdp2width*vdp2height); i++)
-         dispbuffer[i] = COLSATSTRIPPRIORITY(vdp2framebuffer[i]);
+      for (i2 = 0; i2 < vdp2height; i2++)
+      {
+         u8 *vdp1_row = vdp1frontframebuffer + i2 * vdp1width;
+         ReadLineWindowClip(islinewindow, clip, &linewnd0addr, &linewnd1addr);
+
+         if (!has_windows)
+         {
+            for (i = 0; i < vdp2width; i++)
+            {
+               if (vdp1_row[i] == 0)
+               {
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; vdp2src++; continue;
+               }
+               LOG("8-bit Color Bank draw - %02X\n", vdp1_row[i]);
+               dst[0] = 0xFF000000 | vdp2src[0];
+               dst++; vdp2src++;
+            }
+         }
+         else
+         {
+            for (i = 0; i < vdp2width; i++)
+            {
+               if (!TestWindow(wctl, 0x2, 0x1, &clip[0], i, i2))
+               {
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; vdp2src++; continue;
+               }
+               if (!TestWindow(wctl, 0x8, 0x4, &clip[1], i, i2))
+               {
+                  vdp2src++;
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; continue;
+               }
+               if (vdp1_row[i] == 0)
+               {
+                  dst[0] = 0xFF000000 | vdp2src[0];
+                  dst++; vdp2src++; continue;
+               }
+               LOG("8-bit Color Bank draw - %02X\n", vdp1_row[i]);
+               dst[0] = 0xFF000000 | vdp2src[0];
+               dst++; vdp2src++;
+            }
+         }
+      }
    }
 
    VIDSoftVdp1SwapFrameBuffer();
-
-#ifdef USE_OPENGL
-   glRasterPos2i(0, 0);
-   glPixelZoom((float)outputwidth / (float)vdp2width, 0 - ((float)outputheight / (float)vdp2height));
-   glDrawPixels(vdp2width, vdp2height, GL_RGBA, GL_UNSIGNED_BYTE, dispbuffer);
-
-#if HAVE_LIBGLUT
-   if (msglength > 0) {
-      glColor3f(1.0f, 0.0f, 0.0f);
-      glRasterPos2i(10, 22);
-      for (i = 0; i < msglength; i++) {
-         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, message[i]);
-      }
-      glColor3f(1, 1, 1);
-      msglength = 0;
-   }
-#endif
-
-#endif
    YuiSwapBuffers();
 }
 
