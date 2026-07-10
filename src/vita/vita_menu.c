@@ -1164,14 +1164,14 @@ void set_default_mapping(VitaMenuConfig *cfg) {
     cfg->mapping[MAP_DOWN]    = SAT_DOWN;
     cfg->mapping[MAP_LEFT]    = SAT_LEFT;
     cfg->mapping[MAP_RIGHT]   = SAT_RIGHT;
-    cfg->mapping[MAP_CROSS]   = SAT_A;
-    cfg->mapping[MAP_CIRCLE]  = SAT_B;
-    cfg->mapping[MAP_SQUARE]  = SAT_C;
-    cfg->mapping[MAP_TRIANGLE]= SAT_X;
+    cfg->mapping[MAP_CROSS]   = SAT_B;
+    cfg->mapping[MAP_CIRCLE]  = SAT_A;
+    cfg->mapping[MAP_SQUARE]  = SAT_X;
+    cfg->mapping[MAP_TRIANGLE]= SAT_Y;
     cfg->mapping[MAP_L]       = SAT_L;
     cfg->mapping[MAP_R]       = SAT_R;
     cfg->mapping[MAP_START]   = SAT_START;
-    cfg->mapping[MAP_SELECT]  = SAT_Y;
+    cfg->mapping[MAP_SELECT]  = SAT_C;
 }
 
 /* Agregar juego a recientes */
