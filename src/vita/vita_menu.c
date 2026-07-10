@@ -1025,7 +1025,7 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->audio_enabled = 1;
     cfg->audio_volume = 80;
     cfg->cpu_mode = VMENU_CPU_RECOMP;
-    cfg->frame_skip = 0;
+    cfg->frame_skip = 2;
     cfg->auto_frameskip = 1;
     cfg->sh2_sync = 1;
     cfg->show_fps = 0;

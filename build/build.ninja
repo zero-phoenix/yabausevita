@@ -53,7 +53,7 @@ build CMakeFiles/YabauseVita.dir/src/bios.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\bios.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -63,7 +63,7 @@ build CMakeFiles/YabauseVita.dir/src/cdbase.c.obj: C_COMPILER__YabauseVita_unsca
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\cdbase.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -73,7 +73,7 @@ build CMakeFiles/YabauseVita.dir/src/cheat.c.obj: C_COMPILER__YabauseVita_unscan
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\cheat.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -83,7 +83,7 @@ build CMakeFiles/YabauseVita.dir/src/coffelf.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\coffelf.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -93,7 +93,7 @@ build CMakeFiles/YabauseVita.dir/src/cs0.c.obj: C_COMPILER__YabauseVita_unscanne
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\cs0.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -103,7 +103,7 @@ build CMakeFiles/YabauseVita.dir/src/cs1.c.obj: C_COMPILER__YabauseVita_unscanne
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\cs1.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -113,7 +113,7 @@ build CMakeFiles/YabauseVita.dir/src/cs2.c.obj: C_COMPILER__YabauseVita_unscanne
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\cs2.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -123,7 +123,7 @@ build CMakeFiles/YabauseVita.dir/src/debug.c.obj: C_COMPILER__YabauseVita_unscan
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\debug.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -133,7 +133,7 @@ build CMakeFiles/YabauseVita.dir/src/error.c.obj: C_COMPILER__YabauseVita_unscan
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\error.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -143,7 +143,7 @@ build CMakeFiles/YabauseVita.dir/src/memory.c.obj: C_COMPILER__YabauseVita_unsca
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\memory.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -153,7 +153,7 @@ build CMakeFiles/YabauseVita.dir/src/m68kcore.c.obj: C_COMPILER__YabauseVita_uns
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\m68kcore.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -163,7 +163,7 @@ build CMakeFiles/YabauseVita.dir/src/m68kd.c.obj: C_COMPILER__YabauseVita_unscan
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\m68kd.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -173,7 +173,7 @@ build CMakeFiles/YabauseVita.dir/src/movie.c.obj: C_COMPILER__YabauseVita_unscan
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\movie.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -183,7 +183,7 @@ build CMakeFiles/YabauseVita.dir/src/netlink.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\netlink.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -193,7 +193,7 @@ build CMakeFiles/YabauseVita.dir/src/peripheral.c.obj: C_COMPILER__YabauseVita_u
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\peripheral.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -203,7 +203,7 @@ build CMakeFiles/YabauseVita.dir/src/profile.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\profile.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -213,7 +213,7 @@ build CMakeFiles/YabauseVita.dir/src/scu.c.obj: C_COMPILER__YabauseVita_unscanne
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\scu.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -223,7 +223,7 @@ build CMakeFiles/YabauseVita.dir/src/sh2core.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\sh2core.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -233,7 +233,7 @@ build CMakeFiles/YabauseVita.dir/src/sh2d.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\sh2d.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -243,7 +243,7 @@ build CMakeFiles/YabauseVita.dir/src/sh2idle.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\sh2idle.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -253,7 +253,7 @@ build CMakeFiles/YabauseVita.dir/src/sh2int.c.obj: C_COMPILER__YabauseVita_unsca
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\sh2int.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers -O3 -funroll-loops
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -263,7 +263,7 @@ build CMakeFiles/YabauseVita.dir/src/smpc.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\smpc.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -273,7 +273,7 @@ build CMakeFiles/YabauseVita.dir/src/scsp.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\scsp.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -283,7 +283,7 @@ build CMakeFiles/YabauseVita.dir/src/vdp1.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vdp1.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -293,7 +293,7 @@ build CMakeFiles/YabauseVita.dir/src/vdp2.c.obj: C_COMPILER__YabauseVita_unscann
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vdp2.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -303,7 +303,7 @@ build CMakeFiles/YabauseVita.dir/src/vdp2debug.c.obj: C_COMPILER__YabauseVita_un
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vdp2debug.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -313,7 +313,7 @@ build CMakeFiles/YabauseVita.dir/src/vidshared.c.obj: C_COMPILER__YabauseVita_un
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vidshared.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -323,7 +323,7 @@ build CMakeFiles/YabauseVita.dir/src/vidsoft.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vidsoft.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers -O3 -funroll-loops -fgcse-after-reload
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -333,7 +333,7 @@ build CMakeFiles/YabauseVita.dir/src/yabause.c.obj: C_COMPILER__YabauseVita_unsc
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\yabause.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src
@@ -343,7 +343,7 @@ build CMakeFiles/YabauseVita.dir/src/vita/main.c.obj: C_COMPILER__YabauseVita_un
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vita\main.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers -fno-lto
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
@@ -353,7 +353,27 @@ build CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj: C_COMPILER__YabauseVi
   CONFIG = Release
   DEFINES = -DVERSION=\"0.9.10\"
   DEP_FILE = CMakeFiles\YabauseVita.dir\src\vita\vita_menu.c.obj.d
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
+  INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
+  OBJECT_DIR = CMakeFiles\YabauseVita.dir
+  OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
+  TARGET_SUPPORT_DIR = CMakeFiles\YabauseVita.dir
+
+build CMakeFiles/YabauseVita.dir/src/vita/sh2fast.c.obj: C_COMPILER__YabauseVita_unscanned_Release C$:/Users/D/Documents/GitHub/yabausevita/src/vita/sh2fast.c || cmake_object_order_depends_target_YabauseVita
+  CONFIG = Release
+  DEFINES = -DVERSION=\"0.9.10\"
+  DEP_FILE = CMakeFiles\YabauseVita.dir\src\vita\sh2fast.c.obj.d
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers -O3 -funroll-loops
+  INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
+  OBJECT_DIR = CMakeFiles\YabauseVita.dir
+  OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
+  TARGET_SUPPORT_DIR = CMakeFiles\YabauseVita.dir
+
+build CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj: C_COMPILER__YabauseVita_unscanned_Release C$:/Users/D/Documents/GitHub/yabausevita/src/vita/sh2lru.c || cmake_object_order_depends_target_YabauseVita
+  CONFIG = Release
+  DEFINES = -DVERSION=\"0.9.10\"
+  DEP_FILE = CMakeFiles\YabauseVita.dir\src\vita\sh2lru.c.obj.d
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers -O3 -funroll-loops -fgcse-after-reload
   INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
@@ -367,11 +387,11 @@ build CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj: C_COMPILER__YabauseVi
 #############################################
 # Link the executable YabauseVita
 
-build YabauseVita: C_EXECUTABLE_LINKER__YabauseVita_Release CMakeFiles/YabauseVita.dir/src/bios.c.obj CMakeFiles/YabauseVita.dir/src/cdbase.c.obj CMakeFiles/YabauseVita.dir/src/cheat.c.obj CMakeFiles/YabauseVita.dir/src/coffelf.c.obj CMakeFiles/YabauseVita.dir/src/cs0.c.obj CMakeFiles/YabauseVita.dir/src/cs1.c.obj CMakeFiles/YabauseVita.dir/src/cs2.c.obj CMakeFiles/YabauseVita.dir/src/debug.c.obj CMakeFiles/YabauseVita.dir/src/error.c.obj CMakeFiles/YabauseVita.dir/src/memory.c.obj CMakeFiles/YabauseVita.dir/src/m68kcore.c.obj CMakeFiles/YabauseVita.dir/src/m68kd.c.obj CMakeFiles/YabauseVita.dir/src/movie.c.obj CMakeFiles/YabauseVita.dir/src/netlink.c.obj CMakeFiles/YabauseVita.dir/src/peripheral.c.obj CMakeFiles/YabauseVita.dir/src/profile.c.obj CMakeFiles/YabauseVita.dir/src/scu.c.obj CMakeFiles/YabauseVita.dir/src/sh2core.c.obj CMakeFiles/YabauseVita.dir/src/sh2d.c.obj CMakeFiles/YabauseVita.dir/src/sh2idle.c.obj CMakeFiles/YabauseVita.dir/src/sh2int.c.obj CMakeFiles/YabauseVita.dir/src/smpc.c.obj CMakeFiles/YabauseVita.dir/src/scsp.c.obj CMakeFiles/YabauseVita.dir/src/vdp1.c.obj CMakeFiles/YabauseVita.dir/src/vdp2.c.obj CMakeFiles/YabauseVita.dir/src/vdp2debug.c.obj CMakeFiles/YabauseVita.dir/src/vidshared.c.obj CMakeFiles/YabauseVita.dir/src/vidsoft.c.obj CMakeFiles/YabauseVita.dir/src/yabause.c.obj CMakeFiles/YabauseVita.dir/src/vita/main.c.obj CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj
+build YabauseVita: C_EXECUTABLE_LINKER__YabauseVita_Release CMakeFiles/YabauseVita.dir/src/bios.c.obj CMakeFiles/YabauseVita.dir/src/cdbase.c.obj CMakeFiles/YabauseVita.dir/src/cheat.c.obj CMakeFiles/YabauseVita.dir/src/coffelf.c.obj CMakeFiles/YabauseVita.dir/src/cs0.c.obj CMakeFiles/YabauseVita.dir/src/cs1.c.obj CMakeFiles/YabauseVita.dir/src/cs2.c.obj CMakeFiles/YabauseVita.dir/src/debug.c.obj CMakeFiles/YabauseVita.dir/src/error.c.obj CMakeFiles/YabauseVita.dir/src/memory.c.obj CMakeFiles/YabauseVita.dir/src/m68kcore.c.obj CMakeFiles/YabauseVita.dir/src/m68kd.c.obj CMakeFiles/YabauseVita.dir/src/movie.c.obj CMakeFiles/YabauseVita.dir/src/netlink.c.obj CMakeFiles/YabauseVita.dir/src/peripheral.c.obj CMakeFiles/YabauseVita.dir/src/profile.c.obj CMakeFiles/YabauseVita.dir/src/scu.c.obj CMakeFiles/YabauseVita.dir/src/sh2core.c.obj CMakeFiles/YabauseVita.dir/src/sh2d.c.obj CMakeFiles/YabauseVita.dir/src/sh2idle.c.obj CMakeFiles/YabauseVita.dir/src/sh2int.c.obj CMakeFiles/YabauseVita.dir/src/smpc.c.obj CMakeFiles/YabauseVita.dir/src/scsp.c.obj CMakeFiles/YabauseVita.dir/src/vdp1.c.obj CMakeFiles/YabauseVita.dir/src/vdp2.c.obj CMakeFiles/YabauseVita.dir/src/vdp2debug.c.obj CMakeFiles/YabauseVita.dir/src/vidshared.c.obj CMakeFiles/YabauseVita.dir/src/vidsoft.c.obj CMakeFiles/YabauseVita.dir/src/yabause.c.obj CMakeFiles/YabauseVita.dir/src/vita/main.c.obj CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2fast.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj
   CONFIG = Release
-  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   LINK_FLAGS = -Wl,-z,nocopyreloc -flto
-  LINK_LIBRARIES = -lvita2d  -lSceDisplay_stub  -lSceCtrl_stub  -lSceAudio_stub  -lSceSysmodule_stub  -lSceGxm_stub  -lSceCommonDialog_stub  -lSceAppMgr_stub  -lSceIofilemgr_stub  -lScePower_stub  -lSceSysmem_stub  -lSceKernelThreadMgr_stub  -lSceKernelModulemgr_stub  -lSceLibKernel_stub  -lSceLibc_stub  -lm
+  LINK_LIBRARIES = -lvita2d  -lSceDisplay_stub  -lSceCtrl_stub  -lSceAudio_stub  -lSceSysmodule_stub  -lSceGxm_stub  -lSceCommonDialog_stub  -lSceAppMgr_stub  -lSceIofilemgr_stub  -lScePower_stub  -lm
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -443,7 +463,7 @@ build CMakeFiles/YabauseVita.self-self YabauseVita.self | ${cmake_ninja_workdir}
 # Custom command for YabauseVita.self.out
 
 build YabauseVita.self.out | ${cmake_ninja_workdir}YabauseVita.self.out: CUSTOM_COMMAND YabauseVita.velf || YabauseVita YabauseVita-velf
-  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\D\Documents\GitHub\yabausevita\build && C:\Users\D\VitaSDK\vitasdk\bin\vita-make-fself.exe -c -m 64 -s C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.velf C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.self.out"
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\D\Documents\GitHub\yabausevita\build && C:\Users\D\VitaSDK\vitasdk\bin\vita-make-fself.exe -c -m 64 C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.velf C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.self.out"
   DESC = Creating SELF YabauseVita.self
   restat = 1
 
