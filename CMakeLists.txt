@@ -11,7 +11,7 @@ endif()
 project(YabauseVita C)
 
 add_definitions(-DVERSION="0.9.10")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto -O3")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
@@ -55,6 +55,8 @@ set(YABAUSE_CORE_SOURCES
 set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
+    src/vita/sh2fast.c
+    src/vita/sh2lru.c
 )
 
 add_executable(${VITA_APP_NAME}
@@ -67,6 +69,12 @@ target_include_directories(${VITA_APP_NAME} PRIVATE src)
 # Disable LTO for main.c to prevent aggressive optimizer reordering
 # of code before unbounded while loops
 set_source_files_properties(src/vita/main.c PROPERTIES COMPILE_FLAGS "-fno-lto")
+
+# Extra optimization for SH2 cores and video renderer
+set_source_files_properties(src/vita/sh2lru.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops -fgcse-after-reload")
+set_source_files_properties(src/vita/sh2fast.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
+set_source_files_properties(src/sh2int.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
+set_source_files_properties(src/vidsoft.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops -fgcse-after-reload")
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d

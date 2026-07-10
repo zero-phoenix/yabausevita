@@ -20,6 +20,9 @@
 
 #include "vita_menu.h"
 
+extern SH2Interface_struct SH2Fast;
+extern SH2Interface_struct SH2LRU;
+
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
 #define TARGET_FRAME_MS 16
@@ -38,7 +41,7 @@ M68K_struct *M68KCoreList[] = { &M68KDummy, NULL };
 
 extern SH2Interface_struct SH2Interpreter;
 extern SH2Interface_struct SH2DebugInterpreter;
-SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, NULL };
+SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, &SH2Fast, &SH2LRU, NULL };
 
 extern PerInterface_struct PERDummy;
 PerInterface_struct *PERCoreList[] = { &PERDummy, NULL };
@@ -252,7 +255,7 @@ int main(int argc, char *argv[])
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = SH2CORE_INTERPRETER;
+    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : SH2CORE_INTERPRETER;
     yinit.vidcoretype   = VIDCORE_SOFT;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
