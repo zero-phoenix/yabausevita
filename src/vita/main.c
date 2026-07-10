@@ -75,7 +75,7 @@ void YuiSwapBuffers(void)
     int srcw, srch;
     VIDSoftGetScreenSize(&srcw, &srch);
 
-    if (dispbuffer == NULL || srcw <= 0 || srch <= 0 || vita_fb == NULL)
+    if (srcw <= 0 || srch <= 0 || vita_fb == NULL || dispbuffer == NULL)
         return;
 
     int offx = (VITA_SCREEN_W - srcw) / 2;
@@ -84,18 +84,20 @@ void YuiSwapBuffers(void)
     if (offy < 0) offy = 0;
 
     uint32_t *dst = (uint32_t *)vita_fb;
-    for (int y = 0; y < srch && (y + offy) < VITA_SCREEN_H; y++)
-    {
-        uint32_t *dstrow = dst + (y + offy) * VITA_SCREEN_W + offx;
-        u32 *srcrow = dispbuffer + y * srcw;
-        int copyw = srcw;
-        if (offx + copyw > VITA_SCREEN_W)
-            copyw = VITA_SCREEN_W - offx;
-        memcpy(dstrow, srcrow, copyw * sizeof(uint32_t));
-    }
+    int copyw = srcw;
+    if (offx + copyw > VITA_SCREEN_W)
+        copyw = VITA_SCREEN_W - offx;
+    if (copyw <= 0) return;
+
+    int max_h = srch;
+    if (offy + max_h > VITA_SCREEN_H)
+        max_h = VITA_SCREEN_H - offy;
+    if (max_h <= 0) return;
+
+    for (int y = 0; y < max_h; y++)
+        memcpy(dst + (y + offy) * VITA_SCREEN_W + offx, dispbuffer + y * srcw, copyw * sizeof(uint32_t));
 
     SceDisplayFrameBuf fb;
-    memset(&fb, 0, sizeof(fb));
     fb.size = sizeof(fb);
     fb.base = vita_fb;
     fb.pitch = VITA_SCREEN_W;
@@ -250,7 +252,7 @@ int main(int argc, char *argv[])
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? SH2CORE_DEBUGINTERPRETER : SH2CORE_INTERPRETER;
+    yinit.sh2coretype   = SH2CORE_INTERPRETER;
     yinit.vidcoretype   = VIDCORE_SOFT;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
@@ -293,14 +295,13 @@ int main(int argc, char *argv[])
     g_auto_frameskip = cfg.auto_frameskip;
     g_frame_skip = cfg.frame_skip;
 
-    int fps_count = 0, skip_counter = 0;
+    int frame_count = 0, skip_counter = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
     SceUInt64 next_display = 0;
     unsigned int last_buttons = 0;
     int skip = g_frame_skip;
     if (skip < 0) skip = 0;
     if (skip > 4) skip = 4;
-    SceUInt64 frame_interval = TARGET_FRAME_MS * 1000ULL;
 
     vita_log("Entering emulation loop, frame_skip=%d\n", skip);
 
@@ -316,21 +317,21 @@ int main(int argc, char *argv[])
         }
 
         YabauseExec();
-        fps_count++;
+        frame_count++;
 
         SceUInt64 now = sceKernelGetProcessTimeWide();
-        if (now >= fps_timer + 1000000ULL)
-        {
-            float f = (float)fps_count * 1000000.0f / (float)(now - fps_timer);
-            vita_log("FPS: %.1f\n", f);
-            fps_count = 0;
-            fps_timer = now;
-        }
-
         if (now >= next_display)
         {
             YuiSwapBuffers();
-            next_display = now + frame_interval;
+            next_display = now + 16000ULL;
+        }
+
+        if (now - fps_timer >= 5000000ULL)
+        {
+            float f = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
+            vita_log("FPS: %.1f\n", f);
+            frame_count = 0;
+            fps_timer = now;
         }
 
         SceCtrlData pad;
