@@ -78,6 +78,9 @@ static void GPUYuiSwapBuffers(void)
             gpu_tex_h = 0;
             return;
         }
+        vita2d_texture_set_filters(gpu_display_tex,
+            SCE_GXM_TEXTURE_FILTER_POINT,
+            SCE_GXM_TEXTURE_FILTER_POINT);
     }
 
     uint32_t *tex_pixels = (uint32_t *)vita2d_texture_get_datap(gpu_display_tex);
@@ -86,7 +89,8 @@ static void GPUYuiSwapBuffers(void)
 
     if (tex_stride_pix == (uint32_t)srcw)
     {
-        for (int i = 0; i < srcw * srch; i++)
+        int n = srcw * srch;
+        for (int i = 0; i < n; i++)
             tex_pixels[i] = __builtin_bswap32(dispbuffer[i]);
     }
     else
@@ -100,18 +104,10 @@ static void GPUYuiSwapBuffers(void)
     }
 
     vita2d_start_drawing();
-    vita2d_set_clear_color(RGBA8(0, 0, 0, 255));
-    vita2d_clear_screen();
 
-    float scale_x = 960.0f / (float)srcw;
-    float scale_y = 544.0f / (float)srch;
-    float scale = (scale_x < scale_y) ? scale_x : scale_y;
-    float draw_w = srcw * scale;
-    float draw_h = srch * scale;
-    float draw_x = (960.0f - draw_w) / 2.0f;
-    float draw_y = (544.0f - draw_h) / 2.0f;
-
-    vita2d_draw_texture_scale(gpu_display_tex, draw_x, draw_y, scale, scale);
+    int offx = (960 - srcw) / 2;
+    int offy = (544 - srch) / 2;
+    vita2d_draw_texture(gpu_display_tex, offx, offy);
 
     vita2d_end_drawing();
     vita2d_swap_buffers();
