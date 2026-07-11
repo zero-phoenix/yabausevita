@@ -54,6 +54,7 @@ void ProfileStop (char* str_tag) ;
 void ProfilePrint () ;
 /* Resets the profiler. */
 void ProfileReset () ;
+void ProfilePrintToFile (FILE *f) ;
 
 #ifdef __cplusplus
 }

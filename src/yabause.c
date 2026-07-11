@@ -65,12 +65,8 @@ extern long long gettime();
 #include "psp/common.h"
 #endif
 
-#ifdef SYS_PROFILE_H
- #include SYS_PROFILE_H
-#else
- #define DONT_PROFILE
- #include "profile.h"
-#endif
+#define DONT_PROFILE
+#include "profile.h"
 
 //////////////////////////////////////////////////////////////////////////////
 

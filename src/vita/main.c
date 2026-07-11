@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : SH2CORE_INTERPRETER;
+    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : 2;
     yinit.vidcoretype   = VIDCORE_GPU;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
@@ -334,6 +334,7 @@ int main(int argc, char *argv[])
         {
             float f = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
             vita_log("FPS: %.1f\n", f);
+            VIDGPUVdp2LogTiming();
             frame_count = 0;
             fps_timer = now;
         }

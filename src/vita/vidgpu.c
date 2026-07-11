@@ -1,5 +1,6 @@
 #include <string.h>
 #include <vita2d.h>
+#include <psp2/kernel/processmgr.h>
 #include "vdp1.h"
 #include "vidsoft.h"
 
@@ -32,8 +33,15 @@ extern void FASTCALL VIDSoftVdp2SetPriorityNBG1(int);
 extern void FASTCALL VIDSoftVdp2SetPriorityNBG2(int);
 extern void FASTCALL VIDSoftVdp2SetPriorityNBG3(int);
 extern void FASTCALL VIDSoftVdp2SetPriorityRBG0(int);
+extern void VIDSoftVdp2Composite(void);
 extern void VIDSoftOnScreenDebugMessage(char *string, ...);
 extern void VIDSoftGetGlSize(int *width, int *height);
+extern int vita_log(const char *fmt, ...);
+
+/* Lightweight frame timing */
+#define TICK() sceKernelGetProcessTimeWide()
+static SceUInt64 acc_composite, acc_upload, acc_display;
+static int timing_frame_count;
 
 static vita2d_texture *gpu_display_tex = NULL;
 static int gpu_tex_w = 0, gpu_tex_h = 0;
@@ -41,9 +49,18 @@ static int gpu_tex_w = 0, gpu_tex_h = 0;
 static int VIDGPUInit(void)
 {
     vita2d_init_advanced(0x800000);
+
+    /* Clear any residual menu content from vita2d framebuffer */
+    vita2d_start_drawing();
+    vita2d_clear_screen();
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
+
     gpu_display_tex = NULL;
     gpu_tex_w = 0;
     gpu_tex_h = 0;
+    acc_composite = acc_upload = acc_display = 0;
+    timing_frame_count = 0;
     return VIDSoftInit();
 }
 
@@ -58,12 +75,20 @@ static void VIDGPUDeInit(void)
     vita2d_fini();
 }
 
+/* Swap RGB<->BGR bytes and change byte order to match vita2d A8B8G8R8 */
+static INLINE u32 argb_to_vita2d(u32 p)
+{
+    return (p & 0xFF00FF00U) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
+}
+
 static void GPUYuiSwapBuffers(void)
 {
     int srcw = vdp2width;
     int srch = vdp2height;
     if (srcw <= 0 || srch <= 0 || !dispbuffer)
         return;
+
+    SceUInt64 t0 = TICK();
 
     if (gpu_tex_w != srcw || gpu_tex_h != srch)
     {
@@ -72,58 +97,61 @@ static void GPUYuiSwapBuffers(void)
         gpu_display_tex = vita2d_create_empty_texture(srcw, srch);
         gpu_tex_w = srcw;
         gpu_tex_h = srch;
-        if (!gpu_display_tex)
-        {
-            gpu_tex_w = 0;
-            gpu_tex_h = 0;
-            return;
-        }
+        if (!gpu_display_tex) { gpu_tex_w = gpu_tex_h = 0; return; }
         vita2d_texture_set_filters(gpu_display_tex,
-            SCE_GXM_TEXTURE_FILTER_POINT,
-            SCE_GXM_TEXTURE_FILTER_POINT);
+            SCE_GXM_TEXTURE_FILTER_POINT, SCE_GXM_TEXTURE_FILTER_POINT);
     }
 
-    uint32_t *tex_pixels = (uint32_t *)vita2d_texture_get_datap(gpu_display_tex);
-    uint32_t tex_stride = vita2d_texture_get_stride(gpu_display_tex);
-    uint32_t tex_stride_pix = tex_stride / 4;
+    uint32_t *tp = (uint32_t *)vita2d_texture_get_datap(gpu_display_tex);
+    uint32_t stride = vita2d_texture_get_stride(gpu_display_tex) / 4;
+    int n = srcw * srch;
 
-    /* Convert ARGB (dispbuffer) to A8B8G8R8 (vita2d): swap R <-> B */
-    if (tex_stride_pix == (uint32_t)srcw)
+    if (stride == (uint32_t)srcw)
     {
-        int n = srcw * srch;
         for (int i = 0; i < n; i++)
-        {
-            u32 p = dispbuffer[i];
-            tex_pixels[i] = (p & 0xFF00FF00) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
-        }
+            tp[i] = argb_to_vita2d(dispbuffer[i]);
     }
     else
     {
         for (int y = 0; y < srch; y++)
         {
-            uint32_t *row = tex_pixels + y * tex_stride_pix;
+            uint32_t *row = tp + y * stride;
+            u32 *src = dispbuffer + y * srcw;
             for (int x = 0; x < srcw; x++)
-            {
-                u32 p = dispbuffer[y * srcw + x];
-                row[x] = (p & 0xFF00FF00) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
-            }
+                row[x] = argb_to_vita2d(src[x]);
         }
     }
 
+    acc_upload += TICK() - t0;
+
+    t0 = TICK();
     vita2d_start_drawing();
-
-    int offx = (960 - srcw) / 2;
-    int offy = (544 - srch) / 2;
+    int offx = (960 - srcw) / 2, offy = (544 - srch) / 2;
     vita2d_draw_texture(gpu_display_tex, offx, offy);
-
     vita2d_end_drawing();
     vita2d_swap_buffers();
+    acc_display += TICK() - t0;
+}
+
+void VIDGPUVdp2LogTiming(void)
+{
+    if (timing_frame_count > 0)
+    {
+        vita_log("  GPU timing: composite=%lldus upload=%lldus display=%lldus frames=%d\n",
+            acc_composite, acc_upload, acc_display, timing_frame_count);
+    }
+    acc_composite = acc_upload = acc_display = 0;
+    timing_frame_count = 0;
 }
 
 static void VIDGPUVdp2DrawEnd(void)
 {
+    SceUInt64 t0 = TICK();
     VIDSoftVdp2Composite();
+    acc_composite += TICK() - t0;
+
     GPUYuiSwapBuffers();
+    timing_frame_count++;
 }
 
 VideoInterface_struct VIDGPU = {

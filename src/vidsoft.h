@@ -36,6 +36,7 @@ extern VideoInterface_struct VIDSoft;
 
 void VIDSoftGetScreenSize(int *width, int *height);
 void VIDSoftVdp2Composite(void);
+void VIDGPUVdp2LogTiming(void);
 #endif
 
 

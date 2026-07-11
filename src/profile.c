@@ -184,5 +184,29 @@ void ProfileReset () {
   Init () ;
 }
 
+void ProfilePrintToFile(FILE *f)
+{
+    int i;
+    long l_prof_time;
+    if (g_i_hwm == 0) {
+        fprintf(f, "ProfilePrint: nothing to print.\n");
+        return;
+    }
+    l_prof_time = clock() - g_init_time;
+    for (i = 0; i < g_i_hwm; ++i) {
+        if (g_tag[i].i_stopped == 0)
+            g_tag[i].l_total_ms += clock() - g_tag[i].start_time;
+    }
+    qsort(&g_tag, g_i_hwm, sizeof(entry_t), CompareEntries);
+    fprintf(f, "--- Profiler results ---\n");
+    for (i = 0; i < g_i_hwm; ++i) {
+        fprintf(f, "  %s: calls=%d, total_ms=%d, %%%.1f\n",
+            g_tag[i].str_name,
+            g_tag[i].i_calls,
+            (int)((double)g_tag[i].l_total_ms / CLOCKS_PER_SEC * 1000),
+            (double)g_tag[i].l_total_ms / l_prof_time * 100);
+    }
+}
+
 #endif /* !SYS_PROFILE_H && !DONT_PROFILE */
 

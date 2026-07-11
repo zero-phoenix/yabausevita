@@ -25,45 +25,41 @@ static int sh2fast_init(void)
     return SH2InterpreterInit();
 }
 
-static void sh2fast_deinit(void)
-{
-}
+static void sh2fast_deinit(void) {}
+static int sh2fast_reset(void) { return 0; }
 
-static int sh2fast_reset(void)
-{
-    return 0;
-}
-
-static void FASTCALL sh2fast_exec(SH2_struct *context, u32 cycles)
+static void FASTCALL sh2fast_exec(SH2_struct *restrict context, u32 cycles)
 {
     if (!context) return;
-
-    if (context->isIdle)
+    if (__builtin_expect(context->isIdle, 0))
+    {
         SH2idleParse(context, cycles);
-    else
-        SH2idleCheck(context, cycles);
+        return;
+    }
+    SH2idleCheck(context, cycles);
 
     u32 last_page = 0xFFFFFFFF;
-    u32 (*cached_fetch)(u32) = NULL;
+    fetchfunc cached_fetch = NULL;
+    opcodefunc *restrict local_opcodes = opcodes;
 
-    while (context->cycles < cycles)
+    while (__builtin_expect(context->cycles < cycles, 1))
     {
         u32 pc = context->regs.PC;
         u32 page = (pc >> 20) & 0x0FF;
 
-        if (page == last_page && cached_fetch)
-        {
-            context->instruction = (u16)cached_fetch(pc);
-        }
-        else
+        if (__builtin_expect(page != last_page, 0))
         {
             last_page = page;
             cached_fetch = fetchlist[page];
-            context->instruction = cached_fetch ? (u16)cached_fetch(pc) : 0xFFFF;
         }
 
-        void (*handler)(SH2_struct *) = opcodes[context->instruction];
-        if (handler)
+        if (__builtin_expect(cached_fetch != NULL, 1))
+            context->instruction = (u16)cached_fetch(pc);
+        else
+            context->instruction = 0xFFFF;
+
+        void (*handler)(SH2_struct *) = local_opcodes[context->instruction];
+        if (__builtin_expect(handler != NULL, 1))
             handler(context);
         else
             context->regs.PC += 2;
@@ -74,8 +70,7 @@ static void FASTCALL sh2fast_exec(SH2_struct *context, u32 cycles)
 
 static void sh2fast_write_notify(u32 start, u32 length)
 {
-    (void)start;
-    (void)length;
+    (void)start; (void)length;
 }
 
 SH2Interface_struct SH2Fast = {
