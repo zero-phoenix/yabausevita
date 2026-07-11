@@ -247,6 +247,9 @@ int main(int argc, char *argv[])
     vita_log("Selected: %s\n", cfg.rom_path);
     vita_log("BIOS: %s\n", cfg.bios_path);
 
+    /* Clear screen to remove any residual menu content */
+    clear_fb();
+
     vita_log("Calling YabauseInit\n");
 
     char cdpath[VMENU_MAX_PATH];

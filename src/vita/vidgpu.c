@@ -50,11 +50,14 @@ static int VIDGPUInit(void)
 {
     vita2d_init_advanced(0x800000);
 
-    /* Clear any residual menu content from vita2d framebuffer */
-    vita2d_start_drawing();
-    vita2d_clear_screen();
-    vita2d_end_drawing();
-    vita2d_swap_buffers();
+    /* Clear both front/back buffers to eliminate menu ghosting */
+    for (int i = 0; i < 2; i++)
+    {
+        vita2d_start_drawing();
+        vita2d_clear_screen();
+        vita2d_end_drawing();
+        vita2d_swap_buffers();
+    }
 
     gpu_display_tex = NULL;
     gpu_tex_w = 0;
