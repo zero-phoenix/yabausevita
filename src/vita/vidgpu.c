@@ -87,11 +87,15 @@ static void GPUYuiSwapBuffers(void)
     uint32_t tex_stride = vita2d_texture_get_stride(gpu_display_tex);
     uint32_t tex_stride_pix = tex_stride / 4;
 
+    /* Convert ARGB (dispbuffer) to A8B8G8R8 (vita2d): swap R <-> B */
     if (tex_stride_pix == (uint32_t)srcw)
     {
         int n = srcw * srch;
         for (int i = 0; i < n; i++)
-            tex_pixels[i] = __builtin_bswap32(dispbuffer[i]);
+        {
+            u32 p = dispbuffer[i];
+            tex_pixels[i] = (p & 0xFF00FF00) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
+        }
     }
     else
     {
@@ -99,7 +103,10 @@ static void GPUYuiSwapBuffers(void)
         {
             uint32_t *row = tex_pixels + y * tex_stride_pix;
             for (int x = 0; x < srcw; x++)
-                row[x] = __builtin_bswap32(dispbuffer[y * srcw + x]);
+            {
+                u32 p = dispbuffer[y * srcw + x];
+                row[x] = (p & 0xFF00FF00) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
+            }
         }
     }
 
