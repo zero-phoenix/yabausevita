@@ -129,6 +129,7 @@ static void GPUYuiSwapBuffers(void)
 
     t0 = TICK();
     vita2d_start_drawing();
+    vita2d_clear_screen();
     int offx = (960 - srcw) / 2, offy = (544 - srch) / 2;
     vita2d_draw_texture(gpu_display_tex, offx, offy);
     vita2d_end_drawing();
