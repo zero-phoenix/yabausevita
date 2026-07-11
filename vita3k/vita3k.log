@@ -1,80 +1,81 @@
-[00:55:04.383] |I| [main]: Vita3K v0.2.1 4058-6063154f
-[00:55:04.384] |I| [main]: OS: Microsoft Windows 10 Professional (build 19045)
-[00:55:04.384] |I| [main]: CPU: Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz | 8 Threads | 3.392 GHz
-[00:55:04.385] |I| [main]: Available ram memory: 24520 MiB
-[00:55:04.385] |I| [app::init]: Base path: "C:\Users\D\Documents\GitHub\yabausevita\vita3k\"
-[00:55:04.385] |I| [app::init]: VitaFS path: "C:\Users\D\AppData\Roaming\Vita3K\Vita3K\"
-[00:55:04.399] |E| [discordrpc::init]: Failed to initialize Discord Rich Presence, err_code: 4
-[00:55:04.401] |I| [export_library_init_taihen]: taiHEN: HLE module initialized
-[00:55:04.405] |E| [main]: File: [1] is not a supported content type.
-[00:55:05.238] |I| [ThemeManager::apply_theme_entry]: Loaded stylesheet 'dark' from :/themes/dark/dark.qss
-[00:55:05.824] |I| [renderer::vulkan::VKState::create]: Vulkan device: NVIDIA GeForce GTX 1050
-[00:55:05.824] |I| [renderer::vulkan::VKState::create]: Driver version: 582.66.0.0
-[00:55:06.335] |I| [renderer::vulkan::ScreenRenderer::setup]: Your device support high deep stencil quality
-[00:55:06.336] |I| [renderer::vulkan::ScreenRenderer::setup]: Present mode: Mailbox
-[00:55:06.590] |I| [renderer::State::init_overlay_font_dirs]: Overlay font firmware dir: C:\Users\D\AppData\Roaming\Vita3K\Vita3K\sa0\data\font\pvf/
-[00:55:06.590] |I| [renderer::State::init_overlay_font_dirs]: Overlay font system dirs: 1 entries
-[00:55:06.595] |I| [renderer::vulkan::VKState::late_init]: The Vulkan renderer is using texture viewport for better performance
-[00:55:06.595] |I| [renderer::vulkan::VKState::late_init]: Using the following memory mapping method: Double buffer
-[00:55:06.761] |I| [renderer::vulkan::PipelineCache::set_async_compilation]: Enabling asynchronous pipeline compilation with 3 threads
-[00:55:06.765] |E| [SDLAudioAdapter::init]: SDL audio error: Audio subsystem is not initialized
-[00:55:06.765] |W| [app::late_init]: Failed to initialize audio! Audio will not work.
-[00:55:06.767] |I| [load_app_impl]: CPU Optimisation state: true
-[00:55:06.767] |I| [load_app_impl]: ngs state: true
-[00:55:06.767] |I| [load_app_impl]: Resolution multiplier: 1
-[00:55:06.767] |I| [load_app_impl]: modules mode: Automatic
-[00:55:06.767] |I| [load_app_impl]: Title: YabauseVita
-[00:55:06.767] |I| [load_app_impl]: Serial: YABA00001
-[00:55:06.767] |I| [load_app_impl]: Version: 1.00
-[00:55:06.767] |I| [load_app_impl]: Category: gd
-[00:55:06.772] |I| [load_module]: Loading module "app0:eboot.bin"
-[00:55:06.792] |I| [load_self]: Loaded module segment 0 @ [0x81000000 - 0x81066F14 / 0x81000000] (size: 0x00066F14) of module app0:eboot.bin
-[00:55:06.792] |I| [load_self]: Loaded module segment 1 @ [0x81070000 - 0x81160F94 / 0x81070000] (size: 0x000F0F94) of module app0:eboot.bin
-[00:55:06.792] |I| [load_self]: Linking SELF app0:eboot.bin...
-[00:55:06.792] |I| [load_self]: eboot.bin module NID: 0xCB3BA597
-[00:55:06.793] |I| [load_module::<lambda_2>::operator ()]: Module YabauseVita (at "app0:eboot.bin") loaded
-[00:55:06.793] |I| [load_app_impl]: Main executable YabauseVita (eboot.bin) loaded
-[00:55:06.793] |I| [get_patches]: Found 0 patches for titleid YABA00001
-[00:55:06.794] |I| [load_module]: Loading module "os0:kd/bootimage.skprx"
-[00:55:06.868] |I| [load_self]: Loaded module segment 0 @ [0x80005000 - 0x8030FE5C / 0x81000000] (size: 0x0030AE5C) of module os0:kd/bootimage.skprx
-[00:55:06.868] |I| [load_self]: Linking SELF os0:kd/bootimage.skprx...
-[00:55:06.868] |I| [load_module::<lambda_2>::operator ()]: Module SceKernelBootimage (at "os0:kd/bootimage.skprx") loaded
-[00:55:06.868] |I| [load_module]: Loading module "os0:kd/sysmodule.skprx"
-[00:55:06.869] |I| [load_self]: Loaded module segment 0 @ [0x80310000 - 0x80312D74 / 0x81000000] (size: 0x00002D74) of module os0:kd/sysmodule.skprx
-[00:55:06.869] |I| [load_self]: Loaded module segment 1 @ [0x80313000 - 0x80313004 / 0x81003000] (size: 0x00000004) of module os0:kd/sysmodule.skprx
-[00:55:06.869] |I| [load_self]: Linking ELF os0:kd/sysmodule.skprx...
-[00:55:06.869] |I| [load_module::<lambda_2>::operator ()]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") loaded
-[00:55:06.869] |I| [load_module]: Loading module "vs0:sys/external/libc.suprx"
-[00:55:06.874] |I| [load_self]: vs0:sys/external/libc.suprx: Skipping special segment 0x6FFFFF01...
-[00:55:06.874] |I| [load_self]: Loaded module segment 0 @ [0x80315000 - 0x803668A4 / 0x81000000] (size: 0x000518A4) of module vs0:sys/external/libc.suprx
-[00:55:06.874] |I| [load_self]: Loaded module segment 1 @ [0x80367000 - 0x803698A0 / 0x81052000] (size: 0x000028A0) of module vs0:sys/external/libc.suprx
-[00:55:06.874] |I| [load_self]: Linking SELF vs0:sys/external/libc.suprx...
-[00:55:06.875] |I| [load_module::<lambda_2>::operator ()]: Module SceLibc (at "vs0:sys/external/libc.suprx") loaded
-[00:55:06.875] |I| [load_module]: Loading module "vs0:sys/external/libfios2.suprx"
-[00:55:06.878] |I| [load_self]: vs0:sys/external/libfios2.suprx: Skipping special segment 0x6FFFFF01...
-[00:55:06.878] |I| [load_self]: Loaded module segment 0 @ [0x8036A000 - 0x80396CBF / 0x81000000] (size: 0x0002CCBF) of module vs0:sys/external/libfios2.suprx
-[00:55:06.878] |I| [load_self]: Loaded module segment 1 @ [0x80397000 - 0x8039C255 / 0x8102D000] (size: 0x00005255) of module vs0:sys/external/libfios2.suprx
-[00:55:06.878] |I| [load_self]: Linking SELF vs0:sys/external/libfios2.suprx...
-[00:55:06.878] |I| [load_module::<lambda_2>::operator ()]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") loaded
-[00:55:06.878] |I| [load_module]: Loading module "vs0:sys/external/libSceFt2.suprx"
-[00:55:06.883] |I| [load_self]: Loaded module segment 0 @ [0x8039D000 - 0x803EDF04 / 0x81000000] (size: 0x00050F04) of module vs0:sys/external/libSceFt2.suprx
-[00:55:06.883] |I| [load_self]: Loaded module segment 1 @ [0x803EE000 - 0x803EE2F4 / 0x81051000] (size: 0x000002F4) of module vs0:sys/external/libSceFt2.suprx
-[00:55:06.883] |I| [load_self]: Linking SELF vs0:sys/external/libSceFt2.suprx...
-[00:55:06.883] |I| [load_module::<lambda_2>::operator ()]: Module SceLibft2 (at "vs0:sys/external/libSceFt2.suprx") loaded
-[00:55:06.883] |I| [load_module]: Loading module "vs0:sys/external/libpvf.suprx"
-[00:55:06.885] |I| [load_self]: Loaded module segment 0 @ [0x803EF000 - 0x803FEF14 / 0x81000000] (size: 0x0000FF14) of module vs0:sys/external/libpvf.suprx
-[00:55:06.885] |I| [load_self]: Loaded module segment 1 @ [0x803FF000 - 0x803FF008 / 0x81010000] (size: 0x00000008) of module vs0:sys/external/libpvf.suprx
-[00:55:06.885] |I| [load_self]: Linking SELF vs0:sys/external/libpvf.suprx...
-[00:55:06.885] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPvf (at "vs0:sys/external/libpvf.suprx") loaded
-[00:55:06.887] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Found pipeline cache, reading...
-[00:55:06.888] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Pipeline cache read and loaded
-[00:55:07.096] |W| [export_ksceKernelRegisterProcEventHandler::<lambda_1>::operator ()]: Stubbed ksceKernelRegisterProcEventHandler import called. (Immediately run create and start callbacks on current thread)
-[00:55:07.096] |I| [start_module]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") module_start returned 0x0
-[00:55:07.152] |I| [start_module]: Module SceLibc (at "vs0:sys/external/libc.suprx") module_start returned 0x0
-[00:55:07.185] |W| [export_sceKernelGetProcessId::<lambda_1>::operator ()]: Stubbed sceKernelGetProcessId import called. (pid: 1)
-[00:55:07.186] |I| [start_module]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") module_start returned 0x0
-[00:55:07.189] |I| [MainWindow::boot_game_once]: Game started: YabauseVita (YABA00001)
-[00:55:07.236] |I| [GameCompatibility::on_ver_reply_finished]: DB is up to date (2026-07-09 18:30:03Z)
-[00:55:07.378] |I| [export_sceIoOpen]: Opening file: tty0:
-[00:55:07.398] |I| [stat_file]: Skipped 2 duplicate messages..
-[00:55:07.398] |E| [stat_file]: Missing file at "C:/Users/D/AppData/Roaming/Vita3K/Vita3K/ux0/data/yabausevita_log.txt" (target path: ux0:/data/yabausevita_log.txt)
+[19:13:31.100] |I| [main]: Vita3K v0.2.1 4058-6063154f
+[19:13:31.100] |I| [main]: OS: Microsoft Windows 10 Professional (build 19045)
+[19:13:31.100] |I| [main]: CPU: Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz | 8 Threads | 3.392 GHz
+[19:13:31.100] |I| [main]: Available ram memory: 24520 MiB
+[19:13:31.101] |I| [app::init]: Base path: "C:\Users\D\Documents\GitHub\yabausevita\vita3k\"
+[19:13:31.101] |I| [app::init]: VitaFS path: "C:\Users\D\AppData\Roaming\Vita3K\Vita3K\"
+[19:13:31.103] |E| [discordrpc::init]: Failed to initialize Discord Rich Presence, err_code: 4
+[19:13:31.103] |I| [export_library_init_taihen]: taiHEN: HLE module initialized
+[19:13:31.105] |E| [main]: File: [1] is not a supported content type.
+[19:13:31.487] |I| [ThemeManager::apply_theme_entry]: Loaded stylesheet 'dark' from :/themes/dark/dark.qss
+[19:13:31.860] |I| [renderer::vulkan::VKState::create]: Vulkan device: NVIDIA GeForce GTX 1050
+[19:13:31.860] |I| [renderer::vulkan::VKState::create]: Driver version: 582.66.0.0
+[19:13:32.194] |I| [renderer::vulkan::ScreenRenderer::setup]: Your device support high deep stencil quality
+[19:13:32.194] |I| [renderer::vulkan::ScreenRenderer::setup]: Present mode: Mailbox
+[19:13:32.220] |I| [renderer::State::init_overlay_font_dirs]: Overlay font firmware dir: C:\Users\D\AppData\Roaming\Vita3K\Vita3K\sa0\data\font\pvf/
+[19:13:32.220] |I| [renderer::State::init_overlay_font_dirs]: Overlay font system dirs: 1 entries
+[19:13:32.222] |I| [renderer::vulkan::VKState::late_init]: The Vulkan renderer is using texture viewport for better performance
+[19:13:32.222] |I| [renderer::vulkan::VKState::late_init]: Using the following memory mapping method: Double buffer
+[19:13:32.345] |I| [renderer::vulkan::PipelineCache::set_async_compilation]: Enabling asynchronous pipeline compilation with 3 threads
+[19:13:32.346] |E| [SDLAudioAdapter::init]: SDL audio error: Audio subsystem is not initialized
+[19:13:32.346] |W| [app::late_init]: Failed to initialize audio! Audio will not work.
+[19:13:32.347] |I| [load_app_impl]: CPU Optimisation state: true
+[19:13:32.347] |I| [load_app_impl]: ngs state: true
+[19:13:32.347] |I| [load_app_impl]: Resolution multiplier: 1
+[19:13:32.347] |I| [load_app_impl]: modules mode: Automatic
+[19:13:32.347] |I| [load_app_impl]: Title: YabauseVita
+[19:13:32.347] |I| [load_app_impl]: Serial: YABA00001
+[19:13:32.347] |I| [load_app_impl]: Version: 1.00
+[19:13:32.347] |I| [load_app_impl]: Category: gd
+[19:13:32.349] |I| [load_module]: Loading module "app0:eboot.bin"
+[19:13:32.353] |I| [load_self]: Loaded module segment 0 @ [0x81000000 - 0x81064CFC / 0x81000000] (size: 0x00064CFC) of module app0:eboot.bin
+[19:13:32.353] |I| [load_self]: Loaded module segment 1 @ [0x81070000 - 0x81161004 / 0x81070000] (size: 0x000F1004) of module app0:eboot.bin
+[19:13:32.353] |I| [load_self]: Linking SELF app0:eboot.bin...
+[19:13:32.353] |I| [load_self]: eboot.bin module NID: 0x52FB5F42
+[19:13:32.353] |I| [load_module::<lambda_2>::operator ()]: Module YabauseVita (at "app0:eboot.bin") loaded
+[19:13:32.353] |I| [load_app_impl]: Main executable YabauseVita (eboot.bin) loaded
+[19:13:32.353] |I| [get_patches]: Found 0 patches for titleid YABA00001
+[19:13:32.354] |I| [load_module]: Loading module "os0:kd/bootimage.skprx"
+[19:13:32.386] |I| [load_self]: Loaded module segment 0 @ [0x80005000 - 0x8030FE5C / 0x81000000] (size: 0x0030AE5C) of module os0:kd/bootimage.skprx
+[19:13:32.386] |I| [load_self]: Linking SELF os0:kd/bootimage.skprx...
+[19:13:32.386] |I| [load_module::<lambda_2>::operator ()]: Module SceKernelBootimage (at "os0:kd/bootimage.skprx") loaded
+[19:13:32.386] |I| [load_module]: Loading module "os0:kd/sysmodule.skprx"
+[19:13:32.387] |I| [load_self]: Loaded module segment 0 @ [0x80310000 - 0x80312D74 / 0x81000000] (size: 0x00002D74) of module os0:kd/sysmodule.skprx
+[19:13:32.387] |I| [load_self]: Loaded module segment 1 @ [0x80313000 - 0x80313004 / 0x81003000] (size: 0x00000004) of module os0:kd/sysmodule.skprx
+[19:13:32.387] |I| [load_self]: Linking ELF os0:kd/sysmodule.skprx...
+[19:13:32.387] |I| [load_module::<lambda_2>::operator ()]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") loaded
+[19:13:32.387] |I| [load_module]: Loading module "vs0:sys/external/libc.suprx"
+[19:13:32.390] |I| [load_self]: vs0:sys/external/libc.suprx: Skipping special segment 0x6FFFFF01...
+[19:13:32.390] |I| [load_self]: Loaded module segment 0 @ [0x80315000 - 0x803668A4 / 0x81000000] (size: 0x000518A4) of module vs0:sys/external/libc.suprx
+[19:13:32.390] |I| [load_self]: Loaded module segment 1 @ [0x80367000 - 0x803698A0 / 0x81052000] (size: 0x000028A0) of module vs0:sys/external/libc.suprx
+[19:13:32.390] |I| [load_self]: Linking SELF vs0:sys/external/libc.suprx...
+[19:13:32.390] |I| [load_module::<lambda_2>::operator ()]: Module SceLibc (at "vs0:sys/external/libc.suprx") loaded
+[19:13:32.390] |I| [load_module]: Loading module "vs0:sys/external/libfios2.suprx"
+[19:13:32.392] |I| [load_self]: vs0:sys/external/libfios2.suprx: Skipping special segment 0x6FFFFF01...
+[19:13:32.392] |I| [load_self]: Loaded module segment 0 @ [0x8036A000 - 0x80396CBF / 0x81000000] (size: 0x0002CCBF) of module vs0:sys/external/libfios2.suprx
+[19:13:32.392] |I| [load_self]: Loaded module segment 1 @ [0x80397000 - 0x8039C255 / 0x8102D000] (size: 0x00005255) of module vs0:sys/external/libfios2.suprx
+[19:13:32.392] |I| [load_self]: Linking SELF vs0:sys/external/libfios2.suprx...
+[19:13:32.392] |I| [load_module::<lambda_2>::operator ()]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") loaded
+[19:13:32.392] |I| [load_module]: Loading module "vs0:sys/external/libSceFt2.suprx"
+[19:13:32.395] |I| [load_self]: Loaded module segment 0 @ [0x8039D000 - 0x803EDF04 / 0x81000000] (size: 0x00050F04) of module vs0:sys/external/libSceFt2.suprx
+[19:13:32.395] |I| [load_self]: Loaded module segment 1 @ [0x803EE000 - 0x803EE2F4 / 0x81051000] (size: 0x000002F4) of module vs0:sys/external/libSceFt2.suprx
+[19:13:32.395] |I| [load_self]: Linking SELF vs0:sys/external/libSceFt2.suprx...
+[19:13:32.396] |I| [load_module::<lambda_2>::operator ()]: Module SceLibft2 (at "vs0:sys/external/libSceFt2.suprx") loaded
+[19:13:32.396] |I| [load_module]: Loading module "vs0:sys/external/libpvf.suprx"
+[19:13:32.396] |I| [load_self]: Loaded module segment 0 @ [0x803EF000 - 0x803FEF14 / 0x81000000] (size: 0x0000FF14) of module vs0:sys/external/libpvf.suprx
+[19:13:32.396] |I| [load_self]: Loaded module segment 1 @ [0x803FF000 - 0x803FF008 / 0x81010000] (size: 0x00000008) of module vs0:sys/external/libpvf.suprx
+[19:13:32.396] |I| [load_self]: Linking SELF vs0:sys/external/libpvf.suprx...
+[19:13:32.396] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPvf (at "vs0:sys/external/libpvf.suprx") loaded
+[19:13:32.398] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Found pipeline cache, reading...
+[19:13:32.398] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Pipeline cache read and loaded
+[19:13:32.505] |W| [export_ksceKernelRegisterProcEventHandler::<lambda_1>::operator ()]: Stubbed ksceKernelRegisterProcEventHandler import called. (Immediately run create and start callbacks on current thread)
+[19:13:32.505] |I| [start_module]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") module_start returned 0x0
+[19:13:32.534] |I| [start_module]: Module SceLibc (at "vs0:sys/external/libc.suprx") module_start returned 0x0
+[19:13:32.561] |W| [export_sceKernelGetProcessId::<lambda_1>::operator ()]: Stubbed sceKernelGetProcessId import called. (pid: 1)
+[19:13:32.561] |I| [start_module]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") module_start returned 0x0
+[19:13:32.562] |I| [MainWindow::boot_game_once]: Game started: YabauseVita (YABA00001)
+[19:13:32.563] |I| [renderer::vulkan::VKState::precompile_shader]: Program Compiled 1/1
+[19:13:32.596] |I| [GameCompatibility::on_ver_reply_finished]: DB is up to date (2026-07-10 17:47:09Z)
+[19:13:32.681] |I| [export_sceIoOpen]: Opening file: tty0:
+[19:13:32.688] |I| [stat_file]: Skipped 2 duplicate messages..
+[19:13:32.688] |E| [stat_file]: Missing file at "C:/Users/D/AppData/Roaming

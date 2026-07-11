@@ -57,6 +57,7 @@ set(VITA_PLATFORM_SOURCES
     src/vita/vita_menu.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
+    src/vita/vidgpu.c
 )
 
 add_executable(${VITA_APP_NAME}

@@ -379,6 +379,16 @@ build CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj: C_COMPILER__YabauseVita_
   OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
   TARGET_SUPPORT_DIR = CMakeFiles\YabauseVita.dir
 
+build CMakeFiles/YabauseVita.dir/src/vita/vidgpu.c.obj: C_COMPILER__YabauseVita_unscanned_Release C$:/Users/D/Documents/GitHub/yabausevita/src/vita/vidgpu.c || cmake_object_order_depends_target_YabauseVita
+  CONFIG = Release
+  DEFINES = -DVERSION=\"0.9.10\"
+  DEP_FILE = CMakeFiles\YabauseVita.dir\src\vita\vidgpu.c.obj.d
+  FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
+  INCLUDES = -IC:/Users/D/Documents/GitHub/yabausevita/src
+  OBJECT_DIR = CMakeFiles\YabauseVita.dir
+  OBJECT_FILE_DIR = CMakeFiles\YabauseVita.dir\src\vita
+  TARGET_SUPPORT_DIR = CMakeFiles\YabauseVita.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target YabauseVita
@@ -387,7 +397,7 @@ build CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj: C_COMPILER__YabauseVita_
 #############################################
 # Link the executable YabauseVita
 
-build YabauseVita: C_EXECUTABLE_LINKER__YabauseVita_Release CMakeFiles/YabauseVita.dir/src/bios.c.obj CMakeFiles/YabauseVita.dir/src/cdbase.c.obj CMakeFiles/YabauseVita.dir/src/cheat.c.obj CMakeFiles/YabauseVita.dir/src/coffelf.c.obj CMakeFiles/YabauseVita.dir/src/cs0.c.obj CMakeFiles/YabauseVita.dir/src/cs1.c.obj CMakeFiles/YabauseVita.dir/src/cs2.c.obj CMakeFiles/YabauseVita.dir/src/debug.c.obj CMakeFiles/YabauseVita.dir/src/error.c.obj CMakeFiles/YabauseVita.dir/src/memory.c.obj CMakeFiles/YabauseVita.dir/src/m68kcore.c.obj CMakeFiles/YabauseVita.dir/src/m68kd.c.obj CMakeFiles/YabauseVita.dir/src/movie.c.obj CMakeFiles/YabauseVita.dir/src/netlink.c.obj CMakeFiles/YabauseVita.dir/src/peripheral.c.obj CMakeFiles/YabauseVita.dir/src/profile.c.obj CMakeFiles/YabauseVita.dir/src/scu.c.obj CMakeFiles/YabauseVita.dir/src/sh2core.c.obj CMakeFiles/YabauseVita.dir/src/sh2d.c.obj CMakeFiles/YabauseVita.dir/src/sh2idle.c.obj CMakeFiles/YabauseVita.dir/src/sh2int.c.obj CMakeFiles/YabauseVita.dir/src/smpc.c.obj CMakeFiles/YabauseVita.dir/src/scsp.c.obj CMakeFiles/YabauseVita.dir/src/vdp1.c.obj CMakeFiles/YabauseVita.dir/src/vdp2.c.obj CMakeFiles/YabauseVita.dir/src/vdp2debug.c.obj CMakeFiles/YabauseVita.dir/src/vidshared.c.obj CMakeFiles/YabauseVita.dir/src/vidsoft.c.obj CMakeFiles/YabauseVita.dir/src/yabause.c.obj CMakeFiles/YabauseVita.dir/src/vita/main.c.obj CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2fast.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj
+build YabauseVita: C_EXECUTABLE_LINKER__YabauseVita_Release CMakeFiles/YabauseVita.dir/src/bios.c.obj CMakeFiles/YabauseVita.dir/src/cdbase.c.obj CMakeFiles/YabauseVita.dir/src/cheat.c.obj CMakeFiles/YabauseVita.dir/src/coffelf.c.obj CMakeFiles/YabauseVita.dir/src/cs0.c.obj CMakeFiles/YabauseVita.dir/src/cs1.c.obj CMakeFiles/YabauseVita.dir/src/cs2.c.obj CMakeFiles/YabauseVita.dir/src/debug.c.obj CMakeFiles/YabauseVita.dir/src/error.c.obj CMakeFiles/YabauseVita.dir/src/memory.c.obj CMakeFiles/YabauseVita.dir/src/m68kcore.c.obj CMakeFiles/YabauseVita.dir/src/m68kd.c.obj CMakeFiles/YabauseVita.dir/src/movie.c.obj CMakeFiles/YabauseVita.dir/src/netlink.c.obj CMakeFiles/YabauseVita.dir/src/peripheral.c.obj CMakeFiles/YabauseVita.dir/src/profile.c.obj CMakeFiles/YabauseVita.dir/src/scu.c.obj CMakeFiles/YabauseVita.dir/src/sh2core.c.obj CMakeFiles/YabauseVita.dir/src/sh2d.c.obj CMakeFiles/YabauseVita.dir/src/sh2idle.c.obj CMakeFiles/YabauseVita.dir/src/sh2int.c.obj CMakeFiles/YabauseVita.dir/src/smpc.c.obj CMakeFiles/YabauseVita.dir/src/scsp.c.obj CMakeFiles/YabauseVita.dir/src/vdp1.c.obj CMakeFiles/YabauseVita.dir/src/vdp2.c.obj CMakeFiles/YabauseVita.dir/src/vdp2debug.c.obj CMakeFiles/YabauseVita.dir/src/vidshared.c.obj CMakeFiles/YabauseVita.dir/src/vidsoft.c.obj CMakeFiles/YabauseVita.dir/src/yabause.c.obj CMakeFiles/YabauseVita.dir/src/vita/main.c.obj CMakeFiles/YabauseVita.dir/src/vita/vita_menu.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2fast.c.obj CMakeFiles/YabauseVita.dir/src/vita/sh2lru.c.obj CMakeFiles/YabauseVita.dir/src/vita/vidgpu.c.obj
   CONFIG = Release
   FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   LINK_FLAGS = -Wl,-z,nocopyreloc -flto

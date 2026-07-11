@@ -137,14 +137,14 @@ u8 *vdp1backframebuffer;
 
 u32 *vdp2framebuffer=NULL;
 
-static int vdp1width;
-static int vdp1height;
+int vdp1width;
+int vdp1height;
 static int vdp1clipxstart;
 static int vdp1clipxend;
 static int vdp1clipystart;
 static int vdp1clipyend;
-static int vdp1pixelsize;
-static int vdp1spritetype;
+int vdp1pixelsize;
+int vdp1spritetype;
 int vdp2width;
 int vdp2height;
 static int nbg0priority=0;
@@ -2767,12 +2767,8 @@ void VIDSoftVdp2DrawStart(void)
 
 //////////////////////////////////////////////////////////////////////////////
 
-static INLINE void write_vdp2only_pixel(u32 *restrict dst, u32 *restrict src)
-{
-    dst[0] = 0xFF000000 | src[0];
-}
-
-void VIDSoftVdp2DrawEnd(void)
+// Shared compositing function (for GPU core to reuse)
+void VIDSoftVdp2Composite(void)
 {
    int i, i2;
    int colormode = Vdp2Regs->SPCTL & 0x20;
@@ -2790,7 +2786,6 @@ void VIDSoftVdp2DrawEnd(void)
       for (i = 0; i < n; i++)
          dispbuffer[i] = 0xFF000000 | vdp2framebuffer[i];
       VIDSoftVdp1SwapFrameBuffer();
-      YuiSwapBuffers();
       return;
    }
 
@@ -3055,6 +3050,11 @@ winpass16b_1:
    }
 
    VIDSoftVdp1SwapFrameBuffer();
+}
+
+void VIDSoftVdp2DrawEnd(void)
+{
+   VIDSoftVdp2Composite();
    YuiSwapBuffers();
 }
 

@@ -23,12 +23,19 @@
 #include "vdp1.h"
 
 #define VIDCORE_SOFT   2
+#define VIDCORE_GPU    4
 
 extern u32 *dispbuffer;
+extern u8 *vdp1frontframebuffer;
+extern u8 *vdp1backframebuffer;
+extern u32 *vdp2framebuffer;
+extern int vdp2width, vdp2height;
+extern int vdp1width, vdp1pixelsize, vdp1spritetype;
 
 extern VideoInterface_struct VIDSoft;
 
 void VIDSoftGetScreenSize(int *width, int *height);
+void VIDSoftVdp2Composite(void);
 #endif
 
 

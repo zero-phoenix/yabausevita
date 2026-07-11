@@ -22,6 +22,7 @@
 
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
+extern VideoInterface_struct VIDGPU;
 
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
@@ -54,7 +55,7 @@ extern SoundInterface_struct SNDDummy;
 SoundInterface_struct *SNDCoreList[] = { &SNDDummy, NULL };
 
 extern VideoInterface_struct VIDSoft;
-VideoInterface_struct *VIDCoreList[] = { &VIDSoft, NULL };
+VideoInterface_struct *VIDCoreList[] = { &VIDSoft, &VIDGPU, NULL };
 
 void YuiErrorMsg(const char *string)
 {
@@ -256,7 +257,7 @@ int main(int argc, char *argv[])
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
     yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : SH2CORE_INTERPRETER;
-    yinit.vidcoretype   = VIDCORE_SOFT;
+    yinit.vidcoretype   = VIDCORE_GPU;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
     yinit.cdcoretype    = CDCORE_ISO;
