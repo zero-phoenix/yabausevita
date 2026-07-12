@@ -91,9 +91,12 @@ target_link_libraries(${VITA_APP_NAME}
     m
 )
 
+set(VITA_MAKE_FSELF_FLAGS "${VITA_MAKE_FSELF_FLAGS} -a 0x3800000000000001")
+
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     UNSAFE
     NOASLR
+    UNCOMPRESSED
 )
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
