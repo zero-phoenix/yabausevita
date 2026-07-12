@@ -1,11 +1,47 @@
+/*  src/vita/main.c: PS Vita entry point for Yabause (Phase 2)
+    Copyright 2026 YabauseVita port
+
+    This file is part of Yabause.
+
+    PHASE 2: adds real button input (sceCtrl), a simple on-screen file
+    browser (debugScreen text, cloned from the real vitasdk/samples repo
+    at build time -- not hand-typed, to avoid transcription bugs), and
+    real ISO/CUE+BIN loading via Yabause's own portable ISOCD core.
+
+    Still using:
+      - SH2CORE_INTERPRETER (slow but portable -- Phase 4 will add a
+        real ARM dynarec)
+      - VIDCORE_SOFT (Phase 3 will add vitaGL for filtered upscaling)
+      - PERCORE_DUMMY still used INSIDE Yabause once a game boots --
+        the buttons you press only work in this file's own menu for
+        now. Wiring sceCtrl into Yabause's actual PerInterface_struct
+        (so buttons work IN GAME) is the next step after this one.
+      - SNDCORE_DUMMY (silence, still no audio)
+
+    SUPPORTED ROM FORMATS this phase: .iso, .cue (+matching .bin).
+    NOT YET: .ccd/.img/.sub (CloneCD), .chd (needs libchdr), .7z
+    (needs decompression -- extract on your PC first).
+
+    Folder layout this creates on first run:
+      ux0:data/yabausevita/roms/
+      ux0:data/yabausevita/bios/jp/
+      ux0:data/yabausevita/bios/us/
+      ux0:data/yabausevita/bios/eu/
+*/
+
 #include <psp2/kernel/processmgr.h>
-#include <psp2/display.h>
 #include <psp2/kernel/threadmgr.h>
+#include <psp2/display.h>
 #include <psp2/ctrl.h>
-#include <vita2d.h>
+#include <psp2/io/dirent.h>
+#include <psp2/io/stat.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
+
+#include "debugScreen.h"
+#define printf psvDebugScreenPrintf
 
 #include "../yabause.h"
 #include "../sh2core.h"
@@ -16,33 +52,30 @@
 #include "../cs2.h"
 #include "../scsp.h"
 #include "../m68kcore.h"
-#include "../smpc.h"
-
-#include "vita_menu.h"
-
-extern SH2Interface_struct SH2Fast;
-extern SH2Interface_struct SH2LRU;
-extern VideoInterface_struct VIDGPU;
 
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
-#define TARGET_FRAME_MS 16
-#define MAX_SKIP_FRAMES 10
+
+#define ROMS_DIR       "ux0:data/yabausevita/roms"
+#define BIOS_ROOT_DIR  "ux0:data/yabausevita/bios"
+#define BIOS_JP_DIR    "ux0:data/yabausevita/bios/jp"
+#define BIOS_US_DIR    "ux0:data/yabausevita/bios/us"
+#define BIOS_EU_DIR    "ux0:data/yabausevita/bios/eu"
+#define YABAUSEVITA_ROOT "ux0:data/yabausevita"
+
+#define MAX_ROM_ENTRIES 200
+#define MAX_PATH_LEN 512
 
 static void *vita_fb = NULL;
-static int g_auto_frameskip = 1;
-static int g_frame_skip = 0;
-static int g_show_fps = 0;
-static int g_vsync = 1;
 
-int vita_log(const char *fmt, ...);
+/* ---- every Yabause port must define these 6 lists ---- */
 
 extern M68K_struct M68KDummy;
 M68K_struct *M68KCoreList[] = { &M68KDummy, NULL };
 
 extern SH2Interface_struct SH2Interpreter;
 extern SH2Interface_struct SH2DebugInterpreter;
-SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, &SH2Fast, &SH2LRU, NULL };
+SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, NULL };
 
 extern PerInterface_struct PERDummy;
 PerInterface_struct *PERCoreList[] = { &PERDummy, NULL };
@@ -55,11 +88,13 @@ extern SoundInterface_struct SNDDummy;
 SoundInterface_struct *SNDCoreList[] = { &SNDDummy, NULL };
 
 extern VideoInterface_struct VIDSoft;
-VideoInterface_struct *VIDCoreList[] = { &VIDSoft, &VIDGPU, NULL };
+VideoInterface_struct *VIDCoreList[] = { &VIDSoft, NULL };
+
+/* ---- required by yui.h ---- */
 
 void YuiErrorMsg(const char *string)
 {
-    vita_log("[Yabause ERROR] %s\n", string);
+    printf("[Yabause ERROR] %s\n", string);
 }
 
 void YuiSetVideoAttribute(int type, int val)
@@ -79,7 +114,7 @@ void YuiSwapBuffers(void)
     int srcw, srch;
     VIDSoftGetScreenSize(&srcw, &srch);
 
-    if (srcw <= 0 || srch <= 0 || vita_fb == NULL || dispbuffer == NULL)
+    if (dispbuffer == NULL || srcw <= 0 || srch <= 0)
         return;
 
     int offx = (VITA_SCREEN_W - srcw) / 2;
@@ -88,73 +123,16 @@ void YuiSwapBuffers(void)
     if (offy < 0) offy = 0;
 
     uint32_t *dst = (uint32_t *)vita_fb;
-    int copyw = srcw;
-    if (offx + copyw > VITA_SCREEN_W)
-        copyw = VITA_SCREEN_W - offx;
-    if (copyw <= 0) return;
-
-    int max_h = srch;
-    if (offy + max_h > VITA_SCREEN_H)
-        max_h = VITA_SCREEN_H - offy;
-    if (max_h <= 0) return;
-
-    for (int y = 0; y < max_h; y++)
-        memcpy(dst + (y + offy) * VITA_SCREEN_W + offx, dispbuffer + y * srcw, copyw * sizeof(uint32_t));
-
-    SceDisplayFrameBuf fb;
-    fb.size = sizeof(fb);
-    fb.base = vita_fb;
-    fb.pitch = VITA_SCREEN_W;
-    fb.pixelformat = SCE_DISPLAY_PIXELFORMAT_A8B8G8R8;
-    fb.width = VITA_SCREEN_W;
-    fb.height = VITA_SCREEN_H;
-    sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
-}
-
-FILE *g_logfile = NULL;
-
-int vita_log(const char *fmt, ...)
-{
-    FILE *f = fopen("ux0:data/yabausevita_log.txt", "a");
-    if (!f) return -1;
-    va_list args;
-    va_start(args, fmt);
-    int r = vfprintf(f, fmt, args);
-    va_end(args);
-    fclose(f);
-    return r;
-}
-
-static const unsigned int vita_btn_bits[MAP_COUNT] = {
-    SCE_CTRL_UP,       SCE_CTRL_DOWN,    SCE_CTRL_LEFT,   SCE_CTRL_RIGHT,
-    SCE_CTRL_CROSS,    SCE_CTRL_CIRCLE,  SCE_CTRL_SQUARE, SCE_CTRL_TRIANGLE,
-    SCE_CTRL_LTRIGGER, SCE_CTRL_RTRIGGER,SCE_CTRL_START,  SCE_CTRL_SELECT
-};
-
-static void apply_saturn_btn(PerPad_struct *pad, int btn, int press)
-{
-    switch (btn)
+    for (int y = 0; y < srch && (y + offy) < VITA_SCREEN_H; y++)
     {
-        case SAT_UP:     if(press) PerPadUpPressed(pad);    else PerPadUpReleased(pad);    break;
-        case SAT_DOWN:   if(press) PerPadDownPressed(pad);  else PerPadDownReleased(pad);  break;
-        case SAT_LEFT:   if(press) PerPadLeftPressed(pad);  else PerPadLeftReleased(pad);  break;
-        case SAT_RIGHT:  if(press) PerPadRightPressed(pad); else PerPadRightReleased(pad); break;
-        case SAT_A:      if(press) PerPadAPressed(pad);     else PerPadAReleased(pad);     break;
-        case SAT_B:      if(press) PerPadBPressed(pad);     else PerPadBReleased(pad);     break;
-        case SAT_C:      if(press) PerPadCPressed(pad);     else PerPadCReleased(pad);     break;
-        case SAT_X:      if(press) PerPadXPressed(pad);     else PerPadXReleased(pad);     break;
-        case SAT_Y:      if(press) PerPadYPressed(pad);     else PerPadYReleased(pad);     break;
-        case SAT_Z:      if(press) PerPadZPressed(pad);     else PerPadZReleased(pad);     break;
-        case SAT_L:      if(press) PerPadLTriggerPressed(pad);  else PerPadLTriggerReleased(pad);  break;
-        case SAT_R:      if(press) PerPadRTriggerPressed(pad);  else PerPadRTriggerReleased(pad);  break;
-        case SAT_START:  if(press) PerPadStartPressed(pad); else PerPadStartReleased(pad); break;
+        uint32_t *dstrow = dst + (y + offy) * VITA_SCREEN_W + offx;
+        u32 *srcrow = dispbuffer + y * srcw;
+        int copyw = srcw;
+        if (offx + copyw > VITA_SCREEN_W)
+            copyw = VITA_SCREEN_W - offx;
+        memcpy(dstrow, srcrow, copyw * sizeof(uint32_t));
     }
-}
 
-static void clear_fb(void)
-{
-    if (!vita_fb) return;
-    memset(vita_fb, 0, (size_t)VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
     SceDisplayFrameBuf fb;
     memset(&fb, 0, sizeof(fb));
     fb.size = sizeof(fb);
@@ -166,199 +144,296 @@ static void clear_fb(void)
     sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
 }
 
-static int map_region(int vmenu_region)
+/* ---- folder setup: sceIoMkdir needs each path level created one at a
+   time (like mkdir, not mkdir -p), so we call it once per folder in
+   order from shortest to longest path. Failing because a folder
+   ALREADY exists is fine and expected on every run after the first. ---- */
+
+static void ensure_folders_exist(void)
 {
-    switch (vmenu_region)
-    {
-        case VMENU_REGION_JP: return REGION_JAPAN;
-        case VMENU_REGION_US: return REGION_NORTHAMERICA;
-        case VMENU_REGION_EU: return REGION_EUROPE;
-        default:              return REGION_AUTODETECT;
-    }
+    sceIoMkdir(YABAUSEVITA_ROOT, 0777);
+    sceIoMkdir(ROMS_DIR, 0777);
+    sceIoMkdir(BIOS_ROOT_DIR, 0777);
+    sceIoMkdir(BIOS_JP_DIR, 0777);
+    sceIoMkdir(BIOS_US_DIR, 0777);
+    sceIoMkdir(BIOS_EU_DIR, 0777);
 }
 
-static void chd_to_bin_path(char *path, int max_len)
+/* ---- tiny helpers to recognize file extensions, case-insensitively ---- */
+
+static int has_extension(const char *filename, const char *ext)
 {
-    char ext[16];
-    const char *dot = strrchr(path, '.');
-    if (!dot) return;
-    safe_strcpy(ext, dot + 1, sizeof(ext));
-    to_lower(ext);
-    if (strcmp(ext, "chd") != 0) return;
-
-    char bin_path[VMENU_MAX_PATH];
-    safe_strcpy(bin_path, path, sizeof(bin_path));
-    int len = (int)(dot - path);
-    bin_path[len] = '\0';
-    safe_strcat(bin_path, ".bin", sizeof(bin_path));
-
-    SceIoStat tmp;
-    memset(&tmp, 0, sizeof(tmp));
-    if (sceIoGetstat(bin_path, &tmp) >= 0)
+    size_t flen = strlen(filename);
+    size_t elen = strlen(ext);
+    if (flen < elen) return 0;
+    const char *tail = filename + (flen - elen);
+    for (size_t i = 0; i < elen; i++)
     {
-        safe_strcpy(path, bin_path, max_len);
-        vita_log("CHD->BIN swap: %s\n", bin_path);
+        char a = tail[i], b = ext[i];
+        if (a >= 'A' && a <= 'Z') a += 32;
+        if (b >= 'A' && b <= 'Z') b += 32;
+        if (a != b) return 0;
     }
+    return 1;
 }
 
-static int vita_menu_load_callback(const VitaMenuConfig *cfg, char *error, int error_size)
+typedef enum {
+    ROM_SUPPORTED,
+    ROM_UNSUPPORTED_CCD,
+    ROM_UNSUPPORTED_CHD,
+    ROM_UNSUPPORTED_7Z,
+    ROM_UNKNOWN
+} RomSupportLevel;
+
+static RomSupportLevel classify_rom(const char *filename)
 {
-    (void)cfg; (void)error; (void)error_size;
+    if (has_extension(filename, ".iso")) return ROM_SUPPORTED;
+    if (has_extension(filename, ".cue")) return ROM_SUPPORTED;
+    if (has_extension(filename, ".ccd")) return ROM_UNSUPPORTED_CCD;
+    if (has_extension(filename, ".chd")) return ROM_UNSUPPORTED_CHD;
+    if (has_extension(filename, ".7z"))  return ROM_UNSUPPORTED_7Z;
+    return ROM_UNKNOWN;
+}
+
+/* ---- scan the roms folder into a simple fixed-size array of names ---- */
+
+static char rom_names[MAX_ROM_ENTRIES][256];
+static int rom_count = 0;
+
+static void scan_roms_folder(void)
+{
+    rom_count = 0;
+    SceUID dir = sceIoDopen(ROMS_DIR);
+    if (dir < 0)
+        return;
+
+    SceIoDirent entry;
+    memset(&entry, 0, sizeof(entry));
+    while (sceIoDread(dir, &entry) > 0 && rom_count < MAX_ROM_ENTRIES)
+    {
+        /* skip directories, only list files */
+        if (!SCE_S_ISDIR(entry.d_stat.st_mode))
+        {
+            strncpy(rom_names[rom_count], entry.d_name, sizeof(rom_names[0]) - 1);
+            rom_names[rom_count][sizeof(rom_names[0]) - 1] = '\0';
+            rom_count++;
+        }
+        memset(&entry, 0, sizeof(entry));
+    }
+    sceIoDclose(dir);
+}
+
+/* ---- find the first .bin BIOS file across the 3 region folders,
+   checked in this order: Japan, USA, Europe. Returns 1 and fills
+   out_path if found, 0 otherwise (caller falls back to HLE bios). ---- */
+
+static int find_first_bios(char *out_path, size_t out_len)
+{
+    const char *dirs[] = { BIOS_JP_DIR, BIOS_US_DIR, BIOS_EU_DIR };
+    for (int d = 0; d < 3; d++)
+    {
+        SceUID dir = sceIoDopen(dirs[d]);
+        if (dir < 0) continue;
+
+        SceIoDirent entry;
+        memset(&entry, 0, sizeof(entry));
+        while (sceIoDread(dir, &entry) > 0)
+        {
+            if (!SCE_S_ISDIR(entry.d_stat.st_mode) && has_extension(entry.d_name, ".bin"))
+            {
+                snprintf(out_path, out_len, "%s/%s", dirs[d], entry.d_name);
+                sceIoDclose(dir);
+                return 1;
+            }
+            memset(&entry, 0, sizeof(entry));
+        }
+        sceIoDclose(dir);
+    }
     return 0;
 }
 
+/* ---- simple debounced button read: returns which direction/button
+   was newly pressed this frame (not held from last frame) ---- */
+
+typedef struct {
+    int up, down, cross, start;
+} MenuInput;
+
+static SceCtrlData s_prev_pad;
+
+static MenuInput read_menu_input(void)
+{
+    SceCtrlData pad;
+    sceCtrlPeekBufferPositive(0, &pad, 1);
+
+    MenuInput mi;
+    mi.up     = (pad.buttons & SCE_CTRL_UP)     && !(s_prev_pad.buttons & SCE_CTRL_UP);
+    mi.down   = (pad.buttons & SCE_CTRL_DOWN)   && !(s_prev_pad.buttons & SCE_CTRL_DOWN);
+    mi.cross  = (pad.buttons & SCE_CTRL_CROSS)  && !(s_prev_pad.buttons & SCE_CTRL_CROSS);
+    mi.start  = (pad.buttons & SCE_CTRL_START)  && !(s_prev_pad.buttons & SCE_CTRL_START);
+
+    s_prev_pad = pad;
+    return mi;
+}
+
+/* ---- the ROM browser screen. Returns the chosen full path in
+   out_path, or returns 0 if the user picked something unsupported
+   and we should just keep browsing. ---- */
+
+static int run_rom_browser(char *out_path, size_t out_len)
+{
+    scan_roms_folder();
+    int selected = 0;
+
+    while (1)
+    {
+        printf("\e[2J\e[H");
+        printf("YabauseVita - Phase 2\n");
+        printf("========================================\n");
+
+        if (rom_count == 0)
+        {
+            printf("\nNo files found in:\n  %s\n\n", ROMS_DIR);
+            printf("Copy a .iso or .cue+.bin game there via\n");
+            printf("FTP or USB, then restart the app.\n");
+            sceKernelDelayThread(3 * 1000 * 1000);
+            return 0;
+        }
+
+        printf("Select a game (UP/DOWN, X to confirm):\n\n");
+        for (int i = 0; i < rom_count; i++)
+        {
+            RomSupportLevel lvl = classify_rom(rom_names[i]);
+            const char *marker = (i == selected) ? "> " : "  ";
+            const char *tag = "";
+            if (lvl == ROM_UNSUPPORTED_CCD) tag = "  [CCD not supported yet]";
+            else if (lvl == ROM_UNSUPPORTED_CHD) tag = "  [CHD not supported yet]";
+            else if (lvl == ROM_UNSUPPORTED_7Z) tag = "  [extract .7z on PC first]";
+            else if (lvl == ROM_UNKNOWN) tag = "  [unknown format]";
+            printf("%s%s%s\n", marker, rom_names[i], tag);
+        }
+
+        MenuInput mi = read_menu_input();
+        if (mi.up)   { selected--; if (selected < 0) selected = rom_count - 1; }
+        if (mi.down) { selected++; if (selected >= rom_count) selected = 0; }
+
+        if (mi.cross)
+        {
+            RomSupportLevel lvl = classify_rom(rom_names[selected]);
+            if (lvl == ROM_SUPPORTED)
+            {
+                snprintf(out_path, out_len, "%s/%s", ROMS_DIR, rom_names[selected]);
+                return 1;
+            }
+            else
+            {
+                printf("\e[2J\e[H");
+                printf("This format isn't supported yet.\n\n");
+                if (lvl == ROM_UNSUPPORTED_CCD)
+                    printf("CCD/IMG/SUB (CloneCD) needs a new reader\n"
+                           "that doesn't exist in this build yet.\n");
+                else if (lvl == ROM_UNSUPPORTED_CHD)
+                    printf("CHD needs the libchdr library, which\n"
+                           "isn't linked into this build yet.\n");
+                else if (lvl == ROM_UNSUPPORTED_7Z)
+                    printf(".7z is a compressed archive. Extract it\n"
+                           "on your PC and copy the .iso/.cue+.bin\n"
+                           "here instead.\n");
+                else
+                    printf("Try a .iso or .cue+.bin file instead.\n");
+                printf("\nPress X to go back.\n");
+
+                while (1)
+                {
+                    MenuInput mi2 = read_menu_input();
+                    if (mi2.cross) break;
+                    sceDisplayWaitVblankStart();
+                }
+            }
+        }
+
+        sceDisplayWaitVblankStart();
+    }
+}
+
+/* ---- entry point ---- */
+
 int main(int argc, char *argv[])
 {
-    (void)argc; (void)argv;
+    psvDebugScreenInit();
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+    memset(&s_prev_pad, 0, sizeof(s_prev_pad));
 
-    vita_log("YabauseVita starting\n");
+    printf("YabauseVita starting...\n");
+    ensure_folders_exist();
 
-    vita_fb = malloc((size_t)VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
+    /* still keep our own dark-blue raw framebuffer ready for when
+       VIDCORE_SOFT starts drawing real Saturn frames later */
+    vita_fb = malloc(VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
     if (vita_fb == NULL)
     {
-        vita_log("FATAL: could not allocate framebuffer\n");
+        printf("FATAL: could not allocate framebuffer\n");
+        sceKernelDelayThread(3 * 1000 * 1000);
         sceKernelExitProcess(0);
         return 0;
     }
-    vita_log("fb=%p\n", vita_fb);
 
-    vita_log("Initializing menu\n");
-    if (vita_menu_init() != 0)
+    char rom_path[MAX_PATH_LEN];
+    if (!run_rom_browser(rom_path, sizeof(rom_path)))
     {
-        vita_log("FATAL: vita_menu_init failed\n");
+        /* empty roms folder case already showed a message; just exit */
         sceKernelExitProcess(0);
         return 0;
     }
 
-    VitaMenuConfig cfg;
-    memset(&cfg, 0, sizeof(cfg));
+    char bios_path[MAX_PATH_LEN];
+    int have_bios = find_first_bios(bios_path, sizeof(bios_path));
 
-    vita_log("Entering menu\n");
-    int menu_result = vita_menu_run(&cfg, NULL);
-    vita_log("Menu exited with result=%d\n", menu_result);
-
-    if (menu_result != 0)
-    {
-        vita_log("No game selected, exiting\n");
-        sceKernelExitProcess(0);
-        return 0;
-    }
-
-    vita_log("Selected: %s\n", cfg.rom_path);
-    vita_log("BIOS: %s\n", cfg.bios_path);
-
-    vita_log("Calling YabauseInit\n");
-
-    char cdpath[VMENU_MAX_PATH];
-    safe_strcpy(cdpath, cfg.rom_path, sizeof(cdpath));
-    chd_to_bin_path(cdpath, sizeof(cdpath));
+    printf("\e[2J\e[H");
+    printf("Loading: %s\n", rom_path);
+    if (have_bios)
+        printf("BIOS:    %s\n", bios_path);
+    else
+        printf("BIOS:    none found -- using HLE BIOS\n"
+               "(put a .bin BIOS in bios/jp, bios/us or\n"
+               "bios/eu for better compatibility)\n");
+    printf("\nThis will be SLOW (interpreter core, no\n"
+             "GPU acceleration yet) -- that's expected.\n");
+    sceKernelDelayThread(2 * 1000 * 1000);
 
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : 2;
-    yinit.vidcoretype   = VIDCORE_GPU;
+    yinit.sh2coretype   = SH2CORE_INTERPRETER;
+    yinit.vidcoretype   = VIDCORE_SOFT;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
     yinit.cdcoretype    = CDCORE_ISO;
-    yinit.cdpath        = cdpath;
-    yinit.biospath      = cfg.bios_path;
     yinit.carttype      = 0;
-    yinit.regionid      = (cfg.rom_region != VMENU_REGION_UNKNOWN && cfg.rom_region != VMENU_REGION_AUTO) ? map_region(cfg.rom_region) : REGION_AUTODETECT;
+    yinit.regionid      = 0;
+    yinit.biospath      = have_bios ? bios_path : NULL;
+    yinit.cdpath        = rom_path
     yinit.buppath       = NULL;
     yinit.mpegpath      = NULL;
-    yinit.cartpath      = NULL;
-    yinit.netlinksetting = NULL;
-    yinit.flags         = 0;
-    yinit.frameskip     = cfg.frame_skip;
+    yinit.cartpath      = NULL
+    yinit.netlinksetting = NULL
+    yinit.flags         = 0
+    yinit.frameskip     = 0
 
-    int init_ret = YabauseInit(&yinit);
-    vita_log("YabauseInit returned %d\n", init_ret);
-
-    if (init_ret != 0)
+    int ret = YabauseInit(&yinit);
+    if (ret != 0)
     {
-        vita_log("FATAL: YabauseInit failed\n");
+        printf("\e[2J\e[H");
+        printf("YabauseInit failed (code %d).\n", ret);
+        printf("Check that the file is a valid .iso or\n");
+        printf(".cue with its matching .bin next to it.\n");
         while (1) sceDisplayWaitVblankStart();
     }
 
-    vita_log("QuickLoading game\n");
-    int ql_ret = YabauseQuickLoadGame();
-    vita_log("YabauseQuickLoadGame returned %d\n", ql_ret);
-
-    if (ql_ret != 0)
+    while (1)
     {
-        vita_log("FATAL: QuickLoad failed\n");
-        while (1) sceDisplayWaitVblankStart();
-    }
-
-    vita_log("Adding per-pad\n");
-    PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
-    vita_log("pad=%s\n", saturn_pad ? "OK" : "FAIL");
-
-    g_show_fps = cfg.show_fps;
-    g_auto_frameskip = cfg.auto_frameskip;
-    g_frame_skip = cfg.frame_skip;
-
-    int frame_count = 0, skip_counter = 0;
-    SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
-    SceUInt64 next_display = 0;
-    unsigned int last_buttons = 0;
-    int skip = g_frame_skip;
-    if (skip < 0) skip = 0;
-    if (skip > 4) skip = 4;
-
-    vita_log("Entering emulation loop, frame_skip=%d\n", skip);
-
-    for (;;)
-    {
-        int display_this = (skip == 0) ? 1 : (skip_counter == 0);
-        skip_counter = (skip_counter + 1) % (skip + 1);
-
-        if (!display_this)
-        {
-            YabauseExec();
-            continue;
-        }
-
         YabauseExec();
-        frame_count++;
-
-        SceUInt64 now = sceKernelGetProcessTimeWide();
-        if (now >= next_display)
-        {
-            YuiSwapBuffers();
-            next_display = now + 16000ULL;
-        }
-
-        if (now - fps_timer >= 5000000ULL)
-        {
-            float f = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
-            vita_log("FPS: %.1f\n", f);
-            VIDGPUVdp2LogTiming();
-            frame_count = 0;
-            fps_timer = now;
-        }
-
-        SceCtrlData pad;
-        sceCtrlPeekBufferPositive(0, &pad, 1);
-        unsigned int cur = pad.buttons;
-        unsigned int changed = cur ^ last_buttons;
-        if (changed && saturn_pad)
-        {
-            for (int m = 0; m < MAP_COUNT; m++)
-            {
-                unsigned int bit = vita_btn_bits[m];
-                if (changed & bit)
-                    apply_saturn_btn(saturn_pad, cfg.mapping[m], cur & bit);
-            }
-        }
-        if (cur & SCE_CTRL_START)
-            break;
-        last_buttons = cur;
     }
 
-    vita_log("Emulation stopped\n");
-
-    sceKernelExitProcess(0);
     return 0;
 }
