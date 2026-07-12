@@ -109,4 +109,6 @@ vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     FILE sce_sys/bg0.png                                sce_sys/bg0.png
     FILE sce_sys/startup.png                            sce_sys/startup.png
     FILE sce_sys/livearea/contents/template.xml         sce_sys/livearea/contents/template.xml
+    FILE sce_sys/icon0.png                              sce_sys/livearea/contents/icon0.png
+    FILE sce_sys/bg0.png                                sce_sys/livearea/contents/bg0.png
 )
