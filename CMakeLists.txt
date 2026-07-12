@@ -93,11 +93,8 @@ target_link_libraries(${VITA_APP_NAME}
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     UNSAFE
-    ATTRIBUTE 0
-    MEMSIZE 64
+    NOASLR
 )
-
-set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -s CATEGORY=gd")
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
