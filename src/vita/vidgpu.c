@@ -78,12 +78,6 @@ static void VIDGPUDeInit(void)
     vita2d_fini();
 }
 
-/* Swap RGB<->BGR bytes and change byte order to match vita2d A8B8G8R8 */
-static INLINE u32 argb_to_vita2d(u32 p)
-{
-    return (p & 0xFF00FF00U) | ((p >> 16) & 0xFF) | ((p & 0xFF) << 16);
-}
-
 static void GPUYuiSwapBuffers(void)
 {
     int srcw = vdp2width;
@@ -97,7 +91,8 @@ static void GPUYuiSwapBuffers(void)
     {
         if (gpu_display_tex)
             vita2d_free_texture(gpu_display_tex);
-        gpu_display_tex = vita2d_create_empty_texture(srcw, srch);
+        gpu_display_tex = vita2d_create_empty_texture_format(srcw, srch,
+            SCE_GXM_TEXTURE_FORMAT_A8R8G8B8);
         gpu_tex_w = srcw;
         gpu_tex_h = srch;
         if (!gpu_display_tex) { gpu_tex_w = gpu_tex_h = 0; return; }
@@ -109,10 +104,11 @@ static void GPUYuiSwapBuffers(void)
     uint32_t stride = vita2d_texture_get_stride(gpu_display_tex) / 4;
     int n = srcw * srch;
 
+    /* dispbuffer stores pixels as 0xAARRGGBB (little-endian: B,G,R,A).
+       A8R8G8B8 expects same byte order — no conversion needed. */
     if (stride == (uint32_t)srcw)
     {
-        for (int i = 0; i < n; i++)
-            tp[i] = argb_to_vita2d(dispbuffer[i]);
+        memcpy(tp, dispbuffer, (size_t)n * sizeof(uint32_t));
     }
     else
     {
@@ -121,7 +117,7 @@ static void GPUYuiSwapBuffers(void)
             uint32_t *row = tp + y * stride;
             u32 *src = dispbuffer + y * srcw;
             for (int x = 0; x < srcw; x++)
-                row[x] = argb_to_vita2d(src[x]);
+                row[x] = src[x];
         }
     }
 
