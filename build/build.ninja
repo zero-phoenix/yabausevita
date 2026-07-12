@@ -401,7 +401,7 @@ build YabauseVita: C_EXECUTABLE_LINKER__YabauseVita_Release CMakeFiles/YabauseVi
   CONFIG = Release
   FLAGS = -Wl,-q -O3 -DNDEBUG -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers
   LINK_FLAGS = -Wl,-z,nocopyreloc -flto
-  LINK_LIBRARIES = -lvita2d  -lSceDisplay_stub  -lSceCtrl_stub  -lSceAudio_stub  -lSceSysmodule_stub  -lSceGxm_stub  -lSceCommonDialog_stub  -lSceAppMgr_stub  -lSceIofilemgr_stub  -lScePower_stub  -lm
+  LINK_LIBRARIES = -lvita2d  -lSceDisplay_stub  -lSceCtrl_stub  -lSceAudio_stub  -lSceAppMgr_stub  -lSceGxm_stub  -lSceIofilemgr_stub  -lm
   OBJECT_DIR = CMakeFiles\YabauseVita.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -473,7 +473,7 @@ build CMakeFiles/YabauseVita.self-self YabauseVita.self | ${cmake_ninja_workdir}
 # Custom command for YabauseVita.self.out
 
 build YabauseVita.self.out | ${cmake_ninja_workdir}YabauseVita.self.out: CUSTOM_COMMAND YabauseVita.velf || YabauseVita YabauseVita-velf
-  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\D\Documents\GitHub\yabausevita\build && C:\Users\D\VitaSDK\vitasdk\bin\vita-make-fself.exe -c -m 64 C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.velf C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.self.out"
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D C:\Users\D\Documents\GitHub\yabausevita\build && C:\Users\D\VitaSDK\vitasdk\bin\vita-make-fself.exe -a 0x3800000000000001 -a 0x3800000000000001 -na C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.velf C:/Users/D/Documents/GitHub/yabausevita/build/YabauseVita.self.out"
   DESC = Creating SELF YabauseVita.self
   restat = 1
 

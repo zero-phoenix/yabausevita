@@ -98,8 +98,8 @@ CMAKE_INSTALL_PREFIX:PATH=C:/Users/D/VitaSDK/vitasdk/arm-vita-eabi
 //linker
 CMAKE_LINKER:PATH=C:/Users/D/VitaSDK/vitasdk/bin/arm-vita-eabi-ld.exe
 
-//Program used to build from build.ninja files.
-CMAKE_MAKE_PROGRAM:FILEPATH=C:/Users/D/AppData/Local/Microsoft/WinGet/Packages/Ninja-build.Ninja_Microsoft.Winget.Source_8wekyb3d8bbwe/ninja.exe
+//No help, variable specified on the command line.
+CMAKE_MAKE_PROGRAM:UNINITIALIZED=ninja
 
 //module linker flags
 CMAKE_MODULE_LINKER_FLAGS:STRING=
@@ -236,7 +236,7 @@ VITA_LIBS_GEN:PATH=C:/Users/D/VitaSDK/vitasdk/bin/vita-libs-gen.exe
 VITA_MAKE_FSELF:PATH=C:/Users/D/VitaSDK/vitasdk/bin/vita-make-fself.exe
 
 //vita-make-fself flags
-VITA_MAKE_FSELF_FLAGS:STRING=
+VITA_MAKE_FSELF_FLAGS:STRING= -a 0x3800000000000001
 
 //vita-mksfoex
 VITA_MKSFOEX:PATH=C:/Users/D/VitaSDK/vitasdk/bin/vita-mksfoex.exe
@@ -335,8 +335,6 @@ CMAKE_HOME_DIRECTORY:INTERNAL=C:/Users/D/Documents/GitHub/yabausevita
 CMAKE_LINKER-ADVANCED:INTERNAL=1
 //Name of CMakeLists files to read
 CMAKE_LIST_FILE_NAME:INTERNAL=CMakeLists.txt
-//ADVANCED property for variable: CMAKE_MAKE_PROGRAM
-CMAKE_MAKE_PROGRAM-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS
 CMAKE_MODULE_LINKER_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_DEBUG

@@ -82,12 +82,9 @@ target_link_libraries(${VITA_APP_NAME}
     SceDisplay_stub
     SceCtrl_stub
     SceAudio_stub
-    SceSysmodule_stub
-    SceGxm_stub
-    SceCommonDialog_stub
     SceAppMgr_stub
+    SceGxm_stub
     SceIofilemgr_stub
-    ScePower_stub
     m
 )
 
