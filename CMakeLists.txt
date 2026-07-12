@@ -91,7 +91,7 @@ target_link_libraries(${VITA_APP_NAME}
 
 set(VITA_MAKE_FSELF_FLAGS "${VITA_MAKE_FSELF_FLAGS} -a 0x3800000000000001")
 
-set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -s CATEGORY=gd")
+set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -s CATEGORY=gd -s STITLE=\"Sega Saturn Emulator\" -s CONTENT_ID=YABA00001")
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     UNSAFE
@@ -105,6 +105,9 @@ vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
     NAME ${VITA_APP_NAME}
+    TITLE "YabauseVita"
+    STITLE "Sega Saturn Emulator"
+    CONTENT_ID ${VITA_TITLEID}
     FILE sce_sys/icon0.png                              sce_sys/icon0.png
     FILE sce_sys/bg0.png                                sce_sys/bg0.png
     FILE sce_sys/startup.png                            sce_sys/startup.png
