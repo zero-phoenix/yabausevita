@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<livearea style="a1" content="start" id="main">
+<livearea style="a1" content="start">
   <background>
     <image>bg0.png</image>
   </background>
   <gate>
-    <image bg="0" x="390" y="200" w="60" h="112" align="center" base="start">startup.png</image>
+    <image bg="0" x="452" y="236" w="56" h="72" align="center" base="start">icon0.png</image>
   </gate>
-  <frame id="frame1" multi="o" affix="10,10,10,10"/>
-  <frame id="frame2" multi="u" affix="0,30,0,0" origin="bg"/>
 </livearea>
