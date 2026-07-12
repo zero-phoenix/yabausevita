@@ -97,6 +97,9 @@ vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     UNSAFE
     NOASLR
     UNCOMPRESSED
+    ATTRIBUTE 0
+    MEMSIZE 64
+    NODRM
 )
 
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
