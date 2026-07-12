@@ -44,6 +44,14 @@ jobs:
           test -f /usr/local/vitasdk/arm-vita-eabi/include/vita2d.h && echo "OK: vita2d.h present" || echo "WARN: vita2d.h missing"
           test -f /usr/local/vitasdk/arm-vita-eabi/include/psp2/kernel/processmgr.h && echo "OK: processmgr.h present"
 
+      - name: Quantize PNG assets to 8-bit (required by PS Vita package installer)
+        run: |
+          sudo apt-get install -y pngquant
+          for png in sce_sys/*.png; do
+            echo "Quantizing: $png"
+            pngquant --force --ext .png --speed 1 --quality 60-100 256 "$png" 2>&1 || true
+          done
+
       - name: Configure (CMake)
         run: |
           export VITASDK=/usr/local/vitasdk
