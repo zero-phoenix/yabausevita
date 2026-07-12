@@ -97,6 +97,8 @@ vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME}
     MEMSIZE 64
 )
 
+set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -s CATEGORY=gd")
+
 vita_create_vpk(${VITA_APP_NAME}.vpk ${VITA_TITLEID} ${VITA_APP_NAME}.self
     VERSION ${VITA_VERSION}
     NAME ${VITA_APP_NAME}
