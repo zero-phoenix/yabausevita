@@ -1,67 +1,75 @@
-name: Build YabauseVita (Phase 2)
+name: Build YabauseVita
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITASDK: /usr/local/vitasdk
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install clang 21
-        run: curl https://apt.llvm.org/llvm.sh | sudo bash -s -- 21
+      - name: Install clang
+        run: |
+          curl https://apt.llvm.org/llvm.sh | sudo bash -s -- 18
+          sudo apt-get update && sudo apt-get install -y clang-18 lld-18
 
-      - name: Checkout vitasdk installer
+      - name: Checkout vdpm
         uses: actions/checkout@v4
         with:
           repository: vitasdk/vdpm
           path: vdpm
 
-      - name: Checkout vitasdk samples (for debugScreen.c/.h)
-        uses: actions/checkout@v4
-        with:
-          repository: vitasdk/samples
-          path: external/vitasdk-samples
-
-      - name: Install vitasdk (full toolchain)
+      - name: Install VitaSDK + vita2d
         run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="$VITASDK/bin:$PATH"
           cd vdpm
           ./bootstrap-vitasdk.sh
           ./install-all.sh
-        env:
-          VITASDK: /usr/local/vitasdk
 
-      - name: Flush filesystem writes before compiling
+      - name: Verify vita2d
         run: |
-          sync
-          sleep 5
-          test -f /usr/local/vitasdk/arm-vita-eabi/include/psp2/kernel/processmgr.h && echo "OK: header present"
+          ls -la /usr/local/vitasdk/arm-vita-eabi/lib/libvita2d.a
+          test -f /usr/local/vitasdk/arm-vita-eabi/include/vita2d.h && echo "OK: vita2d.h present"
 
-      - name: Configure
+      - name: Configure (CMake)
         run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="/usr/local/vitasdk/bin:$PATH"
+          rm -rf build
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-        env:
-          VITASDK: /usr/local/vitasdk
+          cmake -DVITASDK="/usr/local/vitasdk" \
+                -DCMAKE_TOOLCHAIN_FILE="/usr/local/vitasdk/share/vita.toolchain.cmake" \
+                -DCMAKE_BUILD_TYPE=Release ..
 
       - name: Build
-        run: cmake --build build --verbose
-        env:
-          VITASDK: /usr/local/vitasdk
+        run: |
+          export VITASDK=/usr/local/vitasdk
+          export PATH="/usr/local/vitasdk/bin:$PATH"
+          cmake --build build --verbose -- -j$(nproc)
 
-      - name: Upload VPK
+      - name: Verify VPK
+        run: |
+          test -f build/YabauseVita.vpk && echo "OK: VPK exists"
+          unzip -l build/YabauseVita.vpk
+
+      - name: Upload VPK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YabauseVita-phase2-vpk
+          name: YabauseVita-vpk
           path: build/YabauseVita.vpk
+          if-no-files-found: error
 
-      - name: Upload build log always (even on failure, for debugging)
+      - name: Upload build directory (debug)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log
+          name: build-directory
           path: build/
