@@ -2299,12 +2299,10 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
     int result = -1;
     int running = 1;
     SceUInt64 last_time = sceKernelGetProcessTimeWide();
-    float auto_launch_timer = 0.0f;
-    int has_recent_game = (config->recent_count > 0 && config->recent_games[0][0] && g_file_count > 0 && g_file_sel >= 0 && g_file_sel < g_file_count);
 
     if (vdbg) { fclose(vdbg); vdbg = NULL; }
     FILE *dbg = fopen("ux0:data/yabause/vmenu_dbg.txt", "a");
-    if (dbg) fprintf(dbg, "menu_run: entering loop, has_recent=%d, file_sel=%d\n", has_recent_game, g_file_sel);
+    if (dbg) fprintf(dbg, "menu_run: entering loop, file_sel=%d\n", g_file_sel);
 
     while (running) {
          SceUInt64 now = sceKernelGetProcessTimeWide();
@@ -2393,25 +2391,7 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
                 break;
         }
 
-/* ── Auto-launch recent game after 2s if no input ── */
-        if (has_recent_game && g_active_tab == VMENU_TAB_ROMS && g_load_state == VMENU_LOAD_IDLE) {
-            int directional = pad.buttons & (SCE_CTRL_UP | SCE_CTRL_DOWN | SCE_CTRL_LEFT | SCE_CTRL_RIGHT |
-                                             SCE_CTRL_CROSS | SCE_CTRL_CIRCLE | SCE_CTRL_SQUARE | SCE_CTRL_TRIANGLE |
-                                             SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER);
-            if (directional) {
-                auto_launch_timer = 0.0f;
-                if (dbg) fprintf(dbg, "AutoLaunch reset: directional=%04x\n", directional);
-            } else {
-                auto_launch_timer += dt;
-                if (dbg) fprintf(dbg, "AutoLaunch timer: %.2f\n", auto_launch_timer);
-                if (auto_launch_timer >= 2.0f) {
-                    if (dbg) { fprintf(dbg, "Auto-launching recent game - EXITING MENU NOW\n"); fflush(dbg); }
-                    result = 0;
-                    running = 0;
-                    break;
-                }
-            }
-        }
+/* ── Auto-launch disabled per user request ── */
 
         /* O en pestaña ROMs: salir del menú */
         if (dbg) { fprintf(dbg, "Before Circle check: running=%d, should_load=%d, load_cb=%p\n", running, should_load, load_cb); fflush(dbg); }

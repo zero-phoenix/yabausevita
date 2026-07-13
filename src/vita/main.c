@@ -395,7 +395,8 @@ int main(int argc, char *argv[])
     PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
     vita_log("pad=%s\n", saturn_pad ? "OK" : "FAIL");
 
-    vita_log("Button mapping:\n");
+    set_default_mapping(&cfg);
+    vita_log("Button mapping (reset to defaults):\n");
     for (int mi = 0; mi < MAP_COUNT; mi++) {
         vita_log("  map[%d] = %d\n", mi, cfg.mapping[mi]);
     }
