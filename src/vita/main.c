@@ -454,8 +454,11 @@ int main(int argc, char *argv[])
             for (int m = 0; m < MAP_COUNT; m++)
             {
                 unsigned int bit = vita_btn_bits[m];
-                if (changed & bit)
+                if (changed & bit) {
+                    vita_log("BTN: vita_bit=%08x map_idx=%d sat=%d press=%d\n",
+                             bit, m, cfg.mapping[m], !!(cur & bit));
                     apply_saturn_btn(saturn_pad, cfg.mapping[m], cur & bit);
+                }
             }
         }
         if (cur & SCE_CTRL_START)
