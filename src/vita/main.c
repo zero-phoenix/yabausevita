@@ -21,6 +21,7 @@
 #include "../smpc.h"
 
 #include "vita_menu.h"
+#include "chd_read.h"
 
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
@@ -179,7 +180,7 @@ static int map_region(int vmenu_region)
     }
 }
 
-/* Returns: 0=swapped to .bin, 1=not CHD (no change), -1=CHD with no .bin sidecar */
+/* Returns: 0=success (path now points to .bin), 1=not CHD (no change) */
 static int chd_to_bin_path(char *path, int max_len)
 {
     char ext[16];
@@ -190,8 +191,8 @@ static int chd_to_bin_path(char *path, int max_len)
     if (strcmp(ext, "chd") != 0) return 1;
 
     char bin_path[VMENU_MAX_PATH];
-    safe_strcpy(bin_path, path, sizeof(bin_path));
     int len = (int)(dot - path);
+    strncpy(bin_path, path, len);
     bin_path[len] = '\0';
     safe_strcat(bin_path, ".bin", sizeof(bin_path));
 
@@ -200,12 +201,24 @@ static int chd_to_bin_path(char *path, int max_len)
     if (sceIoGetstat(bin_path, &tmp) >= 0)
     {
         safe_strcpy(path, bin_path, max_len);
-        vita_log("CHD->BIN swap: %s\n", bin_path);
+        vita_log("Using cached CHD extraction: %s\n", bin_path);
         return 0;
     }
 
-    vita_log("CHD without .bin sidecar: %s\n", path);
-    return -1;
+    vita_log("Extracting CHD to %s\n", bin_path);
+    char err[256];
+    int ret = chd_extract(path, bin_path, err, sizeof(err));
+    if (ret != 0)
+    {
+        vita_log("CHD extraction failed: %s\n", err);
+        vita_menu_show_error("Error al extraer CHD", err);
+        sceKernelExitProcess(0);
+        return 0;
+    }
+
+    safe_strcpy(path, bin_path, max_len);
+    vita_log("CHD extracted successfully: %s\n", bin_path);
+    return 0;
 }
 
 /* Auto-detecta el primer BIOS .bin en ux0:data/yabause/bios/{jp,us,eu} */
@@ -381,6 +394,11 @@ int main(int argc, char *argv[])
     vita_log("Adding per-pad\n");
     PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
     vita_log("pad=%s\n", saturn_pad ? "OK" : "FAIL");
+
+    vita_log("Button mapping:\n");
+    for (int mi = 0; mi < MAP_COUNT; mi++) {
+        vita_log("  map[%d] = %d\n", mi, cfg.mapping[mi]);
+    }
 
     g_show_fps = cfg.show_fps;
     g_auto_frameskip = cfg.auto_frameskip;

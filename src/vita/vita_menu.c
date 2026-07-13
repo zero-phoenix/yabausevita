@@ -293,11 +293,11 @@ static SceUInt64  g_status_time = 0;
 #define CONTENT_H (SCREEN_H - CONTENT_Y - 50)
 #define STATUS_H  22
 #define HINTS_H   28
-#define ITEM_H    34
+#define ITEM_H    38
 #define MARGIN    16
-#define FONT_SCALE 0.85f
-#define FONT_SCALE_SM 0.72f
-#define FONT_SCALE_LG 1.15f
+#define FONT_SCALE 0.95f
+#define FONT_SCALE_SM 0.82f
+#define FONT_SCALE_LG 1.25f
 /* ══════════════════════════════════════════════════════════════
    SECCIÓN 4 — UTILIDADES DE CADENAS Y RUTAS
    ══════════════════════════════════════════════════════════════ */
@@ -1603,6 +1603,7 @@ typedef enum {
     CFG_SECTION_INFO,
     CFG_OPT_CHD_INFO,
     CFG_OPT_BIOS_PATH,
+    CFG_OPT_RESET_MAPPING,
     CFG_COUNT
 } CfgOption;
 
@@ -1649,7 +1650,8 @@ static const char *cfg_labels[CFG_COUNT] = {
     "Select",               /* MAP_SELECT */
     "-- INFORMACION --",    /* SECTION */
     "Info CHD seleccionado",
-    "Ruta BIOS actual"
+    "Ruta BIOS actual",
+    "Restablecer controles"
 };
 
 static int cfg_is_section[CFG_COUNT] = {
@@ -1658,7 +1660,7 @@ static int cfg_is_section[CFG_COUNT] = {
     1, 0, 0, 0, 0,
     1, 0, 0,
     1, 0,0,0,0,0,0,0,0,0,0,0,0,
-    1, 0, 0
+    1, 0, 0, 0
 };
 
 static void draw_config_tab(VitaMenuConfig *cfg) {
@@ -1953,6 +1955,10 @@ static void handle_config_input(VitaMenuConfig *cfg, SceCtrlData *pad,
             case CFG_OPT_SH2SYNC:       cfg->sh2_sync = !cfg->sh2_sync; break;
             case CFG_OPT_FPS:           cfg->show_fps = !cfg->show_fps; break;
             case CFG_OPT_BORDERLESS:    cfg->borderless = !cfg->borderless; break;
+            case CFG_OPT_RESET_MAPPING:
+                set_default_mapping(cfg);
+                set_status("Controles restablecidos a valores de fabrica");
+                break;
             default: break;
         }
         save_config_file(cfg);

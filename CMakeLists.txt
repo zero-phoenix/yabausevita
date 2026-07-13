@@ -55,6 +55,7 @@ set(YABAUSE_CORE_SOURCES
 set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
+    src/vita/chd_read.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
     src/vita/vidgpu.c
@@ -87,6 +88,7 @@ target_link_libraries(${VITA_APP_NAME}
     SceGxm_stub
     SceIofilemgr_stub
     m
+    z
 )
 
 vita_create_self(${VITA_APP_NAME}.self ${VITA_APP_NAME})
