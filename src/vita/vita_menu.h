@@ -140,6 +140,7 @@ typedef int (*VitaMenuLoadCallback)(const VitaMenuConfig *config,
 int  vita_menu_init(void);
 int  vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb);
 void vita_menu_cleanup(void);
+void vita_menu_show_error(const char *title, const char *msg);
 
 /* ── Utilidades exportadas ─────────────────────────────────── */
 void load_config_file(VitaMenuConfig *cfg);

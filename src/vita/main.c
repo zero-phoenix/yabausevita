@@ -179,14 +179,15 @@ static int map_region(int vmenu_region)
     }
 }
 
-static void chd_to_bin_path(char *path, int max_len)
+/* Returns: 0=swapped to .bin, 1=not CHD (no change), -1=CHD with no .bin sidecar */
+static int chd_to_bin_path(char *path, int max_len)
 {
     char ext[16];
     const char *dot = strrchr(path, '.');
-    if (!dot) return;
+    if (!dot) return 1;
     safe_strcpy(ext, dot + 1, sizeof(ext));
     to_lower(ext);
-    if (strcmp(ext, "chd") != 0) return;
+    if (strcmp(ext, "chd") != 0) return 1;
 
     char bin_path[VMENU_MAX_PATH];
     safe_strcpy(bin_path, path, sizeof(bin_path));
@@ -200,7 +201,11 @@ static void chd_to_bin_path(char *path, int max_len)
     {
         safe_strcpy(path, bin_path, max_len);
         vita_log("CHD->BIN swap: %s\n", bin_path);
+        return 0;
     }
+
+    vita_log("CHD without .bin sidecar: %s\n", path);
+    return -1;
 }
 
 /* Auto-detecta el primer BIOS .bin en ux0:data/yabause/bios/{jp,us,eu} */
@@ -319,7 +324,14 @@ int main(int argc, char *argv[])
 
     char cdpath[VMENU_MAX_PATH];
     safe_strcpy(cdpath, cfg.rom_path, sizeof(cdpath));
-    chd_to_bin_path(cdpath, sizeof(cdpath));
+    int chd_ret = chd_to_bin_path(cdpath, sizeof(cdpath));
+    if (chd_ret < 0)
+    {
+        vita_menu_show_error("CHD no soportado",
+            "Este CHD no tiene un archivo .bin adjunto.\nExtrae el .bin primero.");
+        sceKernelExitProcess(0);
+        return 0;
+    }
 
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
@@ -346,7 +358,10 @@ int main(int argc, char *argv[])
     if (init_ret != 0)
     {
         vita_log("FATAL: YabauseInit failed\n");
-        while (1) sceDisplayWaitVblankStart();
+        vita_menu_show_error("Error de inicializacion",
+            "Yabause no pudo inicializarse.\nRevisa la configuracion y BIOS.");
+        sceKernelExitProcess(0);
+        return 0;
     }
 
     vita_log("QuickLoading game\n");
@@ -356,7 +371,11 @@ int main(int argc, char *argv[])
     if (ql_ret != 0)
     {
         vita_log("FATAL: QuickLoad failed\n");
-        while (1) sceDisplayWaitVblankStart();
+        vita_menu_show_error("Error al cargar el juego",
+            "YabauseQuickLoadGame fallo.\n"
+            "El formato del disco podria no ser compatible.");
+        sceKernelExitProcess(0);
+        return 0;
     }
 
     vita_log("Adding per-pad\n");

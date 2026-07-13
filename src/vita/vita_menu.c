@@ -449,8 +449,14 @@ static void draw_text(float x, float y, const char *text, unsigned int color, fl
     unsigned char g = (color >> 8) & 0xFF;
     unsigned char b = (color >> 16) & 0xFF;
     unsigned int tint = RGBA8(r, g, b, 255);
+    float start_x = x;
     y += FONT_BASELINE * scale;
     for (const char *p = text; *p; p++) {
+        if (*p == '\n') {
+            y += (float)FONT_CHAR_H * scale;
+            x = start_x;
+            continue;
+        }
         int c = (unsigned char)*p;
         if (c < 32 || c > 126) c = '?';
         int idx = c - 32;
@@ -1019,7 +1025,7 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->rom_path[0] = '\0';
     cfg->bios_path[0] = '\0';
     cfg->auto_bios = 1;
-    cfg->video_filter = VMENU_FILTER_BILINEAR;
+    cfg->video_filter = VMENU_FILTER_NEAREST;
     cfg->aspect_ratio = VMENU_ASPECT_4_3;
     cfg->vsync = 1;
     cfg->audio_enabled = 1;
@@ -2494,4 +2500,50 @@ int vita_menu_init(void) {
 void vita_menu_cleanup(void) {
     destroy_font_texture();
     vita2d_fini();
+}
+
+void vita_menu_show_error(const char *title, const char *msg) {
+    SceCtrlData pad;
+    memset(&pad, 0, sizeof(pad));
+
+    for (;;) {
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        if (pad.buttons & SCE_CTRL_CROSS) break;
+
+        vita2d_start_drawing();
+        vita2d_clear_screen();
+
+        float cx = SCREEN_W * 0.5f;
+        float cy = SCREEN_H * 0.5f;
+
+        draw_rounded_rect(cx - 260, cy - 90, 520, 180, COL_BG_PANEL, 8.0f);
+        vita2d_draw_rectangle(cx - 260, cy - 90, 520, 3, COL_ERROR);
+
+        float ttw = text_width_f(title, FONT_SCALE_LG);
+        draw_text(cx - ttw * 0.5f + 15, cy - 65, title, COL_ERROR, FONT_SCALE_LG);
+
+        if (msg && msg[0]) {
+            char display[384];
+            safe_strcpy(display, msg, sizeof(display));
+            float ew = text_width_f(display, FONT_SCALE);
+            if (ew > 480) {
+                int len = (int)strlen(display);
+                while (len > 0) {
+                    display[len] = '\0';
+                    ew = text_width_f(display, FONT_SCALE);
+                    if (ew <= 460) { safe_strcat(display, "...", sizeof(display)); break; }
+                    len--;
+                }
+            }
+            float ew2 = text_width_f(display, FONT_SCALE);
+            draw_text(cx - ew2 * 0.5f, cy - 20, display, COL_TEXT_MAIN, FONT_SCALE);
+        }
+
+        char hint[] = "Presiona X para salir";
+        float iw = text_width_f(hint, FONT_SCALE_SM);
+        draw_text(cx - iw * 0.5f, cy + 30, hint, COL_TEXT_DIM, FONT_SCALE_SM);
+
+        vita2d_end_drawing();
+        vita2d_swap_buffers();
+    }
 }
