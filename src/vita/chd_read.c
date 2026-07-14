@@ -332,6 +332,16 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
         if (comp_type == 0 || comp_type == 4 || block_len >= hunk_sz) {
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, decomp, hunk_sz);
+        } else if (comp_type == 2) {
+            /* CD_LZ: LZMA stub - copy raw data literal (liblzma not in vitasdk) */
+            vita_log("CHD: hunk %u CD_LZ (LZMA) stub, copying literal %u bytes\n", i, block_len);
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
+        } else if (comp_type == 3) {
+            /* CD_FL: FLAC stub - copy raw data literal (libflac not available) */
+            vita_log("CHD: hunk %u CD_FL (FLAC) stub, copying literal %u bytes\n", i, block_len);
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
         } else {
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
