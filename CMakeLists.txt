@@ -56,6 +56,8 @@ set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
     src/vita/chd_read.c
+    src/vita/bitstream.c
+    src/vita/huffman.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
     src/vita/vidgpu.c

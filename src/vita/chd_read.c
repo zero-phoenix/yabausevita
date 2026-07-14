@@ -5,221 +5,366 @@
 #include <stdlib.h>
 #include <zlib.h>
 #include "chd_read.h"
+#include "bitstream.h"
+#include "huffman.h"
 
 extern int vita_log(const char *fmt, ...);
 
-static uint32_t rd32(const uint8_t *p) {
-    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+/* All CHD integers are big-endian (Motorola byte order) */
+static uint32_t r32(const uint8_t *p) {
+    return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3];
 }
-static uint64_t rd64(const uint8_t *p) {
-    return (uint64_t)p[0] | ((uint64_t)p[1] << 8) | ((uint64_t)p[2] << 16) |
-           ((uint64_t)p[3] << 24) | ((uint64_t)p[4] << 32) | ((uint64_t)p[5] << 40) |
-           ((uint64_t)p[6] << 48) | ((uint64_t)p[7] << 56);
+static uint64_t r64(const uint8_t *p) {
+    return ((uint64_t)p[0] << 56) | ((uint64_t)p[1] << 48) | ((uint64_t)p[2] << 40) |
+           ((uint64_t)p[3] << 32) | ((uint64_t)p[4] << 24) | ((uint64_t)p[5] << 16) |
+           ((uint64_t)p[6] << 8) | p[7];
 }
-static uint64_t rd48(const uint8_t *p) {
-    return (uint64_t)p[0] | ((uint64_t)p[1] << 8) | ((uint64_t)p[2] << 16) |
-           ((uint64_t)p[3] << 24) | ((uint64_t)p[4] << 32) | ((uint64_t)p[5] << 40);
+static uint64_t r48(const uint8_t *p) {
+    return ((uint64_t)p[0] << 40) | ((uint64_t)p[1] << 32) | ((uint64_t)p[2] << 24) |
+           ((uint64_t)p[3] << 16) | ((uint64_t)p[4] << 8) | p[5];
 }
 
-static void hexdump(const uint8_t *data, int len) {
-    char buf[256];
-    int pos = 0;
-    for (int i = 0; i < len && pos < 240; i += 1) {
-        pos += snprintf(buf + pos, sizeof(buf) - pos, "%02x ", data[i]);
-    }
-    buf[pos] = '\0';
-    vita_log("CHD HEX: %s\n", buf);
+static void hexdump_f(const uint8_t *d, int len) {
+    char b[512]; int p = 0;
+    for (int i = 0; i < len && p < 480; i++)
+        p += snprintf(b + p, sizeof(b) - p, "%02x ", d[i]);
+    b[p] = 0;
+    vita_log("CHD HEX: %s\n", b);
 }
 
 int chd_extract(const char *chd_path, const char *bin_path, char *error, int error_size)
 {
-    vita_log("chd_extract: opening %s\n", chd_path);
+    if (error_size > 0) error[0] = '\0';
+    vita_log("chd_extract: %s\n", chd_path);
     SceUID fd = sceIoOpen(chd_path, SCE_O_RDONLY, 0);
-    if (fd < 0) {
-        snprintf(error, error_size, "Cannot open %s", chd_path);
-        return -1;
-    }
+    if (fd < 0) { snprintf(error, error_size, "Cannot open"); return -1; }
 
-    uint8_t raw[168];
-    int got = sceIoRead(fd, raw, 168);
-    vita_log("chd_extract: read %d bytes\n", got);
-    hexdump(raw, got > 64 ? 64 : got);
+    uint8_t raw[192];
+    int got = sceIoRead(fd, raw, 192);
+    if (got < 16) { sceIoClose(fd); snprintf(error, error_size, "Too small"); return -1; }
+    if (memcmp(raw, "MComprHD", 8) != 0) { sceIoClose(fd); snprintf(error, error_size, "Bad magic"); return -1; }
 
-    if (got < 16) {
-        sceIoClose(fd);
-        snprintf(error, error_size, "File too small (%d bytes)", got);
-        return -1;
-    }
-
-    if (memcmp(raw, "MComprHD", 8) != 0) {
-        sceIoClose(fd);
-        snprintf(error, error_size, "Not a CHD file (bad magic)");
-        return -1;
-    }
-
-    uint32_t version = rd32(raw + 12);
-    uint32_t hdr_len = rd32(raw + 8);
-    vita_log("chd_extract: hdr_len=%u version=%u\n", hdr_len, version);
-
-    if (version < 1 || version > 8) {
+    uint32_t hdr_len = r32(raw + 8);
+    uint32_t version = r32(raw + 12);
+    if (version < 1 || version > 5) {
         sceIoClose(fd);
         snprintf(error, error_size, "CHD v%u unsupported", version);
         return -1;
     }
+    vita_log("  hdr_len=%u version=%u\n", hdr_len, version);
 
-    int min_hdr = (version <= 2) ? 40 : (version == 3) ? 100 : (version == 4) ? 124 : 160;
-    if (got < min_hdr) {
-        sceIoClose(fd);
-        snprintf(error, error_size, "Truncated header (%d < %d)", got, min_hdr);
-        return -1;
-    }
+    uint64_t logbytes = 0, map_offset = 0, meta_offset = 0;
+    uint32_t hunkcount = 0, hunkbytes = 0, unitbytes = 0;
+    uint32_t compression = 0;
 
-    uint64_t logbytes = 0, logicalsize = 0, unitbytes = 512;
-    uint32_t hunkcount = 0, compression = 0, map_offset = 0;
-
-    if (version == 1 || version == 2) {
-        logbytes    = rd64(raw + 16);
-        logicalsize = rd64(raw + 24);
-        hunkcount   = rd32(raw + 32);
-        compression = rd32(raw + 36);
+    if (version == 1) {
+        if (got < 76) { sceIoClose(fd); snprintf(error, error_size, "Truncated v1"); return -1; }
+        /* v1 header: length(8)+ver(12)+flags(16)+compression(20)+hunksize(24)+totalhunks(28) */
+        /* +cylinders(32)+heads(36)+sectors(40)+md5(44)+parentmd5(60) = 76 bytes */
+        compression = r32(raw + 20);
+        uint32_t hunksize = r32(raw + 24);  /* 512-byte sectors per hunk */
+        hunkcount   = r32(raw + 28);
+        logbytes    = (uint64_t)hunksize * 512;
+        hunkbytes   = (uint32_t)logbytes;
+        map_offset  = hdr_len;
+    } else if (version == 2) {
+        if (got < 80) { sceIoClose(fd); snprintf(error, error_size, "Truncated v2"); return -1; }
+        compression = r32(raw + 20);
+        uint32_t hunksize = r32(raw + 24);
+        hunkcount   = r32(raw + 28);
+        uint32_t seclen = r32(raw + 76);
+        logbytes    = (uint64_t)hunksize * seclen;
+        hunkbytes   = (uint32_t)logbytes;
         map_offset  = hdr_len;
     } else if (version == 3) {
-        logbytes    = rd64(raw + 16);
-        logicalsize = rd64(raw + 24);
-        hunkcount   = rd32(raw + 32);
-        compression = rd32(raw + 36);
+        if (got < 120) { sceIoClose(fd); snprintf(error, error_size, "Truncated v3"); return -1; }
+        compression = r32(raw + 20);
+        hunkcount   = r32(raw + 24);
+        logbytes    = r64(raw + 28);    /* logicalbytes (total size) */
+        meta_offset = r64(raw + 36);
+        hunkbytes   = r32(raw + 76);
         map_offset  = hdr_len;
     } else if (version == 4) {
-        logbytes    = rd64(raw + 16);
-        logicalsize = rd64(raw + 24);
-        hunkcount   = rd32(raw + 32);
-        compression = rd32(raw + 36);
-        map_offset  = rd32(raw + hdr_len - 24);
-        if (map_offset < hdr_len) map_offset = hdr_len;
+        if (got < 108) { sceIoClose(fd); snprintf(error, error_size, "Truncated v4"); return -1; }
+        compression = r32(raw + 20);
+        hunkcount   = r32(raw + 24);
+        logbytes    = r64(raw + 28);
+        meta_offset = r64(raw + 36);
+        hunkbytes   = r32(raw + 44);
+        map_offset  = hdr_len;
     } else {
-        compression = rd32(raw + 16);
-        logbytes    = rd64(raw + 60);
-        logicalsize = rd64(raw + 68);
-        hunkcount   = rd32(raw + 80);
-        unitbytes   = rd64(raw + 84);
-        map_offset  = rd32(raw + 156);
-        if (map_offset == 0) map_offset = hdr_len;
+        /* v5: logicalbytes at offset 32 = TOTAL logical size in bytes */
+        /* hunkcount is NOT stored; calculated from logicalbytes/hunkbytes */
+        if (got < 124) { sceIoClose(fd); snprintf(error, error_size, "Truncated v5"); return -1; }
+        logbytes   = r64(raw + 32);   /* total logical size in bytes */
+        map_offset = r64(raw + 40);   /* offset to map */
+        meta_offset= r64(raw + 48);   /* offset to metadata */
+        hunkbytes  = r32(raw + 56);   /* bytes per hunk */
+        unitbytes  = r32(raw + 60);   /* bytes per unit */
+        hunkcount  = (uint32_t)((logbytes + hunkbytes - 1) / hunkbytes);
     }
 
-    vita_log("chd_extract: logbytes=%llu hunkcount=%u compression=%u map_offset=%u\n",
-             logbytes, hunkcount, compression, map_offset);
+    vita_log("  hunkbytes=%u hunkcount=%u\n  logbytes=%llu map_offset=%llu\n",
+             hunkbytes, hunkcount, (unsigned long long)logbytes,
+             (unsigned long long)map_offset);
 
-    if (hunkcount == 0 || logbytes == 0) {
+    if (hunkcount == 0 || hunkbytes == 0) {
         sceIoClose(fd);
-        snprintf(error, error_size, "Invalid CHD: zero hunks or hunk size");
+        snprintf(error, error_size, "Invalid CHD (zero hunks/bytes)");
         return -1;
     }
+
+    /* For v1/v2, logbytes is per-hunk, not total. total = logbytes * hunkcount */
+    uint64_t total_bytes = version <= 2 ? (logbytes * hunkcount) : logbytes;
+    uint32_t hunk_sz = version <= 2 ? (uint32_t)logbytes : hunkbytes;
+
+    if (hunk_sz == 0) { sceIoClose(fd); snprintf(error, error_size, "Zero hunk size"); return -1; }
 
     SceUID out = sceIoOpen(bin_path, SCE_O_CREAT | SCE_O_WRONLY | SCE_O_TRUNC, 0777);
-    if (out < 0) {
-        sceIoClose(fd);
-        snprintf(error, error_size, "Cannot create %s", bin_path);
-        return -1;
-    }
+    if (out < 0) { sceIoClose(fd); snprintf(error, error_size, "Cannot create bin"); return -1; }
+
+    uint8_t *decomp = (uint8_t *)malloc(hunk_sz);
+    uint8_t *comp = NULL;
+    int result = 0;
 
     int entry_size;
-    if (version == 1 || version == 2) entry_size = 8;
-    else if (version == 3 || version == 4) entry_size = 12;
-    else entry_size = 16;
+    if (version <= 2) entry_size = 8;
+    else if (version <= 4) entry_size = 16;
+    else entry_size = 16; /* v5 map header is same as entry size for processing */
 
-    uint8_t *decomp = (uint8_t *)malloc((size_t)logbytes);
-    if (!decomp) {
-        sceIoClose(fd); sceIoClose(out);
-        snprintf(error, error_size, "Out of memory");
-        return -1;
-    }
+    /* v1/v2: compression type from header */
+    uint8_t v1_comp = (version <= 2) ? (compression & 0x0F) : 0;
 
-    int result = 0;
-    uint8_t entry[16];
-    uint8_t *comp = NULL;
-
-    for (uint32_t i = 0; i < hunkcount; i++) {
-        sceIoLseek(fd, map_offset + i * entry_size, SCE_SEEK_SET);
-        if (sceIoRead(fd, entry, entry_size) != entry_size) {
-            snprintf(error, error_size, "Cannot read map entry %u", i);
-            result = -1; break;
-        }
-
-        uint64_t block_off;
-        uint64_t block_len;
-        uint8_t  comp_type;
-
-        if (version == 1 || version == 2) {
-            block_off = rd32(entry);
-            block_len = rd32(entry + 4);
-            comp_type = compression & 0x0F;
-        } else if (version == 3) {
-            block_off = rd32(entry);
-            uint32_t raw_len = rd32(entry + 4);
-            if (raw_len & 0x80000000UL) {
-                comp_type = 1;
-                block_len = raw_len & 0x7FFFFFFFUL;
-            } else {
-                comp_type = 0;
-                block_len = raw_len;
-            }
-        } else if (version == 4) {
-            block_off = rd32(entry);
-            uint32_t raw_len = rd32(entry + 4);
-            comp_type = (raw_len >> 28) & 0x0F;
-            block_len = raw_len & 0x0FFFFFFFUL;
+    /* v5 map: compressed (Huffman) or uncompressed (uint32) */
+    int v5_compressed = 1;
+    uint8_t *v5_map = NULL;
+    uint64_t v5_first_offs = 0;  /* absolute file offset of first hunk data */
+    if (version == 5) {
+        uint32_t c0 = r32(raw + 16);
+        if (c0 == 0) {
+            v5_compressed = 0;
         } else {
-            block_off = rd48(entry);
-            block_len = rd48(entry + 8);
-            comp_type = entry[14] & 0x0F;
+            /* read 16-byte map header */
+            uint8_t map_hdr[16];
+            sceIoLseek(fd, map_offset, SCE_SEEK_SET);
+            if (sceIoRead(fd, map_hdr, 16) != 16) {
+                sceIoClose(fd); sceIoClose(out); free(decomp);
+                snprintf(error, error_size, "Cannot read v5 map hdr"); return -1;
+            }
+            uint32_t mapbytes = r32(map_hdr);
+            v5_first_offs = r48(map_hdr + 4);
+            uint8_t lengthbits = map_hdr[12];
+            uint8_t selfbits = map_hdr[13];
+            uint8_t parentbits = map_hdr[14];
+
+            /* read huffman-encoded map data at map_offset+16 */
+            uint8_t *compressed = (uint8_t *)malloc(mapbytes);
+            if (!compressed) { result = -1; goto done; }
+            sceIoLseek(fd, map_offset + 16, SCE_SEEK_SET);
+            if (sceIoRead(fd, compressed, mapbytes) != mapbytes) {
+                free(compressed); result = -1; goto done;
+            }
+            struct bitstream *bitbuf = create_bitstream(compressed, mapbytes);
+            if (!bitbuf) { free(compressed); result = -1; goto done; }
+
+            unsigned long rawmap_size = (unsigned long)hunkcount * 12;
+            v5_map = (uint8_t *)malloc(rawmap_size);
+            if (!v5_map) { free(compressed); delete_bitstream(bitbuf); result = -1; goto done; }
+
+            struct huffman_decoder *decoder = create_huffman_decoder(16, 8);
+            if (!decoder) { free(compressed); delete_bitstream(bitbuf); free(v5_map); v5_map = NULL; result = -1; goto done; }
+
+            enum huffman_error herr = huffman_import_tree_rle(decoder, bitbuf);
+            if (herr != HUFFERR_NONE) {
+                free(compressed); delete_bitstream(bitbuf); delete_huffman_decoder(decoder);
+                free(v5_map); v5_map = NULL; result = -1; goto done;
+            }
+
+            /* decode compression types */
+            int repcount = 0;
+            uint8_t lastcomp = 0;
+            for (uint32_t hn = 0; hn < hunkcount; hn++) {
+                uint8_t *rawmap = v5_map + (hn * 12);
+                if (repcount > 0) {
+                    rawmap[0] = lastcomp;
+                    repcount--;
+                } else {
+                    uint8_t val = (uint8_t)huffman_decode_one(decoder, bitbuf);
+                    if (val == 7) { /* COMPRESSION_RLE_SMALL */
+                        rawmap[0] = lastcomp;
+                        repcount = 2 + (int)huffman_decode_one(decoder, bitbuf);
+                    } else if (val == 8) { /* COMPRESSION_RLE_LARGE */
+                        rawmap[0] = lastcomp;
+                        repcount = 2 + 16 + ((int)huffman_decode_one(decoder, bitbuf) << 4);
+                        repcount += (int)huffman_decode_one(decoder, bitbuf);
+                    } else {
+                        rawmap[0] = val;
+                        lastcomp = val;
+                    }
+                }
+            }
+
+            /* decode length/offset/crc for each hunk */
+            uint64_t curoffset = v5_first_offs;
+            uint32_t last_self = 0;
+            uint64_t last_parent = 0;
+            for (uint32_t hn = 0; hn < hunkcount; hn++) {
+                uint8_t *rawmap = v5_map + (hn * 12);
+                uint64_t offset = curoffset;
+                uint32_t length = 0;
+                uint16_t crc = 0;
+                switch (rawmap[0]) {
+                    case 0: case 1: case 2: case 3: /* COMPRESSION_TYPE_0..3 */
+                        curoffset += length = bitstream_read(bitbuf, lengthbits);
+                        crc = (uint16_t)bitstream_read(bitbuf, 16);
+                        break;
+                    case 4: /* COMPRESSION_NONE */
+                        curoffset += length = hunkbytes;
+                        crc = (uint16_t)bitstream_read(bitbuf, 16);
+                        break;
+                    case 5: /* COMPRESSION_SELF */
+                        last_self = offset = bitstream_read(bitbuf, selfbits);
+                        break;
+                    case 6: /* COMPRESSION_PARENT */
+                        offset = bitstream_read(bitbuf, parentbits);
+                        last_parent = offset;
+                        break;
+                    case 9: /* COMPRESSION_SELF_1: last_self++, falls through */
+                        last_self++;
+                    case 10: /* COMPRESSION_SELF_0 */
+                        rawmap[0] = 5; /* COMPRESSION_SELF */
+                        offset = last_self;
+                        break;
+                    case 11: /* COMPRESSION_PARENT_SELF */
+                        rawmap[0] = 6; /* COMPRESSION_PARENT */
+                        last_parent = offset = (((uint64_t)hn) * (uint64_t)hunkbytes) / unitbytes;
+                        break;
+                    case 12: /* COMPRESSION_PARENT_1: last_parent += hunkbytes/unitbytes, falls through */
+                        last_parent += hunkbytes / unitbytes;
+                    case 13: /* COMPRESSION_PARENT_0 */
+                        rawmap[0] = 6;
+                        offset = last_parent;
+                        break;
+                }
+                /* write expanded entry: UINT24 length, UINT48 offset, uint16 crc */
+                rawmap[1] = (uint8_t)(length >> 16);
+                rawmap[2] = (uint8_t)(length >> 8);
+                rawmap[3] = (uint8_t)(length);
+                rawmap[4] = (uint8_t)(offset >> 40);
+                rawmap[5] = (uint8_t)(offset >> 32);
+                rawmap[6] = (uint8_t)(offset >> 24);
+                rawmap[7] = (uint8_t)(offset >> 16);
+                rawmap[8] = (uint8_t)(offset >> 8);
+                rawmap[9] = (uint8_t)(offset);
+                rawmap[10] = (uint8_t)(crc >> 8);
+                rawmap[11] = (uint8_t)(crc);
+            }
+
+            delete_huffman_decoder(decoder);
+            delete_bitstream(bitbuf);
+            free(compressed);
+        }
+    }
+    for (uint32_t i = 0; i < hunkcount; i++)
+    {
+        uint64_t block_off = 0;
+        uint32_t block_len = 0;
+        uint8_t  comp_type = 0;
+
+        if (version <= 2) {
+            /* v1/v2: packed uint64_t - offset[44] + length[20] */
+            uint8_t mentry[8];
+            sceIoLseek(fd, map_offset + i * 8, SCE_SEEK_SET);
+            if (sceIoRead(fd, mentry, 8) != 8) { result = -1; break; }
+            uint64_t pack = r64(mentry);
+            block_off = pack & ((1ULL << 44) - 1);
+            block_len = (uint32_t)(pack >> 44);
+            comp_type = v1_comp;
+        } else if (version <= 4) {
+            /* v3/v4: 16-byte entry */
+            uint8_t mentry[16];
+            sceIoLseek(fd, map_offset + i * 16, SCE_SEEK_SET);
+            if (sceIoRead(fd, mentry, 16) != 16) { result = -1; break; }
+            block_off = r64(mentry);
+            uint8_t flags   = mentry[15];
+            uint16_t len_lo = ((uint16_t)mentry[12] << 8) | mentry[13];
+            uint8_t  len_hi = mentry[14];
+            block_len = ((uint32_t)len_hi << 16) | len_lo;
+            comp_type = (version == 4) ? (flags & 0x0F) : (compression & 0x0F);
+            /* v3: bit 7 of flags indicates zlib; if not set and block_len == hunk_sz, uncompressed */
+            if (version == 3 && (flags & 0x80))
+                comp_type = 1; /* zlib */
+        } else if (v5_map) {
+            uint8_t *me = v5_map + i * 12;
+            comp_type = me[0];
+            block_len = ((uint32_t)me[1] << 16) | ((uint32_t)me[2] << 8) | me[3];
+            block_off = r48(me + 4);
+            if (comp_type == 5) { /* SELF: copy from hunk block_off */
+                /* For sequential extraction, read from previously written output */
+                sceIoLseek(out, (SceOff)block_off * hunk_sz, SCE_SEEK_SET);
+                sceIoRead(out, decomp, hunk_sz);
+                sceIoLseek(out, 0, SCE_SEEK_END);
+                sceIoWrite(out, decomp, hunk_sz);
+                continue;
+            }
+            if (comp_type == 6) { /* PARENT: no parent available */
+                memset(decomp, 0, hunk_sz);
+                sceIoWrite(out, decomp, hunk_sz);
+                continue;
+            }
+        } else if (version == 5) {
+            /* v5 uncompressed: map entries at map_offset (4 bytes each) */
+            uint8_t mentry[4];
+            sceIoLseek(fd, map_offset + i * 4, SCE_SEEK_SET);
+            if (sceIoRead(fd, mentry, 4) != 4) { result = -1; break; }
+            block_off = (uint64_t)r32(mentry) * hunk_sz;
+            block_len = hunk_sz;
+            comp_type = 0;
         }
 
-        memset(decomp, 0, (size_t)logbytes);
+        memset(decomp, 0, hunk_sz);
 
         if (block_off == 0 || block_len == 0) {
-            sceIoWrite(out, decomp, (SceSize)logbytes);
+            sceIoWrite(out, decomp, hunk_sz);
             continue;
         }
 
-        if (comp_type == 0 || block_len == logbytes) {
+        if (comp_type == 0 || comp_type == 4 || block_len >= hunk_sz) {
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
-            sceIoRead(fd, decomp, (SceSize)logbytes);
+            sceIoRead(fd, decomp, hunk_sz);
         } else {
-            comp = (uint8_t *)realloc(comp, (size_t)block_len);
+            comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
-            sceIoRead(fd, comp, (SceSize)block_len);
-
-            unsigned long dest = (unsigned long)logbytes;
+            sceIoRead(fd, comp, block_len);
+            unsigned long dest = hunk_sz;
             int zret;
             if (comp_type == 1) {
-                zret = uncompress(decomp, &dest, comp, (unsigned long)block_len);
+                zret = uncompress(decomp, &dest, comp, block_len);
             } else {
-                z_stream strm;
-                memset(&strm, 0, sizeof(strm));
+                z_stream strm; memset(&strm, 0, sizeof(strm));
                 zret = inflateInit(&strm);
                 if (zret == Z_OK) {
-                    strm.next_in = comp;
-                    strm.avail_in = (unsigned int)block_len;
-                    strm.next_out = decomp;
-                    strm.avail_out = (unsigned int)logbytes;
+                    strm.next_in = comp; strm.avail_in = block_len;
+                    strm.next_out = decomp; strm.avail_out = hunk_sz;
                     zret = inflate(&strm, Z_FINISH);
-                    dest = (unsigned long)logbytes - strm.avail_out;
+                    dest = hunk_sz - strm.avail_out;
                     inflateEnd(&strm);
                 }
             }
             if (zret != Z_OK && zret != Z_STREAM_END) {
-                snprintf(error, error_size, "Decompress err hunk %u comp=%d zret=%d", i, comp_type, zret);
+                snprintf(error, error_size, "Decompress hunk %u type=%d zret=%d", i, comp_type, zret);
                 result = -1; break;
             }
         }
-
-        sceIoWrite(out, decomp, (SceSize)logbytes);
+        sceIoWrite(out, decomp, hunk_sz);
     }
 
-    free(decomp); free(comp);
+done:
+    if (result != 0 && error[0] == 0)
+        snprintf(error, error_size, "CHD extraction error (code %d)", result);
+    free(decomp); free(comp); free(v5_map);
     sceIoClose(out); sceIoClose(fd);
-
     if (result != 0) sceIoRemove(bin_path);
     return result;
 }
