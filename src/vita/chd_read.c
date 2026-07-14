@@ -104,8 +104,8 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
         hunkcount  = (uint32_t)((logbytes + hunkbytes - 1) / hunkbytes);
     }
 
-    vita_log("  hunkbytes=%u hunkcount=%u\n  logbytes=%llu map_offset=%llu\n",
-             hunkbytes, hunkcount, (unsigned long long)logbytes,
+    vita_log("  hunkbytes=%u hunkcount=%u unitbytes=%u\n  logbytes=%llu map_offset=%llu\n",
+             hunkbytes, hunkcount, unitbytes, (unsigned long long)logbytes,
              (unsigned long long)map_offset);
 
     if (hunkcount == 0 || hunkbytes == 0) {
@@ -342,25 +342,58 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             vita_log("CHD: hunk %u CD_FL (FLAC) stub, copying literal %u bytes\n", i, block_len);
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
+        } else if (comp_type == 1 && version == 5) {
+            /* CD_ZL v5: per-sector zlib inflate */
+            comp = (uint8_t *)realloc(comp, block_len);
+            if (!comp) { result = -1; break; }
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, comp, block_len);
+            uint8_t *p_in = comp;
+            uint8_t *p_out = decomp;
+            uint32_t remaining = block_len;
+            while (remaining > 2 && p_out < decomp + hunk_sz) {
+                z_stream zs;
+                memset(&zs, 0, sizeof(zs));
+                if (inflateInit(&zs) != Z_OK) break;
+                zs.next_in = p_in;
+                zs.avail_in = remaining;
+                zs.next_out = p_out;
+                zs.avail_out = (unsigned)(decomp + hunk_sz - p_out);
+                int r = inflate(&zs, Z_SYNC_FLUSH);
+                inflateEnd(&zs);
+                if (r != Z_OK && r != Z_STREAM_END) break;
+                uint32_t consumed = (uint32_t)zs.total_in;
+                if (consumed == 0) break;
+                p_in += consumed;
+                remaining -= consumed;
+                p_out += zs.total_out;
+            }
+        } else if (comp_type == 1) {
+            /* CD_ZL v1-v4: single uncompress */
+            comp = (uint8_t *)realloc(comp, block_len);
+            if (!comp) { result = -1; break; }
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, comp, block_len);
+            unsigned long dest = hunk_sz;
+            int zret = uncompress(decomp, &dest, comp, block_len);
+            if (zret != Z_OK) {
+                snprintf(error, error_size, "Decompress hunk %u type=%d zret=%d", i, comp_type, zret);
+                result = -1; break;
+            }
         } else {
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
             unsigned long dest = hunk_sz;
-            int zret;
-            if (comp_type == 1) {
-                zret = uncompress(decomp, &dest, comp, block_len);
-            } else {
-                z_stream strm; memset(&strm, 0, sizeof(strm));
-                zret = inflateInit(&strm);
-                if (zret == Z_OK) {
-                    strm.next_in = comp; strm.avail_in = block_len;
-                    strm.next_out = decomp; strm.avail_out = hunk_sz;
-                    zret = inflate(&strm, Z_FINISH);
-                    dest = hunk_sz - strm.avail_out;
-                    inflateEnd(&strm);
-                }
+            z_stream strm; memset(&strm, 0, sizeof(strm));
+            int zret = inflateInit(&strm);
+            if (zret == Z_OK) {
+                strm.next_in = comp; strm.avail_in = block_len;
+                strm.next_out = decomp; strm.avail_out = hunk_sz;
+                zret = inflate(&strm, Z_FINISH);
+                dest = hunk_sz - strm.avail_out;
+                inflateEnd(&strm);
             }
             if (zret != Z_OK && zret != Z_STREAM_END) {
                 snprintf(error, error_size, "Decompress hunk %u type=%d zret=%d", i, comp_type, zret);
