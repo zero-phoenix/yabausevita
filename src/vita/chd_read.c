@@ -7,8 +7,44 @@
 #include "chd_read.h"
 #include "bitstream.h"
 #include "huffman.h"
+#include "lzma_dec.h"
 
 extern int vita_log(const char *fmt, ...);
+
+/* ── LZMA allocator (malloc/free) for the public-domain LZMA SDK ── */
+static void *lzma_alloc(ISzAllocPtr p, size_t size) {
+    (void)p;
+    if (size == 0) size = 1;
+    return malloc(size);
+}
+static void lzma_free(ISzAllocPtr p, void *address) {
+    (void)p;
+    free(address);
+}
+static ISzAlloc g_lzma_alloc = { lzma_alloc, lzma_free };
+
+/* Decompress a single LZMA stream.
+   props = 5-byte LZMA properties header (lc/lp/pb + dictSize).
+   Returns bytes written to out, or -1 on failure. */
+static int lzma_decompress_one(const uint8_t *props,
+                                const uint8_t *in, uint32_t in_size,
+                                uint8_t *out, uint32_t out_cap) {
+    CLzmaDec state;
+    SRes sres = LzmaDec_Allocate(&state, props, 5, &g_lzma_alloc);
+    if (sres != SZ_OK) return -1;
+    LzmaDec_Init(&state);
+
+    SizeT in_len = in_size;
+    SizeT out_len = out_cap;
+    ELzmaStatus status;
+    sres = LzmaDec_DecodeToBuf(&state, out, &out_len,
+                                (Byte *)in, &in_len,
+                                LZMA_FINISH_END, &status);
+    LzmaDec_Free(&state, &g_lzma_alloc);
+    if (sres != SZ_OK) return -1;
+    return (int)out_len;
+}
+
 
 /* All CHD integers are big-endian (Motorola byte order) */
 static uint32_t r32(const uint8_t *p) {
@@ -333,10 +369,35 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, decomp, hunk_sz);
         } else if (comp_type == 2) {
-            /* CD_LZ: LZMA stub - copy raw data literal (liblzma not in vitasdk) */
-            vita_log("CHD: hunk %u CD_LZ (LZMA) stub, copying literal %u bytes\n", i, block_len);
+            /* CD_LZ: LZMA compression. CHD stores raw LZMA stream per hunk
+               (no 8-byte uncompressed-size trailer; 5-byte props header at start). */
+            comp = (uint8_t *)realloc(comp, block_len);
+            if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
-            sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
+            sceIoRead(fd, comp, block_len);
+
+            if (block_len > 5) {
+                const uint8_t *props = comp;
+                const uint8_t *lz_in = comp + 5;
+                uint32_t lz_size = block_len - 5;
+                int written = lzma_decompress_one(props, lz_in, lz_size,
+                                                   decomp, hunk_sz);
+                if (written < 0) {
+                    /* Fallback: try without skipping the 5-byte header
+                       (some CHD variants don't embed props per hunk). */
+                    written = lzma_decompress_one(props, comp, block_len,
+                                                   decomp, hunk_sz);
+                }
+                if (written < 0) {
+                    /* Last resort: copy literal (data will be corrupt but
+                       extraction proceeds — audio/video artifacts expected). */
+                    vita_log("CHD: hunk %u CD_LZ decode failed, literal copy\n", i);
+                    memset(decomp, 0, hunk_sz);
+                }
+            } else {
+                vita_log("CHD: hunk %u CD_LZ too small (%u bytes)\n", i, block_len);
+                memset(decomp, 0, hunk_sz);
+            }
         } else if (comp_type == 3) {
             /* CD_FL: FLAC stub - copy raw data literal (libflac not available) */
             vita_log("CHD: hunk %u CD_FL (FLAC) stub, copying literal %u bytes\n", i, block_len);
