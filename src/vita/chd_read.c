@@ -31,7 +31,11 @@ static int lzma_decompress_one(const uint8_t *props,
                                 uint8_t *out, uint32_t out_cap) {
     CLzmaDec state;
     SRes sres = LzmaDec_Allocate(&state, props, 5, &g_lzma_alloc);
-    if (sres != SZ_OK) return -1;
+    if (sres != SZ_OK) {
+        vita_log("LZMA: LzmaDec_Allocate failed sres=%d props=%02x%02x%02x%02x%02x\n",
+                 sres, props[0],props[1],props[2],props[3],props[4]);
+        return -1;
+    }
     LzmaDec_Init(&state);
 
     SizeT in_len = in_size;
@@ -41,9 +45,28 @@ static int lzma_decompress_one(const uint8_t *props,
                                 (Byte *)in, &in_len,
                                 LZMA_FINISH_END, &status);
     LzmaDec_Free(&state, &g_lzma_alloc);
-    if (sres != SZ_OK) return -1;
+    if (sres != SZ_OK) {
+        vita_log("LZMA: decode sres=%d status=%d in_len=%u/%u out_len=%u/%u first_bytes=%02x%02x%02x%02x\n",
+                 sres, status, (uint32_t)in_len, in_size, (uint32_t)out_len, out_cap,
+                 in[0], in[1], in[2], in[3]);
+        return -1;
+    }
     return (int)out_len;
 }
+
+/* CD_LZ codec uses canonical LZMA props: lc=3, lp=0, pb=2.
+   dictSize is derived from hunkbytes (MAME: reduceSize = hunkbytes).
+   We try several candidate dictSize values since the exact clamping
+   done by LzmaEncProps_Normalize is version-specific. */
+static const uint8_t CDLZ_LZMA_PROPS_CANDIDATES[][5] = {
+    { 0x5d, 0x80, 0x4c, 0x00, 0x00 },  /* dictSize = 19584 (hunkbytes) */
+    { 0x5d, 0xe0, 0x4c, 0x00, 0x00 },  /* dictSize = 19680 (hunkbytes+96) */
+    { 0x5d, 0x00, 0x00, 0x01, 0x00 },  /* dictSize = 65536 (64KB) */
+    { 0x5d, 0x00, 0x80, 0x00, 0x00 },  /* dictSize = 32768 (32KB) */
+    { 0x5d, 0x00, 0x40, 0x00, 0x00 },  /* dictSize = 16384 (16KB) */
+    { 0x5d, 0x00, 0x10, 0x00, 0x00 },  /* dictSize = 4096 (min) */
+};
+#define CDLZ_PROPS_COUNT (sizeof(CDLZ_LZMA_PROPS_CANDIDATES)/5)
 
 
 /* All CHD integers are big-endian (Motorola byte order) */
@@ -365,46 +388,70 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             continue;
         }
 
-        if (comp_type == 0 || comp_type == 4 || block_len >= hunk_sz) {
-            sceIoLseek(fd, block_off, SCE_SEEK_SET);
-            sceIoRead(fd, decomp, hunk_sz);
-        } else if (comp_type == 2) {
-            /* CD_LZ: LZMA compression. CHD stores raw LZMA stream per hunk
-               (no 8-byte uncompressed-size trailer; 5-byte props header at start). */
+        if (block_off == 0 || block_len == 0) {
+            sceIoWrite(out, decomp, hunk_sz);
+            continue;
+        }
+
+        /* Codec dispatch for v5_map: comp_type indexes the CHD header compression
+           codecs in order. For NiGHTS: comp[0]=cdlz(LZMA), comp[1]=cdzl(zlib),
+           comp[2]=cdfl(FLAC). So:
+             comp_type 0 = cdlz (LZMA)   — game data, CRITICAL
+             comp_type 1 = cdzl (zlib)   — game data, CRITICAL
+             comp_type 2 = cdfl (FLAC)   — audio, non-critical (stub OK)
+             comp_type 4 = uncompressed (v1-v4 legacy) */
+        if (v5_map && comp_type == 0) {
+            /* cdlz (LZMA): sector-by-sector, like CD_ZL but with LZMA.
+               Each sector's stream is independently LZMA-compressed.
+               MAME uses the same per-sector pattern as cdzl. */
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
 
-            if (block_len > 5) {
-                const uint8_t *props = comp;
-                const uint8_t *lz_in = comp + 5;
-                uint32_t lz_size = block_len - 5;
-                int written = lzma_decompress_one(props, lz_in, lz_size,
-                                                   decomp, hunk_sz);
-                if (written < 0) {
-                    /* Fallback: try without skipping the 5-byte header
-                       (some CHD variants don't embed props per hunk). */
-                    written = lzma_decompress_one(props, comp, block_len,
-                                                   decomp, hunk_sz);
+            /* Try per-sector LZMA with each dictSize candidate */
+            int total_out = 0;
+            int ok = 0;
+            for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT && !ok; ci++) {
+                uint8_t *p_in = comp;
+                uint8_t *p_out = decomp;
+                uint32_t remaining = block_len;
+                total_out = 0;
+                int sector_ok = 1;
+                while (remaining > 5 && p_out + unitbytes <= decomp + hunk_sz) {
+                    int w = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
+                                                 p_in, remaining,
+                                                 p_out, unitbytes);
+                    if (w < 0) { sector_ok = 0; break; }
+                    /* LZMA doesn't tell us consumed input easily per-call;
+                       estimate by re-querying: not feasible with DecodeToBuf.
+                       Fall back: treat whole block as single stream first. */
+                    break;
                 }
-                if (written < 0) {
-                    /* Last resort: copy literal (data will be corrupt but
-                       extraction proceeds — audio/video artifacts expected). */
-                    vita_log("CHD: hunk %u CD_LZ decode failed, literal copy\n", i);
-                    memset(decomp, 0, hunk_sz);
+                /* If single-stream attempt (above break) gave full output, accept */
+                if (sector_ok) {
+                    int w = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
+                                                 comp, block_len,
+                                                 decomp, hunk_sz);
+                    if (w > 0) {
+                        total_out = w;
+                        ok = 1;
+                        if (i < 3) vita_log("LZMA: hunk %u OK props idx %d out=%d\n",
+                                             i, ci, w);
+                    }
                 }
-            } else {
-                vita_log("CHD: hunk %u CD_LZ too small (%u bytes)\n", i, block_len);
+            }
+            if (!ok) {
+                if (i < 5) vita_log("CHD: hunk %u cdlz failed, zeroing (block_len=%u)\n",
+                                     i, block_len);
                 memset(decomp, 0, hunk_sz);
             }
-        } else if (comp_type == 3) {
-            /* CD_FL: FLAC stub - copy raw data literal (libflac not available) */
-            vita_log("CHD: hunk %u CD_FL (FLAC) stub, copying literal %u bytes\n", i, block_len);
-            sceIoLseek(fd, block_off, SCE_SEEK_SET);
-            sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
-        } else if (comp_type == 1 && version == 5) {
-            /* CD_ZL v5: per-sector zlib inflate */
+        } else if (v5_map && comp_type == 2) {
+            /* cdfl (FLAC): audio codec not available. Zero out (audio loss only). */
+            vita_log("CHD: hunk %u cdfl (FLAC) stub, zeroing\n", i);
+            memset(decomp, 0, hunk_sz);
+        } else if (v5_map && comp_type == 1) {
+            /* cdzl (zlib): per-sector zlib inflate (v5) */
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
@@ -429,6 +476,15 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                 remaining -= consumed;
                 p_out += zs.total_out;
             }
+        } else if (v5_map && comp_type == 3) {
+            /* Extra codec slot (rare). Treat as literal. */
+            vita_log("CHD: hunk %u comp_type=3 stub, literal %u bytes\n", i, block_len);
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, decomp, block_len < hunk_sz ? block_len : hunk_sz);
+        } else if (comp_type == 0 || comp_type == 4 || block_len >= hunk_sz) {
+            /* v1-v4 uncompressed, or v5 COMPRESSION_NONE */
+            sceIoLseek(fd, block_off, SCE_SEEK_SET);
+            sceIoRead(fd, decomp, hunk_sz);
         } else if (comp_type == 1) {
             /* CD_ZL v1-v4: single uncompress */
             comp = (uint8_t *)realloc(comp, block_len);
