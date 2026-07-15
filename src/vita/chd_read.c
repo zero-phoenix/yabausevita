@@ -449,45 +449,63 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                 if (written < 0) {
                     if (i < 5) vita_log("CHD: hunk %u cdlz LZMA fail (clen=%u off=%u)\n",
                                          i, complen_base, header_bytes);
-                    memset(decomp, 0, hunk_sz);
+                    memset(decomp, 0, frames * 2352);
                 } else {
-                    /* Reassemble: for each frame, 2352 bytes data + 96 subcode (zero). */
-                    memset(decomp, 0, hunk_sz);
+                    /* Reassemble: 2352 bytes per sector, contiguous, NO subcode.
+                       Yabause CDCORE_ISO requires 2352 or 2048 bytes/sector. */
                     for (uint32_t fr = 0; fr < frames; fr++) {
-                        memcpy(decomp + fr * 2448, cd_base + fr * 2352, 2352);
+                        memcpy(decomp + fr * 2352, cd_base + fr * 2352, 2352);
                     }
                 }
+                sceIoWrite(out, decomp, frames * 2352);
+                continue;
             }
         } else if (v5_map && comp_type == 2) {
-            /* cdfl (FLAC): audio codec not available. Zero out (audio loss only). */
-            vita_log("CHD: hunk %u cdfl (FLAC) stub, zeroing\n", i);
-            memset(decomp, 0, hunk_sz);
+            /* cdfl (FLAC): audio codec not available. Zero 2352 bytes/sector. */
+            if (i < 5) vita_log("CHD: hunk %u cdfl (FLAC) stub\n", i);
+            {
+                uint32_t fr2 = hunk_sz / 2448;
+                memset(decomp, 0, fr2 * 2352);
+                sceIoWrite(out, decomp, fr2 * 2352);
+            }
+            continue;
         } else if (v5_map && comp_type == 1) {
-            /* cdzl (zlib): per-sector zlib inflate (v5) */
+            /* cdzl (CD zlib): same MAME CD header format as cdlz.
+               [ECC bits][complen_base BE][zlib stream][subcode stream] */
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
-            uint8_t *p_in = comp;
-            uint8_t *p_out = decomp;
-            uint32_t remaining = block_len;
-            while (remaining > 2 && p_out < decomp + hunk_sz) {
-                z_stream zs;
-                memset(&zs, 0, sizeof(zs));
-                if (inflateInit(&zs) != Z_OK) break;
-                zs.next_in = p_in;
-                zs.avail_in = remaining;
-                zs.next_out = p_out;
-                zs.avail_out = (unsigned)(decomp + hunk_sz - p_out);
-                int r = inflate(&zs, Z_SYNC_FLUSH);
-                inflateEnd(&zs);
-                if (r != Z_OK && r != Z_STREAM_END) break;
-                uint32_t consumed = (uint32_t)zs.total_in;
-                if (consumed == 0) break;
-                p_in += consumed;
-                remaining -= consumed;
-                p_out += zs.total_out;
+            uint32_t frames2 = hunk_sz / 2448;
+            uint32_t ecc_bytes2 = (frames2 + 7) / 8;
+            uint32_t complen_bytes2 = (hunk_sz < 65536) ? 2 : 3;
+            uint32_t header_bytes2 = ecc_bytes2 + complen_bytes2;
+            if (block_len > header_bytes2) {
+                uint32_t complen_base2;
+                if (complen_bytes2 == 2)
+                    complen_base2 = ((uint32_t)comp[ecc_bytes2] << 8) | comp[ecc_bytes2 + 1];
+                else
+                    complen_base2 = ((uint32_t)comp[ecc_bytes2] << 16) |
+                                    ((uint32_t)comp[ecc_bytes2 + 1] << 8) |
+                                    comp[ecc_bytes2 + 2];
+                /* Decompress base zlib stream into cd_base (frames*2352 bytes) */
+                unsigned long dest_len = frames2 * 2352;
+                int zret = uncompress(cd_base, &dest_len,
+                                       comp + header_bytes2, complen_base2);
+                if (zret == Z_OK) {
+                    for (uint32_t fr = 0; fr < frames2; fr++) {
+                        memcpy(decomp + fr * 2352, cd_base + fr * 2352, 2352);
+                    }
+                } else {
+                    if (i < 5) vita_log("CHD: hunk %u cdzl fail zret=%d\n", i, zret);
+                    memset(decomp, 0, frames2 * 2352);
+                }
+            } else {
+                memset(decomp, 0, frames2 * 2352);
             }
+            sceIoWrite(out, decomp, frames2 * 2352);
+            continue;
+        } else if (v5_map && comp_type == 3) {
         } else if (v5_map && comp_type == 3) {
             /* Extra codec slot (rare). Treat as literal. */
             vita_log("CHD: hunk %u comp_type=3 stub, literal %u bytes\n", i, block_len);
