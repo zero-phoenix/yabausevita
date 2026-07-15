@@ -184,6 +184,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
 
     uint8_t *decomp = (uint8_t *)malloc(hunk_sz);
     uint8_t *comp = NULL;
+    uint8_t *cd_base = (uint8_t *)malloc(hunk_sz);  /* reusable CD base buffer */
     int result = 0;
 
     int entry_size;
@@ -434,52 +435,26 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                    MAX_SECTOR_DATA = 2352 per frame, total base = frames*2352. */
                 const uint8_t *lzma_in = comp + header_bytes;
                 uint32_t lzma_size = complen_base;
-                /* Temp buffer for base data (sectors only, no subcode) */
+                /* Reuse cd_base buffer (allocated once outside loop) */
                 uint32_t base_out_size = frames * 2352;
-                uint8_t *base_buf = (uint8_t *)malloc(base_out_size);
-                if (!base_buf) { result = -1; break; }
 
                 int written = -1;
                 for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT; ci++) {
                     written = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
                                                    lzma_in, lzma_size,
-                                                   base_buf, base_out_size);
+                                                   cd_base, base_out_size);
                     if (written >= 0) break;
                 }
-                free(base_buf);
 
                 if (written < 0) {
                     if (i < 5) vita_log("CHD: hunk %u cdlz LZMA fail (clen=%u off=%u)\n",
                                          i, complen_base, header_bytes);
                     memset(decomp, 0, hunk_sz);
                 } else {
-                    /* Reassemble: for each frame, copy MAX_SECTOR_DATA=2352 bytes
-                       into dest at frame*FRAME_SIZE. Subcode 96 bytes zeroed.
-                       ECC reconstruction skipped (Yabause tolerates). */
-                    uint8_t *p = decomp;
-                    const uint8_t *b = decomp; /* placeholder; use written base */
-                    /* We wrote to a freed base_buf; simpler approach: write base
-                       directly interleaved. Re-do with proper layout. */
+                    /* Reassemble: for each frame, 2352 bytes data + 96 subcode (zero). */
                     memset(decomp, 0, hunk_sz);
-                    /* Actually re-call to write into decomp with frame layout */
-                    /* For now: just place base_buf content sequentially per-frame */
-                    /* Redo: allocate, decompress, copy per-frame, free */
-                    base_buf = (uint8_t *)malloc(base_out_size);
-                    if (base_buf) {
-                        for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT; ci++) {
-                            written = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
-                                                           lzma_in, lzma_size,
-                                                           base_buf, base_out_size);
-                            if (written >= 0) break;
-                        }
-                        if (written >= 0) {
-                            for (uint32_t fr = 0; fr < frames; fr++) {
-                                memcpy(decomp + fr * 2448,
-                                       base_buf + fr * 2352, 2352);
-                                /* subcode 96 bytes already zero from memset */
-                            }
-                        }
-                        free(base_buf);
+                    for (uint32_t fr = 0; fr < frames; fr++) {
+                        memcpy(decomp + fr * 2448, cd_base + fr * 2352, 2352);
                     }
                 }
             }
@@ -560,7 +535,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
 done:
     if (result != 0 && error[0] == 0)
         snprintf(error, error_size, "CHD extraction error (code %d)", result);
-    free(decomp); free(comp); free(v5_map);
+    free(decomp); free(comp); free(v5_map); free(cd_base);
     sceIoClose(out); sceIoClose(fd);
     if (result != 0) sceIoRemove(bin_path);
     return result;
