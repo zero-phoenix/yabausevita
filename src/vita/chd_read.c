@@ -198,6 +198,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
     /* v5 map: compressed (Huffman) or uncompressed (uint32) */
     int v5_compressed = 1;
     uint8_t *v5_map = NULL;
+    int v5_map_was_used = 0;
     uint64_t v5_first_offs = 0;  /* absolute file offset of first hunk data */
     if (version == 5) {
         uint32_t c0 = r32(raw + 16);
@@ -229,6 +230,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
 
             unsigned long rawmap_size = (unsigned long)hunkcount * 12;
             v5_map = (uint8_t *)malloc(rawmap_size);
+            if (v5_map) v5_map_was_used = 1;
             if (!v5_map) { free(compressed); delete_bitstream(bitbuf); result = -1; goto done; }
 
             struct huffman_decoder *decoder = create_huffman_decoder(16, 8);
@@ -449,15 +451,16 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                 if (written < 0) {
                     if (i < 5) vita_log("CHD: hunk %u cdlz LZMA fail (clen=%u off=%u)\n",
                                          i, complen_base, header_bytes);
-                    memset(decomp, 0, frames * 2352);
+                    memset(decomp, 0, hunk_sz);
                 } else {
-                    /* Reassemble: 2352 bytes per sector, contiguous, NO subcode.
-                       Yabause CDCORE_ISO requires 2352 or 2048 bytes/sector. */
+                    /* Reassemble: 2352 data + 96 zero subcode per sector = 2448 total.
+                       Post-process will strip subcode at the end. */
+                    memset(decomp, 0, hunk_sz);
                     for (uint32_t fr = 0; fr < frames; fr++) {
-                        memcpy(decomp + fr * 2352, cd_base + fr * 2352, 2352);
+                        memcpy(decomp + fr * 2448, cd_base + fr * 2352, 2352);
                     }
                 }
-                sceIoWrite(out, decomp, frames * 2352);
+                sceIoWrite(out, decomp, hunk_sz);
                 continue;
             }
         } else if (v5_map && comp_type == 2) {
@@ -466,7 +469,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             {
                 uint32_t fr2 = hunk_sz / 2448;
                 memset(decomp, 0, fr2 * 2352);
-                sceIoWrite(out, decomp, fr2 * 2352);
+                sceIoWrite(out, decomp, hunk_sz);
             }
             continue;
         } else if (v5_map && comp_type == 1) {
@@ -503,7 +506,7 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             } else {
                 memset(decomp, 0, frames2 * 2352);
             }
-            sceIoWrite(out, decomp, frames2 * 2352);
+            sceIoWrite(out, decomp, hunk_sz);
             continue;
         } else if (v5_map && comp_type == 3) {
         } else if (v5_map && comp_type == 3) {
@@ -554,7 +557,48 @@ done:
     if (result != 0 && error[0] == 0)
         snprintf(error, error_size, "CHD extraction error (code %d)", result);
     free(decomp); free(comp); free(v5_map); free(cd_base);
-    sceIoClose(out); sceIoClose(fd);
+
+    /* For v5: strip 96-byte subcode per sector by copying to a temp file.
+       Original: frames * 2448 bytes/hunk (2352 data + 96 subcode).
+       Target: frames * 2352 bytes/hunk (data only, contiguous).
+       Yabause CDCORE_ISO requires size divisible by 2352 or 2048. */
+    if (result == 0 && version == 5 && v5_map_was_used) {
+        vita_log("CHD: post-process stripping subcode (2448->2352)\n");
+        sceIoClose(out);
+        SceOff file_sz;
+        SceUID rin = sceIoOpen(bin_path, SCE_O_RDONLY, 0);
+        if (rin >= 0) {
+            file_sz = sceIoLseek(rin, 0, SCE_SEEK_END);
+            uint32_t frames_total = (uint32_t)(file_sz / 2448);
+            char tmp_path[512];
+            snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", bin_path);
+            SceUID rout = sceIoOpen(tmp_path,
+                SCE_O_CREAT | SCE_O_WRONLY | SCE_O_TRUNC, 0777);
+            if (rout >= 0) {
+                uint8_t *strip_buf = (uint8_t *)malloc(2448);
+                if (strip_buf) {
+                    for (uint32_t s = 0; s < frames_total; s++) {
+                        sceIoLseek(rin, (SceOff)s * 2448, SCE_SEEK_SET);
+                        if (sceIoRead(rin, strip_buf, 2448) != 2448) break;
+                        sceIoWrite(rout, strip_buf, 2352);
+                    }
+                    free(strip_buf);
+                }
+                sceIoClose(rout);
+                sceIoClose(rin);
+                sceIoRemove(bin_path);
+                sceIoRename(tmp_path, bin_path);
+                vita_log("CHD: stripped %u sectors -> %u bytes\n",
+                         frames_total, frames_total * 2352);
+            } else {
+                sceIoClose(rin);
+            }
+        }
+        out = -1;  /* already closed */
+    }
+
+    if (out >= 0) sceIoClose(out);
+    sceIoClose(fd);
     if (result != 0) sceIoRemove(bin_path);
     return result;
 }
