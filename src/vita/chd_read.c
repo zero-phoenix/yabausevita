@@ -401,50 +401,87 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
              comp_type 2 = cdfl (FLAC)   — audio, non-critical (stub OK)
              comp_type 4 = uncompressed (v1-v4 legacy) */
         if (v5_map && comp_type == 0) {
-            /* cdlz (LZMA): sector-by-sector, like CD_ZL but with LZMA.
-               Each sector's stream is independently LZMA-compressed.
-               MAME uses the same per-sector pattern as cdzl. */
+            /* cdlz (CD LZMA): MAME chd_cd_decompressor format.
+               Compressed layout:
+                 [ECC bits: (frames+7)/8 bytes][complen_base: 2 or 3 BE bytes]
+                 [LZMA stream: complen_base bytes][subcode stream: remaining]
+               Then reassemble sectors with ECC reconstruction.
+               We simplify: just decompress base, skip subcode (audio artifacts). */
             comp = (uint8_t *)realloc(comp, block_len);
             if (!comp) { result = -1; break; }
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
 
-            /* Try per-sector LZMA with each dictSize candidate */
-            int total_out = 0;
-            int ok = 0;
-            for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT && !ok; ci++) {
-                uint8_t *p_in = comp;
-                uint8_t *p_out = decomp;
-                uint32_t remaining = block_len;
-                total_out = 0;
-                int sector_ok = 1;
-                while (remaining > 5 && p_out + unitbytes <= decomp + hunk_sz) {
-                    int w = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
-                                                 p_in, remaining,
-                                                 p_out, unitbytes);
-                    if (w < 0) { sector_ok = 0; break; }
-                    /* LZMA doesn't tell us consumed input easily per-call;
-                       estimate by re-querying: not feasible with DecodeToBuf.
-                       Fall back: treat whole block as single stream first. */
-                    break;
+            /* hunkbytes=19584, FRAME_SIZE=2448, frames=8 */
+            uint32_t frames = hunk_sz / 2448;  /* 8 */
+            uint32_t ecc_bytes = (frames + 7) / 8;  /* 1 */
+            uint32_t complen_bytes = (hunk_sz < 65536) ? 2 : 3;  /* 2 */
+            uint32_t header_bytes = ecc_bytes + complen_bytes;  /* 3 */
+            if (block_len < header_bytes) {
+                if (i < 5) vita_log("CHD: hunk %u cdlz too short\n", i);
+                memset(decomp, 0, hunk_sz);
+            } else {
+                /* Read complen_base from header */
+                uint32_t complen_base;
+                if (complen_bytes == 2)
+                    complen_base = ((uint32_t)comp[ecc_bytes] << 8) | comp[ecc_bytes + 1];
+                else
+                    complen_base = ((uint32_t)comp[ecc_bytes] << 16) |
+                                   ((uint32_t)comp[ecc_bytes + 1] << 8) |
+                                   comp[ecc_bytes + 2];
+
+                /* LZMA stream at offset header_bytes, length complen_base.
+                   MAX_SECTOR_DATA = 2352 per frame, total base = frames*2352. */
+                const uint8_t *lzma_in = comp + header_bytes;
+                uint32_t lzma_size = complen_base;
+                /* Temp buffer for base data (sectors only, no subcode) */
+                uint32_t base_out_size = frames * 2352;
+                uint8_t *base_buf = (uint8_t *)malloc(base_out_size);
+                if (!base_buf) { result = -1; break; }
+
+                int written = -1;
+                for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT; ci++) {
+                    written = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
+                                                   lzma_in, lzma_size,
+                                                   base_buf, base_out_size);
+                    if (written >= 0) break;
                 }
-                /* If single-stream attempt (above break) gave full output, accept */
-                if (sector_ok) {
-                    int w = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
-                                                 comp, block_len,
-                                                 decomp, hunk_sz);
-                    if (w > 0) {
-                        total_out = w;
-                        ok = 1;
-                        if (i < 3) vita_log("LZMA: hunk %u OK props idx %d out=%d\n",
-                                             i, ci, w);
+                free(base_buf);
+
+                if (written < 0) {
+                    if (i < 5) vita_log("CHD: hunk %u cdlz LZMA fail (clen=%u off=%u)\n",
+                                         i, complen_base, header_bytes);
+                    memset(decomp, 0, hunk_sz);
+                } else {
+                    /* Reassemble: for each frame, copy MAX_SECTOR_DATA=2352 bytes
+                       into dest at frame*FRAME_SIZE. Subcode 96 bytes zeroed.
+                       ECC reconstruction skipped (Yabause tolerates). */
+                    uint8_t *p = decomp;
+                    const uint8_t *b = decomp; /* placeholder; use written base */
+                    /* We wrote to a freed base_buf; simpler approach: write base
+                       directly interleaved. Re-do with proper layout. */
+                    memset(decomp, 0, hunk_sz);
+                    /* Actually re-call to write into decomp with frame layout */
+                    /* For now: just place base_buf content sequentially per-frame */
+                    /* Redo: allocate, decompress, copy per-frame, free */
+                    base_buf = (uint8_t *)malloc(base_out_size);
+                    if (base_buf) {
+                        for (int ci = 0; ci < (int)CDLZ_PROPS_COUNT; ci++) {
+                            written = lzma_decompress_one(CDLZ_LZMA_PROPS_CANDIDATES[ci],
+                                                           lzma_in, lzma_size,
+                                                           base_buf, base_out_size);
+                            if (written >= 0) break;
+                        }
+                        if (written >= 0) {
+                            for (uint32_t fr = 0; fr < frames; fr++) {
+                                memcpy(decomp + fr * 2448,
+                                       base_buf + fr * 2352, 2352);
+                                /* subcode 96 bytes already zero from memset */
+                            }
+                        }
+                        free(base_buf);
                     }
                 }
-            }
-            if (!ok) {
-                if (i < 5) vita_log("CHD: hunk %u cdlz failed, zeroing (block_len=%u)\n",
-                                     i, block_len);
-                memset(decomp, 0, hunk_sz);
             }
         } else if (v5_map && comp_type == 2) {
             /* cdfl (FLAC): audio codec not available. Zero out (audio loss only). */
