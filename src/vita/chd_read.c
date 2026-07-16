@@ -30,6 +30,7 @@ static int lzma_decompress_one(const uint8_t *props,
                                 const uint8_t *in, uint32_t in_size,
                                 uint8_t *out, uint32_t out_cap) {
     CLzmaDec state;
+    LzmaDec_Construct(&state);
     SRes sres = LzmaDec_Allocate(&state, props, 5, &g_lzma_alloc);
     if (sres != SZ_OK) {
         vita_log("LZMA: LzmaDec_Allocate failed sres=%d props=%02x%02x%02x%02x%02x\n",
@@ -185,6 +186,14 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
     uint8_t *decomp = (uint8_t *)malloc(hunk_sz);
     uint8_t *comp = NULL;
     uint8_t *cd_base = (uint8_t *)malloc(hunk_sz);  /* reusable CD base buffer */
+    if (!decomp || !cd_base) {
+        if (decomp) free(decomp);
+        if (cd_base) free(cd_base);
+        sceIoClose(fd);
+        sceIoClose(out);
+        snprintf(error, error_size, "OOM allocating hunks");
+        return -1;
+    }
     int result = 0;
 
     int entry_size;
@@ -410,8 +419,9 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                  [LZMA stream: complen_base bytes][subcode stream: remaining]
                Then reassemble sectors with ECC reconstruction.
                We simplify: just decompress base, skip subcode (audio artifacts). */
-            comp = (uint8_t *)realloc(comp, block_len);
-            if (!comp) { result = -1; break; }
+            uint8_t *new_comp = (uint8_t *)realloc(comp, block_len);
+            if (!new_comp) { result = -1; break; }
+            comp = new_comp;
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
 
@@ -475,8 +485,9 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
         } else if (v5_map && comp_type == 1) {
             /* cdzl (CD zlib): same MAME CD header format as cdlz.
                [ECC bits][complen_base BE][zlib stream][subcode stream] */
-            comp = (uint8_t *)realloc(comp, block_len);
-            if (!comp) { result = -1; break; }
+            uint8_t *new_comp = (uint8_t *)realloc(comp, block_len);
+            if (!new_comp) { result = -1; break; }
+            comp = new_comp;
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
             uint32_t frames2 = hunk_sz / 2448;
@@ -520,8 +531,9 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
             sceIoRead(fd, decomp, hunk_sz);
         } else if (comp_type == 1) {
             /* CD_ZL v1-v4: single uncompress */
-            comp = (uint8_t *)realloc(comp, block_len);
-            if (!comp) { result = -1; break; }
+            uint8_t *new_comp = (uint8_t *)realloc(comp, block_len);
+            if (!new_comp) { result = -1; break; }
+            comp = new_comp;
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
             unsigned long dest = hunk_sz;
@@ -531,8 +543,9 @@ int chd_extract(const char *chd_path, const char *bin_path, char *error, int err
                 result = -1; break;
             }
         } else {
-            comp = (uint8_t *)realloc(comp, block_len);
-            if (!comp) { result = -1; break; }
+            uint8_t *new_comp = (uint8_t *)realloc(comp, block_len);
+            if (!new_comp) { result = -1; break; }
+            comp = new_comp;
             sceIoLseek(fd, block_off, SCE_SEEK_SET);
             sceIoRead(fd, comp, block_len);
             unsigned long dest = hunk_sz;
