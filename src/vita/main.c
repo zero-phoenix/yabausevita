@@ -225,6 +225,7 @@ static int chd_to_bin_path(char *path, int max_len)
 static int autodetect_bios(char *out_path, size_t out_len)
 {
     const char *dirs[] = {
+        "ux0:data/yabause/bios",
         "ux0:data/yabause/bios/jp",
         "ux0:data/yabause/bios/us",
         "ux0:data/yabause/bios/eu"
@@ -333,8 +334,8 @@ int main(int argc, char *argv[])
 
     vita_log("Selected: %s\n", cfg.rom_path);
 
-    /* Auto-detect BIOS si el usuario no eligió uno y auto_bios está activado */
-    if (cfg.auto_bios && (cfg.bios_path[0] == '\0'))
+    /* Auto-detect BIOS if user didn't select one (try regardless of auto_bios flag) */
+    if (cfg.bios_path[0] == '\0')
     {
         if (autodetect_bios(cfg.bios_path, sizeof(cfg.bios_path)))
         {
@@ -346,13 +347,9 @@ int main(int argc, char *argv[])
             cfg.bios_path[0] = '\0';
         }
     }
-    else if (cfg.bios_path[0] != '\0')
-    {
-        vita_log("Using user-selected BIOS: %s\n", cfg.bios_path);
-    }
     else
     {
-        vita_log("No BIOS selected, using HLE\n");
+        vita_log("Using user-selected BIOS: %s\n", cfg.bios_path);
     }
 
     vita_log("Calling YabauseInit\n");
