@@ -299,31 +299,9 @@ int main(int argc, char *argv[])
     VitaMenuConfig cfg;
     memset(&cfg, 0, sizeof(cfg));
 
-    /* DEBUG: auto-load first .chd in roms, skip menu */
-    SceUID autodir = sceIoDopen(VMENU_ROM_DIR);
-    int menu_result = -1;
-    if (autodir >= 0) {
-        SceIoDirent de;
-        memset(&de, 0, sizeof(de));
-        while (sceIoDread(autodir, &de) > 0) {
-            int dlen = strlen(de.d_name);
-            if (dlen > 4 && strcmp(de.d_name + dlen - 4, ".chd") == 0) {
-                safe_strcpy(cfg.rom_path, VMENU_ROM_DIR, sizeof(cfg.rom_path));
-                safe_strcat(cfg.rom_path, "/", sizeof(cfg.rom_path));
-                safe_strcat(cfg.rom_path, de.d_name, sizeof(cfg.rom_path));
-                vita_log("DEBUG auto-load: %s\n", cfg.rom_path);
-                menu_result = 0;
-                break;
-            }
-        }
-        sceIoDclose(autodir);
-    }
-
-    if (menu_result != 0) {
-        vita_log("DEBUG no CHD found, entering menu\n");
-        menu_result = vita_menu_run(&cfg, NULL);
-        vita_log("Menu exited with result=%d\n", menu_result);
-    }
+    vita_log("Entering menu\n");
+    int menu_result = vita_menu_run(&cfg, NULL);
+    vita_log("Menu exited with result=%d\n", menu_result);
 
     if (menu_result != 0)
     {
