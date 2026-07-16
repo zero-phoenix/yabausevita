@@ -11,8 +11,8 @@ endif()
 project(YabauseVita C)
 
 add_definitions(-DVERSION="0.9.10")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -flto -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
@@ -56,6 +56,9 @@ set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
     src/vita/chd_read.c
+    src/vita/bitstream.c
+    src/vita/huffman.c
+    src/vita/lzma_dec.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
     src/vita/vidgpu.c
