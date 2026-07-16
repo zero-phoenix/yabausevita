@@ -18,7 +18,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.00")
+set(VITA_VERSION  "01.01")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c
@@ -55,10 +55,8 @@ set(YABAUSE_CORE_SOURCES
 set(VITA_PLATFORM_SOURCES
     src/vita/main.c
     src/vita/vita_menu.c
-    src/vita/chd_read.c
-    src/vita/bitstream.c
-    src/vita/huffman.c
-    src/vita/lzma_dec.c
+    src/vita/cd_chd.c
+    src/vita/libchdr/unity.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
     src/vita/vidgpu.c
@@ -69,7 +67,16 @@ add_executable(${VITA_APP_NAME}
     ${VITA_PLATFORM_SOURCES}
 )
 
-target_include_directories(${VITA_APP_NAME} PRIVATE src)
+target_include_directories(${VITA_APP_NAME} PRIVATE
+    src
+    src/vita/libchdr/include
+    src/vita/libchdr/deps/lzma-25.01/include
+    src/vita/libchdr/deps/miniz-3.1.1
+    src/vita/libchdr/deps/zstd-1.5.7
+)
+
+# libchdr (lector CHD): un solo TU; -O2 basta y compila más rápido
+set_source_files_properties(src/vita/libchdr/unity.c PROPERTIES COMPILE_FLAGS "-O2")
 
 # Disable LTO for main.c to prevent aggressive optimizer reordering
 # of code before unbounded while loops

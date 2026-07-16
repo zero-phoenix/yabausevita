@@ -1,6 +1,0 @@
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/YabauseVita.dir
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/YabauseVita-velf.dir
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/YabauseVita.self-self.dir
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/YabauseVita.vpk-vpk.dir
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/edit_cache.dir
-C:/Users/D/Documents/GitHub/yabausevita/build/CMakeFiles/rebuild_cache.dir

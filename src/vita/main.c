@@ -21,7 +21,7 @@
 #include "../smpc.h"
 
 #include "vita_menu.h"
-#include "chd_read.h"
+#include "cd_chd.h"
 
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
@@ -52,7 +52,7 @@ PerInterface_struct *PERCoreList[] = { &PERDummy, NULL };
 
 extern CDInterface DummyCD;
 extern CDInterface ISOCD;
-CDInterface *CDCoreList[] = { &DummyCD, &ISOCD, NULL };
+CDInterface *CDCoreList[] = { &DummyCD, &ISOCD, &CHDCD, NULL };
 
 extern SoundInterface_struct SNDDummy;
 SoundInterface_struct *SNDCoreList[] = { &SNDDummy, NULL };
@@ -180,45 +180,17 @@ static int map_region(int vmenu_region)
     }
 }
 
-/* Returns: 0=success (path now points to .bin), 1=not CHD (no change) */
-static int chd_to_bin_path(char *path, int max_len)
+/* Devuelve el CD core adecuado según la extensión del archivo.
+   CHD se lee DIRECTO (sin extraer a .bin): carga instantánea. */
+static int cd_core_for_path(const char *path)
 {
     char ext[16];
     const char *dot = strrchr(path, '.');
-    if (!dot) return 1;
+    if (!dot) return CDCORE_ISO;
     safe_strcpy(ext, dot + 1, sizeof(ext));
     to_lower(ext);
-    if (strcmp(ext, "chd") != 0) return 1;
-
-    char bin_path[VMENU_MAX_PATH];
-    int len = (int)(dot - path);
-    strncpy(bin_path, path, len);
-    bin_path[len] = '\0';
-    safe_strcat(bin_path, ".bin", sizeof(bin_path));
-
-    SceIoStat tmp;
-    memset(&tmp, 0, sizeof(tmp));
-    if (sceIoGetstat(bin_path, &tmp) >= 0 && tmp.st_size > 0)
-    {
-        safe_strcpy(path, bin_path, max_len);
-        vita_log("Using cached CHD extraction: %s\n", bin_path);
-        return 0;
-    }
-
-    vita_log("Extracting CHD to %s\n", bin_path);
-    char err[256];
-    int ret = chd_extract(path, bin_path, err, sizeof(err));
-    if (ret != 0)
-    {
-        vita_log("CHD extraction failed: %s\n", err);
-        vita_menu_show_error("Error al extraer CHD", err);
-        sceKernelExitProcess(0);
-        return 0;
-    }
-
-    safe_strcpy(path, bin_path, max_len);
-    vita_log("CHD extracted successfully: %s\n", bin_path);
-    return 0;
+    if (strcmp(ext, "chd") == 0) return CDCORE_CHD;
+    return CDCORE_ISO;
 }
 
 /* Auto-detecta el primer BIOS .bin en ux0:data/yabause/bios/{jp,us,eu} */
@@ -334,14 +306,8 @@ int main(int argc, char *argv[])
 
     char cdpath[VMENU_MAX_PATH];
     safe_strcpy(cdpath, cfg.rom_path, sizeof(cdpath));
-    int chd_ret = chd_to_bin_path(cdpath, sizeof(cdpath));
-    if (chd_ret < 0)
-    {
-        vita_menu_show_error("CHD no soportado",
-            "Este CHD no tiene un archivo .bin adjunto.\nExtrae el .bin primero.");
-        sceKernelExitProcess(0);
-        return 0;
-    }
+    int cdcore = cd_core_for_path(cdpath);
+    vita_log("CD core: %s (%d)\n", cdcore == CDCORE_CHD ? "CHD directo" : "ISO", cdcore);
 
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
@@ -350,7 +316,7 @@ int main(int argc, char *argv[])
     yinit.vidcoretype   = VIDCORE_GPU;
     yinit.sndcoretype   = SNDCORE_DUMMY;
     yinit.m68kcoretype  = 0;
-    yinit.cdcoretype    = CDCORE_ISO;
+    yinit.cdcoretype    = cdcore;
     yinit.cdpath        = cdpath;
     yinit.biospath      = cfg.bios_path[0] ? cfg.bios_path : NULL;
     yinit.carttype      = 0;
