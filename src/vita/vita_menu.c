@@ -1039,6 +1039,8 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->recent_count = 0;
     set_default_mapping(cfg);
 
+    int map_version = 1; /* configs antiguas no tienen la clave */
+
     SceUID fd = sceIoOpen(VMENU_CONFIG_PATH, SCE_O_RDONLY, 0);
     if (fd < 0) return;
 
@@ -1075,6 +1077,8 @@ void load_config_file(VitaMenuConfig *cfg) {
             cfg->show_fps = atoi(val);
         else if (strcmp(key, "borderless") == 0)
             cfg->borderless = atoi(val);
+        else if (strcmp(key, "map_version") == 0)
+            map_version = atoi(val);
         else if (strncmp(key, "map_", 4) == 0) {
             const char *map_key = key + 4;
             int map_idx = -1;
@@ -1104,6 +1108,14 @@ void load_config_file(VitaMenuConfig *cfg) {
         }
     }
     sceIoClose(fd);
+
+    /* Migración v2: el mapeo por defecto cambió (□=A ✕=B ○=C △=Y SEL=X).
+       Configs guardadas por versiones previas traen el mapeo viejo (que
+       además era ignorado por un reset forzado en main). Se migran una
+       sola vez; al guardar se escribe map_version=2 y de ahí en adelante
+       se respeta lo que el usuario configure en el menú. */
+    if (map_version < 2)
+        set_default_mapping(cfg);
 }
 
 static void save_config_file(const VitaMenuConfig *cfg) {
@@ -1146,6 +1158,11 @@ static void save_config_file(const VitaMenuConfig *cfg) {
     snprintf(buf, sizeof(buf), "borderless=%d\n", cfg->borderless);
     sceIoWrite(fd, buf, strlen(buf));
 
+    /* map_version=2: marca que este config ya usa el mapeo nuevo;
+       load_config_file migra los configs sin esta clave. */
+    snprintf(buf, sizeof(buf), "map_version=2\n");
+    sceIoWrite(fd, buf, strlen(buf));
+
     static const char *map_keys[MAP_COUNT] = {
         "up","down","left","right","cross","circle","square","triangle","l","r","start","select"
     };
@@ -1164,6 +1181,15 @@ static void save_config_file(const VitaMenuConfig *cfg) {
     sceIoClose(fd);
 }
 
+/* Mapeo por defecto (v2) — posicional, el estándar que usa RetroArch
+   para Saturn en mandos de 4 botones frontales:
+
+       Saturn:  X  Y  Z          Vita:      (△=Y)
+                A  B  C               (□=A)      (○=C)
+                                           (✕=B)
+   □→A  ✕→B  ○→C  (fila inferior del Saturn, de izquierda a derecha)
+   △→Y  SELECT→X  L→L  R→R  START→START
+   (Z se puede asignar en el menú de controles si un juego lo pide.) */
 void set_default_mapping(VitaMenuConfig *cfg) {
     if (!cfg) return;
     cfg->mapping[MAP_UP]      = SAT_UP;
@@ -1171,13 +1197,13 @@ void set_default_mapping(VitaMenuConfig *cfg) {
     cfg->mapping[MAP_LEFT]    = SAT_LEFT;
     cfg->mapping[MAP_RIGHT]   = SAT_RIGHT;
     cfg->mapping[MAP_CROSS]   = SAT_B;
-    cfg->mapping[MAP_CIRCLE]  = SAT_A;
-    cfg->mapping[MAP_SQUARE]  = SAT_X;
+    cfg->mapping[MAP_CIRCLE]  = SAT_C;
+    cfg->mapping[MAP_SQUARE]  = SAT_A;
     cfg->mapping[MAP_TRIANGLE]= SAT_Y;
     cfg->mapping[MAP_L]       = SAT_L;
     cfg->mapping[MAP_R]       = SAT_R;
     cfg->mapping[MAP_START]   = SAT_START;
-    cfg->mapping[MAP_SELECT]  = SAT_C;
+    cfg->mapping[MAP_SELECT]  = SAT_X;
 }
 
 /* Agregar juego a recientes */

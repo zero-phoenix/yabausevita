@@ -2,6 +2,7 @@
 #include <psp2/display.h>
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/ctrl.h>
+#include <psp2/power.h>
 #include <psp2/io/dirent.h>
 #include <psp2/io/stat.h>
 #include <vita2d.h>
@@ -32,7 +33,6 @@ extern VideoInterface_struct VIDGPU;
 #define TARGET_FRAME_MS 16
 #define MAX_SKIP_FRAMES 10
 
-static void *vita_fb = NULL;
 static int g_auto_frameskip = 1;
 static int g_frame_skip = 0;
 static int g_show_fps = 0;
@@ -78,40 +78,10 @@ int YuiSetVideoMode(int width, int height, int bpp, int fullscreen)
 
 void YuiSwapBuffers(void)
 {
-    extern u32 *dispbuffer;
-    int srcw, srch;
-    VIDSoftGetScreenSize(&srcw, &srch);
-
-    if (srcw <= 0 || srch <= 0 || vita_fb == NULL || dispbuffer == NULL)
-        return;
-
-    int offx = (VITA_SCREEN_W - srcw) / 2;
-    int offy = (VITA_SCREEN_H - srch) / 2;
-    if (offx < 0) offx = 0;
-    if (offy < 0) offy = 0;
-
-    uint32_t *dst = (uint32_t *)vita_fb;
-    int copyw = srcw;
-    if (offx + copyw > VITA_SCREEN_W)
-        copyw = VITA_SCREEN_W - offx;
-    if (copyw <= 0) return;
-
-    int max_h = srch;
-    if (offy + max_h > VITA_SCREEN_H)
-        max_h = VITA_SCREEN_H - offy;
-    if (max_h <= 0) return;
-
-    for (int y = 0; y < max_h; y++)
-        memcpy(dst + (y + offy) * VITA_SCREEN_W + offx, dispbuffer + y * srcw, copyw * sizeof(uint32_t));
-
-    SceDisplayFrameBuf fb;
-    fb.size = sizeof(fb);
-    fb.base = vita_fb;
-    fb.pitch = VITA_SCREEN_W;
-    fb.pixelformat = SCE_DISPLAY_PIXELFORMAT_A8B8G8R8;
-    fb.width = VITA_SCREEN_W;
-    fb.height = VITA_SCREEN_H;
-    sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
+    /* VIDGPU (vidgpu.c) presenta cada frame vía vita2d en Vdp2DrawEnd,
+       ya escalado y con el formato de color correcto. La ruta anterior
+       (memcpy 1:1 sin escalar a un framebuffer propio + sceDisplaySetFrameBuf)
+       competía con los buffers de vita2d: imagen pequeña y parpadeos. */
 }
 
 FILE *g_logfile = NULL;
@@ -152,21 +122,6 @@ static void apply_saturn_btn(PerPad_struct *pad, int btn, int press)
         case SAT_R:      if(press) PerPadRTriggerPressed(pad);  else PerPadRTriggerReleased(pad);  break;
         case SAT_START:  if(press) PerPadStartPressed(pad); else PerPadStartReleased(pad); break;
     }
-}
-
-static void clear_fb(void)
-{
-    if (!vita_fb) return;
-    memset(vita_fb, 0, (size_t)VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
-    SceDisplayFrameBuf fb;
-    memset(&fb, 0, sizeof(fb));
-    fb.size = sizeof(fb);
-    fb.base = vita_fb;
-    fb.pitch = VITA_SCREEN_W;
-    fb.pixelformat = SCE_DISPLAY_PIXELFORMAT_A8B8G8R8;
-    fb.width = VITA_SCREEN_W;
-    fb.height = VITA_SCREEN_H;
-    sceDisplaySetFrameBuf(&fb, SCE_DISPLAY_SETBUF_NEXTFRAME);
 }
 
 static int map_region(int vmenu_region)
@@ -251,14 +206,16 @@ int main(int argc, char *argv[])
 
     vita_log("YabauseVita starting\n");
 
-    vita_fb = malloc((size_t)VITA_SCREEN_W * VITA_SCREEN_H * sizeof(uint32_t));
-    if (vita_fb == NULL)
-    {
-        vita_log("FATAL: could not allocate framebuffer\n");
-        sceKernelExitProcess(0);
-        return 0;
-    }
-    vita_log("fb=%p\n", vita_fb);
+    /* Overclock al máximo del API oficial. Se fija UNA sola vez al arrancar:
+       PSVshell puede después subirlos (p.ej. ARM a 500 MHz) o bajarlos sin
+       que la app se los pise, porque nunca volvemos a tocarlos. */
+    scePowerSetArmClockFrequency(444);
+    scePowerSetBusClockFrequency(222);
+    scePowerSetGpuClockFrequency(222);
+    scePowerSetGpuXbarClockFrequency(166);
+    vita_log("Clocks: ARM=%d BUS=%d GPU=%d XBAR=%d MHz\n",
+             scePowerGetArmClockFrequency(), scePowerGetBusClockFrequency(),
+             scePowerGetGpuClockFrequency(), scePowerGetGpuXbarClockFrequency());
 
     vita_log("Initializing menu\n");
     if (vita_menu_init() != 0)
@@ -358,8 +315,9 @@ int main(int argc, char *argv[])
     PerPad_struct *saturn_pad = PerPadAdd(&PORTDATA1);
     vita_log("pad=%s\n", saturn_pad ? "OK" : "FAIL");
 
-    set_default_mapping(&cfg);
-    vita_log("Button mapping (reset to defaults):\n");
+    /* cfg.mapping ya viene cargado del menú/archivo de config del usuario.
+       (Antes se forzaba set_default_mapping aquí y pisaba lo configurado.) */
+    vita_log("Button mapping (from user config):\n");
     for (int mi = 0; mi < MAP_COUNT; mi++) {
         vita_log("  map[%d] = %d\n", mi, cfg.mapping[mi]);
     }
@@ -370,7 +328,7 @@ int main(int argc, char *argv[])
 
     int frame_count = 0, skip_counter = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
-    SceUInt64 next_display = 0;
+    SceUInt64 exit_combo_t0 = 0;
     unsigned int last_buttons = 0;
     int skip = g_frame_skip;
     if (skip < 0) skip = 0;
@@ -393,11 +351,6 @@ int main(int argc, char *argv[])
         frame_count++;
 
         SceUInt64 now = sceKernelGetProcessTimeWide();
-        if (now >= next_display)
-        {
-            YuiSwapBuffers();
-            next_display = now + 16000ULL;
-        }
 
         if (now - fps_timer >= 5000000ULL)
         {
@@ -411,21 +364,37 @@ int main(int argc, char *argv[])
         SceCtrlData pad;
         sceCtrlPeekBufferPositive(0, &pad, 1);
         unsigned int cur = pad.buttons;
+
+        /* Analógico izquierdo → cruceta del Saturn (zona muerta ±50) */
+        if (pad.lx < 78)       cur |= SCE_CTRL_LEFT;
+        else if (pad.lx > 178) cur |= SCE_CTRL_RIGHT;
+        if (pad.ly < 78)       cur |= SCE_CTRL_UP;
+        else if (pad.ly > 178) cur |= SCE_CTRL_DOWN;
+
         unsigned int changed = cur ^ last_buttons;
         if (changed && saturn_pad)
         {
             for (int m = 0; m < MAP_COUNT; m++)
             {
                 unsigned int bit = vita_btn_bits[m];
-                if (changed & bit) {
-                    vita_log("BTN: vita_bit=%08x map_idx=%d sat=%d press=%d\n",
-                             bit, m, cfg.mapping[m], !!(cur & bit));
+                if (changed & bit)
                     apply_saturn_btn(saturn_pad, cfg.mapping[m], cur & bit);
-                }
             }
         }
-        if (cur & SCE_CTRL_START)
-            break;
+
+        /* Salir del juego: mantener START+SELECT ~1 segundo.
+           START solo YA NO cierra la app — llega al juego (pausa, menús). */
+        if ((cur & (SCE_CTRL_START | SCE_CTRL_SELECT)) ==
+                   (SCE_CTRL_START | SCE_CTRL_SELECT))
+        {
+            if (exit_combo_t0 == 0)
+                exit_combo_t0 = now;
+            else if (now - exit_combo_t0 >= 1000000ULL)
+                break;
+        }
+        else
+            exit_combo_t0 = 0;
+
         last_buttons = cur;
     }
 

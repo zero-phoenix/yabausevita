@@ -91,8 +91,12 @@ static void GPUYuiSwapBuffers(void)
     {
         if (gpu_display_tex)
             vita2d_free_texture(gpu_display_tex);
+        /* dispbuffer (vidsoft) empaqueta 0xAABBGGRR: R en el byte bajo
+           (ver COLSAT2YAB32/Vdp2ColorRamGetColor). En memoria little-endian
+           los bytes quedan R,G,B,A == A8B8G8R8. Usar A8R8G8B8 aquí
+           intercambiaba rojo y azul (tonalidades raras). */
         gpu_display_tex = vita2d_create_empty_texture_format(srcw, srch,
-            SCE_GXM_TEXTURE_FORMAT_A8R8G8B8);
+            SCE_GXM_TEXTURE_FORMAT_A8B8G8R8);
         gpu_tex_w = srcw;
         gpu_tex_h = srch;
         if (!gpu_display_tex) { gpu_tex_w = gpu_tex_h = 0; return; }
@@ -104,8 +108,7 @@ static void GPUYuiSwapBuffers(void)
     uint32_t stride = vita2d_texture_get_stride(gpu_display_tex) / 4;
     int n = srcw * srch;
 
-    /* dispbuffer stores pixels as 0xAARRGGBB (little-endian: B,G,R,A).
-       A8R8G8B8 expects same byte order — no conversion needed. */
+    /* La textura ya coincide byte a byte con dispbuffer: copia directa. */
     if (stride == (uint32_t)srcw)
     {
         memcpy(tp, dispbuffer, (size_t)n * sizeof(uint32_t));
@@ -126,8 +129,17 @@ static void GPUYuiSwapBuffers(void)
     t0 = TICK();
     vita2d_start_drawing();
     vita2d_clear_screen();
-    int offx = (960 - srcw) / 2, offy = (544 - srch) / 2;
-    vita2d_draw_texture(gpu_display_tex, offx, offy);
+    /* Escalado proporcional a la altura máxima de la Vita (544 px),
+       centrado horizontal, sin estirar (misma escala en X e Y).
+       El filtro POINT (arriba) mantiene los píxeles nítidos, sin blur.
+       Toda resolución del Saturn (320x224...704x480) cabe a lo ancho. */
+    {
+        float scale = 544.0f / (float)srch;
+        float drww  = (float)srcw * scale;
+        float offx  = (960.0f - drww) * 0.5f;
+        if (offx < 0.0f) offx = 0.0f;
+        vita2d_draw_texture_scale(gpu_display_tex, offx, 0.0f, scale, scale);
+    }
     vita2d_end_drawing();
     vita2d_swap_buffers();
     acc_display += TICK() - t0;

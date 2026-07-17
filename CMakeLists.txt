@@ -18,7 +18,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.01")
+set(VITA_VERSION  "01.02")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c
@@ -97,6 +97,7 @@ target_link_libraries(${VITA_APP_NAME}
     SceCommonDialog_stub
     SceGxm_stub
     SceIofilemgr_stub
+    ScePower_stub
     m
     z
 )
