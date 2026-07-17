@@ -18,7 +18,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.02")
+set(VITA_VERSION  "01.03")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c
@@ -33,6 +33,10 @@ set(YABAUSE_CORE_SOURCES
     src/memory.c
     src/m68kcore.c
     src/m68kd.c
+    src/m68kq68.c
+    src/q68/q68.c
+    src/q68/q68-core.c
+    src/q68/q68-disasm.c
     src/movie.c
     src/netlink.c
     src/peripheral.c
@@ -59,6 +63,7 @@ set(VITA_PLATFORM_SOURCES
     src/vita/libchdr/unity.c
     src/vita/sh2fast.c
     src/vita/sh2lru.c
+    src/vita/snd_vita.c
     src/vita/vidgpu.c
 )
 
@@ -87,6 +92,9 @@ set_source_files_properties(src/vita/sh2lru.c PROPERTIES COMPILE_FLAGS "-O3 -fun
 set_source_files_properties(src/vita/sh2fast.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
 set_source_files_properties(src/sh2int.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
 set_source_files_properties(src/vidsoft.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops -fgcse-after-reload")
+# Q68 (CPU de sonido 68000) y SCSP: intérpretes calientes con audio activo
+set_source_files_properties(src/q68/q68-core.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
+set_source_files_properties(src/scsp.c PROPERTIES COMPILE_FLAGS "-O3")
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <vita2d.h>
 #include <psp2/kernel/processmgr.h>
+#include "yabause.h"
 #include "vdp1.h"
 #include "vidsoft.h"
 
@@ -45,6 +46,39 @@ static int timing_frame_count;
 
 static vita2d_texture *gpu_display_tex = NULL;
 static int gpu_tex_w = 0, gpu_tex_h = 0;
+
+/* ── Auto-frameskip real ───────────────────────────────────────────────
+   El "frameskip" anterior no saltaba nada: vidsoft renderizaba todas las
+   capas y se componía/presentaba cada frame igual. Aquí la decisión se
+   toma al inicio del frame (Vdp2DrawStart) contra un deadline de 60 fps
+   (50 en PAL) de reloj real:
+
+   - A tiempo → renderizar y presentar (el vsync de vita2d marca el paso).
+   - Con retraso de más de medio frame → saltar VIDSoftVdp2DrawScreens +
+     Composite + subida a GPU + present + espera de vsync (lo caro),
+     hasta FS_MAX_CONSEC frames seguidos. El VDP1 se sigue ejecutando
+     siempre (hay juegos que leen su framebuffer).
+
+   Resultado: cuando la emulación va sobrada no se salta nada, y cuando
+   una escena pesa, el juego mantiene su velocidad sacrificando frames
+   dibujados — que es lo que se nota como "más fps" en la mano.        */
+
+static int fs_auto = 1;
+static int fs_fixed = 0;
+static int fs_counter = 0;
+static int fs_consec = 0;
+static int fs_skip_now = 0;
+static int fs_skipped_total = 0;
+static SceUInt64 fs_deadline = 0;
+#define FS_MAX_CONSEC 4
+
+void VIDGPUConfigureFrameSkip(int auto_on, int fixed)
+{
+    fs_auto  = auto_on ? 1 : 0;
+    fs_fixed = fixed < 0 ? 0 : (fixed > 4 ? 4 : fixed);
+    fs_counter = fs_consec = fs_skip_now = 0;
+    fs_deadline = 0;
+}
 
 static int VIDGPUInit(void)
 {
@@ -149,20 +183,65 @@ void VIDGPUVdp2LogTiming(void)
 {
     if (timing_frame_count > 0)
     {
-        vita_log("  GPU timing: composite=%lldus upload=%lldus display=%lldus frames=%d\n",
-            acc_composite, acc_upload, acc_display, timing_frame_count);
+        vita_log("  GPU timing: composite=%lldus upload=%lldus display=%lldus frames=%d skipped=%d\n",
+            acc_composite, acc_upload, acc_display, timing_frame_count, fs_skipped_total);
     }
     acc_composite = acc_upload = acc_display = 0;
     timing_frame_count = 0;
+    fs_skipped_total = 0;
+}
+
+/* Decide al inicio de cada frame si este se dibuja o se salta. */
+static void VIDGPUVdp2DrawStart(void)
+{
+    SceUInt64 now = TICK();
+    SceUInt64 period = yabsys.IsPal ? 20000 : 16667;
+
+    if (fs_deadline == 0)
+        fs_deadline = now;
+
+    fs_skip_now = 0;
+    if (fs_auto)
+    {
+        if ((s64)(now - fs_deadline) > (s64)(period / 2) &&
+            fs_consec < FS_MAX_CONSEC)
+            fs_skip_now = 1;
+    }
+    else if (fs_fixed > 0)
+    {
+        fs_skip_now = (fs_counter != 0);
+        fs_counter = (fs_counter + 1) % (fs_fixed + 1);
+    }
+
+    if (fs_skip_now) { fs_consec++; fs_skipped_total++; }
+    else               fs_consec = 0;
+
+    fs_deadline += period;
+    /* Resincronizar tras pausas largas (cargas de CD, menús, etc.) */
+    if ((s64)(now - fs_deadline) > (s64)(8 * period))
+        fs_deadline = now + period;
+
+    VIDSoftVdp2DrawStart();
+}
+
+/* En frames saltados no se renderizan las capas del VDP2 (lo más caro). */
+static void VIDGPUVdp2DrawScreens(void)
+{
+    if (fs_skip_now)
+        return;
+    VIDSoftVdp2DrawScreens();
 }
 
 static void VIDGPUVdp2DrawEnd(void)
 {
-    SceUInt64 t0 = TICK();
-    VIDSoftVdp2Composite();
-    acc_composite += TICK() - t0;
+    if (!fs_skip_now)
+    {
+        SceUInt64 t0 = TICK();
+        VIDSoftVdp2Composite();
+        acc_composite += TICK() - t0;
 
-    GPUYuiSwapBuffers();
+        GPUYuiSwapBuffers();
+    }
     timing_frame_count++;
 }
 
@@ -186,9 +265,9 @@ VideoInterface_struct VIDGPU = {
     VIDSoftVdp1SystemClipping,
     VIDSoftVdp1LocalCoordinate,
     VIDSoftVdp2Reset,
-    VIDSoftVdp2DrawStart,
+    VIDGPUVdp2DrawStart,
     VIDGPUVdp2DrawEnd,
-    VIDSoftVdp2DrawScreens,
+    VIDGPUVdp2DrawScreens,
     VIDSoftVdp2SetResolution,
     VIDSoftVdp2SetPriorityNBG0,
     VIDSoftVdp2SetPriorityNBG1,

@@ -23,10 +23,13 @@
 
 #include "vita_menu.h"
 #include "cd_chd.h"
+#include "snd_vita.h"
 
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
 extern VideoInterface_struct VIDGPU;
+extern void VIDGPUConfigureFrameSkip(int auto_on, int fixed);
+extern void VIDGPUVdp2LogTiming(void);
 
 #define VITA_SCREEN_W 960
 #define VITA_SCREEN_H 544
@@ -41,7 +44,7 @@ static int g_vsync = 1;
 int vita_log(const char *fmt, ...);
 
 extern M68K_struct M68KDummy;
-M68K_struct *M68KCoreList[] = { &M68KDummy, NULL };
+M68K_struct *M68KCoreList[] = { &M68KDummy, &M68KQ68, NULL };
 
 extern SH2Interface_struct SH2Interpreter;
 extern SH2Interface_struct SH2DebugInterpreter;
@@ -55,7 +58,7 @@ extern CDInterface ISOCD;
 CDInterface *CDCoreList[] = { &DummyCD, &ISOCD, &CHDCD, NULL };
 
 extern SoundInterface_struct SNDDummy;
-SoundInterface_struct *SNDCoreList[] = { &SNDDummy, NULL };
+SoundInterface_struct *SNDCoreList[] = { &SNDDummy, &SNDVita, NULL };
 
 extern VideoInterface_struct VIDSoft;
 VideoInterface_struct *VIDCoreList[] = { &VIDSoft, &VIDGPU, NULL };
@@ -271,8 +274,11 @@ int main(int argc, char *argv[])
     yinit.percoretype   = PERCORE_DUMMY;
     yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : 2; /* 2=SH2Fast, 3=SH2LRU */
     yinit.vidcoretype   = VIDCORE_GPU;
-    yinit.sndcoretype   = SNDCORE_DUMMY;
-    yinit.m68kcoretype  = 0;
+    /* Audio real: backend sceAudioOut + 68K Q68 ejecutando el driver de
+       sonido del juego (SFX/música secuenciada) + música CDDA del CD.
+       Con audio OFF ambos quedan en dummy y se ahorra ese CPU. */
+    yinit.sndcoretype   = cfg.audio_enabled ? SNDCORE_VITA : SNDCORE_DUMMY;
+    yinit.m68kcoretype  = cfg.audio_enabled ? M68KCORE_Q68 : M68KCORE_DUMMY;
     yinit.cdcoretype    = cdcore;
     yinit.cdpath        = cdpath;
     yinit.biospath      = cfg.bios_path[0] ? cfg.bios_path : NULL;
@@ -295,6 +301,13 @@ int main(int argc, char *argv[])
             "Yabause no pudo inicializarse.\nRevisa la configuracion y BIOS.");
         sceKernelExitProcess(0);
         return 0;
+    }
+
+    if (cfg.audio_enabled)
+    {
+        ScspSetVolume(cfg.audio_volume);
+        ScspUnMuteAudio();
+        vita_log("Audio ON: vol=%d%%, 68K=Q68\n", cfg.audio_volume);
     }
 
     vita_log("QuickLoading game\n");
@@ -326,27 +339,21 @@ int main(int argc, char *argv[])
     g_auto_frameskip = cfg.auto_frameskip;
     g_frame_skip = cfg.frame_skip;
 
-    int frame_count = 0, skip_counter = 0;
+    /* El frameskip REAL lo decide el video core frame a frame (vidgpu.c):
+       en modo auto salta el render solo cuando va retrasado del deadline
+       de 60 fps, y presenta todo cuando la emulación va sobrada. */
+    VIDGPUConfigureFrameSkip(g_auto_frameskip, g_frame_skip);
+
+    int frame_count = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
     SceUInt64 exit_combo_t0 = 0;
     unsigned int last_buttons = 0;
-    int skip = g_frame_skip;
-    if (skip < 0) skip = 0;
-    if (skip > 4) skip = 4;
 
-    vita_log("Entering emulation loop, frame_skip=%d\n", skip);
+    vita_log("Entering emulation loop: auto_skip=%d fixed_skip=%d audio=%d\n",
+             g_auto_frameskip, g_frame_skip, cfg.audio_enabled);
 
     for (;;)
     {
-        int display_this = (skip == 0) ? 1 : (skip_counter == 0);
-        skip_counter = (skip_counter + 1) % (skip + 1);
-
-        if (!display_this)
-        {
-            YabauseExec();
-            continue;
-        }
-
         YabauseExec();
         frame_count++;
 
