@@ -11,6 +11,21 @@ endif()
 project(YabauseVita C)
 
 add_definitions(-DVERSION="0.9.10")
+
+# ── Flags críticos de rendimiento (v01.05) ─────────────────────────────
+# DONT_PROFILE: sin él, PROFILE_START/STOP son funciones REALES (clock() +
+#   búsqueda de strings) llamadas ~2.5 MILLONES de veces/segundo desde el
+#   loop de emulación — la causa principal de que el emulador nunca pasara
+#   de unos pocos fps en ninguna versión anterior.
+# NO_DECILINE: rebanadas SH2 por línea (~1700 ciclos) en vez de por
+#   deciline (~170): 10× menos llamadas a SH2Exec/ScuExec. Lo mismo que
+#   usaba el port oficial de PSP.
+# PSP_TIMING_TWEAKS: contabilidad de ciclos más barata (FRT por ciclos
+#   pasados en vez de acumulados), también del port de PSP.
+# HAVE_GETTIMEOFDAY: sin él, YabauseGetTicks() no tiene rama válida en
+#   Vita (retorna basura) y tickfreq queda en 0 — el auto-frameskip
+#   interno calculaba sobre basura.
+add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
@@ -18,7 +33,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.04")
+set(VITA_VERSION  "01.05")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c

@@ -137,6 +137,19 @@ u8 *vdp1backframebuffer;
 
 u32 *vdp2framebuffer=NULL;
 
+/* ── Doble búfer del framebuffer VDP2 (hilo de render en PS Vita) ────────
+   vdp2framebuffer: destino de dibujo del frame actual (hilo principal).
+   vdp2framebuffer_alt: el otro búfer del ping-pong.
+   vdp2composite_src: el frame COMPLETO que el hilo de render compone y
+   presenta. El intercambio (VIDSoftVdp2SwapCompositeBuffer) lo hace el
+   hilo principal SOLO cuando el hilo de render está libre, así nunca se
+   dibuja y compone el mismo búfer a la vez.
+   vidsoft_external_vdp1_swap=1: el swap de framebuffers del VDP1 lo hace
+   el port (vidgpu) en el momento del handoff, no el composite.          */
+static u32 *vdp2framebuffer_alt=NULL;
+u32 *vdp2composite_src=NULL;
+int vidsoft_external_vdp1_swap=0;
+
 int vdp1width;
 int vdp1height;
 static int vdp1clipxstart;
@@ -1390,6 +1403,11 @@ int VIDSoftInit(void)
    if ((vdp2framebuffer = (u32 *)calloc(sizeof(u32), 704 * 512)) == NULL)
       return -1;
 
+   /* Segundo búfer del ping-pong para el hilo de render. Si falla, se
+      degrada a búfer único (composite lee el mismo búfer que se dibuja). */
+   vdp2framebuffer_alt = (u32 *)calloc(sizeof(u32), 704 * 512);
+   vdp2composite_src = vdp2framebuffer;
+
    vdp1backframebuffer = vdp1framebuffer[0];
    vdp1frontframebuffer = vdp1framebuffer[1];
    vdp2width = 320;
@@ -1446,6 +1464,11 @@ void VIDSoftDeInit(void)
 
    if (vdp2framebuffer)
       free(vdp2framebuffer);
+
+   if (vdp2framebuffer_alt)
+      free(vdp2framebuffer_alt);
+   vdp2framebuffer_alt = NULL;
+   vdp2composite_src = NULL;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2774,7 +2797,7 @@ void VIDSoftVdp2Composite(void)
    int colormode = Vdp2Regs->SPCTL & 0x20;
    vdp2draw_struct info;
    u32 *dst=dispbuffer;
-   u32 *vdp2src=vdp2framebuffer;
+   u32 *vdp2src=vdp2composite_src;   /* frame completo entregado al render */
    int islinewindow;
    clipping_struct clip[2];
    u32 linewnd0addr, linewnd1addr;
@@ -2784,8 +2807,9 @@ void VIDSoftVdp2Composite(void)
    {
       int n = vdp2width * vdp2height;
       for (i = 0; i < n; i++)
-         dispbuffer[i] = 0xFF000000 | vdp2framebuffer[i];
-      VIDSoftVdp1SwapFrameBuffer();
+         dispbuffer[i] = 0xFF000000 | vdp2composite_src[i];
+      if (!vidsoft_external_vdp1_swap)
+         VIDSoftVdp1SwapFrameBuffer();
       return;
    }
 
@@ -3049,7 +3073,27 @@ winpass16b_1:
       }
    }
 
-   VIDSoftVdp1SwapFrameBuffer();
+   if (!vidsoft_external_vdp1_swap)
+      VIDSoftVdp1SwapFrameBuffer();
+}
+
+/* Intercambia el destino de dibujo con el búfer alterno y publica el frame
+   recién dibujado como fuente del composite. Llamar SOLO desde el hilo
+   principal, con el hilo de render libre. */
+void VIDSoftVdp2SwapCompositeBuffer(void)
+{
+   if (vdp2framebuffer_alt == NULL)
+   {
+      /* sin búfer alterno: composite lee el mismo búfer (modo degradado) */
+      vdp2composite_src = vdp2framebuffer;
+      return;
+   }
+   {
+      u32 *t = vdp2framebuffer;
+      vdp2framebuffer = vdp2framebuffer_alt;
+      vdp2framebuffer_alt = t;
+      vdp2composite_src = t;   /* el frame que se acaba de terminar */
+   }
 }
 
 void VIDSoftVdp2DrawEnd(void)

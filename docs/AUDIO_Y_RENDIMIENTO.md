@@ -1,4 +1,58 @@
-# Audio y rendimiento (v01.03 → v01.04)
+# Audio y rendimiento (v01.03 → v01.05)
+
+## v01.05: los 3 núcleos + las patologías del loop
+
+Con el audio ya en su núcleo (v01.04) el juego seguía a ~1 fps: el hilo
+principal era el cuello. Diagnóstico y paquete de fixes:
+
+**1. `-DHAVE_GETTIMEOFDAY` (crítico).** En Vita, `YabauseGetTicks()` no
+tenía rama válida (retornaba **basura**, sin `return`) y `tickfreq`
+quedaba en 0. El auto-frameskip interno de vdp2.c — activo desde
+siempre vía la config — decidía saltos y límites de velocidad sobre
+matemática rota, de forma no determinista. Ahora mide microsegundos
+reales.
+
+**2. `-DNO_DECILINE` + `-DPSP_TIMING_TWEAKS` (los flags del port de
+PSP).** El loop ejecutaba los SH2 en rebanadas de ~170 ciclos: 5 260
+llamadas a `SH2Exec`/`ScuExec` por frame (315 800/s), y el overhead por
+llamada (chequeo de idle, setup del cache de bloques) dominaba el tiempo
+total. Con rebanadas por línea son 10× menos llamadas, con HBlankIN
+preservado (9/10 + 1/10 de línea).
+
+**3. Auto-frameskip interno de vdp2.c como único governor**
+(`yinit.frameskip = 1` siempre). Mide ticks reales (ya correctos por el
+punto 1), salta frames completos cuando va retrasado — **incluido el
+render del VDP1**, con `Vdp1NoDraw` manteniendo la semántica de EDSR que
+los juegos esperan — hasta 9 seguidos, y limita la velocidad cuando el
+juego va sobrado. Se eliminó el frameskip por deadline de vidgpu (dos
+sistemas de skip peleándose).
+
+**4. Hilo de render en el núcleo 1.** De los frames que sí se dibujan,
+la mitad cara de la salida — Composite (mezcla VDP1+VDP2 por píxel),
+subida a GPU, draw y **la espera de vsync** — corre en un hilo fijado al
+núcleo 1, con doble búfer del framebuffer VDP2 (ping-pong sin memcpy) y
+el swap del VDP1 movido al handoff (hilo principal, solo cuando el
+render está libre → sin carreras). Si el render sigue ocupado cuando
+llega el siguiente frame, ese frame no se presenta y punto: el hilo
+principal **jamás** espera a la GPU ni al vsync.
+
+```
+núcleo 0: SH2 + SCU + VDP1 + capas VDP2   (el juego)
+núcleo 1: Composite + upload + present + vsync
+núcleo 2: 68K + timers SCSP + mezcla + CDDA
+```
+
+**5. `-DDONT_PROFILE`** por higiene (yabause.c ya lo definía localmente;
+ahora aplica a todo el árbol).
+
+**Telemetría** (en `ux0:data/yabausevita_log.txt`, cada 5 s):
+`FPS:` = velocidad real del juego (frames emulados), y
+`GPU: drawn/presented/dropped` + µs de composite/upload/display.
+Si algo sigue lento, ese log dice exactamente dónde mirar.
+
+---
+
+# Registro histórico v01.04
 
 ## v01.04: por qué v01.03 iba a ~0 fps, y la solución
 

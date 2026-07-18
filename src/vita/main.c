@@ -28,7 +28,6 @@
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
 extern VideoInterface_struct VIDGPU;
-extern void VIDGPUConfigureFrameSkip(int auto_on, int fixed);
 extern void VIDGPUVdp2LogTiming(void);
 
 #define VITA_SCREEN_W 960
@@ -289,7 +288,12 @@ int main(int argc, char *argv[])
     yinit.cartpath      = NULL;
     yinit.netlinksetting = NULL;
     yinit.flags         = 0;
-    yinit.frameskip     = cfg.frame_skip;
+    /* Siempre 1: activa el auto-frameskip interno de vdp2.c, que mide
+       ticks reales, salta frames completos (incluido el render del VDP1,
+       con la semántica correcta de Vdp1NoDraw) y limita la velocidad
+       cuando el juego va sobrado. Requiere HAVE_GETTIMEOFDAY definido
+       (sin él, YabauseGetTicks devolvía basura en Vita). */
+    yinit.frameskip     = 1;
 
     int init_ret = YabauseInit(&yinit);
     vita_log("YabauseInit returned %d\n", init_ret);
@@ -343,11 +347,6 @@ int main(int argc, char *argv[])
     g_show_fps = cfg.show_fps;
     g_auto_frameskip = cfg.auto_frameskip;
     g_frame_skip = cfg.frame_skip;
-
-    /* El frameskip REAL lo decide el video core frame a frame (vidgpu.c):
-       en modo auto salta el render solo cuando va retrasado del deadline
-       de 60 fps, y presenta todo cuando la emulación va sobrada. */
-    VIDGPUConfigureFrameSkip(g_auto_frameskip, g_frame_skip);
 
     int frame_count = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
