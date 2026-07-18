@@ -1,8 +1,6 @@
 #include <string.h>
-#include <stdint.h>
 #include <vita2d.h>
 #include <psp2/kernel/processmgr.h>
-#include <psp2/kernel/threadmgr.h>
 #include "yabause.h"
 #include "vdp1.h"
 #include "vidsoft.h"
@@ -39,9 +37,6 @@ extern void FASTCALL VIDSoftVdp2SetPriorityRBG0(int);
 extern void VIDSoftVdp2Composite(void);
 extern void VIDSoftOnScreenDebugMessage(char *string, ...);
 extern void VIDSoftGetGlSize(int *width, int *height);
-extern void VIDSoftVdp1SwapFrameBuffer(void);
-extern void VIDSoftVdp2SwapCompositeBuffer(void);
-extern int vidsoft_external_vdp1_swap;
 extern int vita_log(const char *fmt, ...);
 
 /* Lightweight frame timing */
@@ -52,60 +47,37 @@ static int timing_frame_count;
 static vita2d_texture *gpu_display_tex = NULL;
 static int gpu_tex_w = 0, gpu_tex_h = 0;
 
-/* ── Hilo de render en el núcleo 1 (v01.05) ────────────────────────────
-   El frameskip ahora lo gobierna el mecanismo INTERNO de vdp2.c
-   (EnableAutoFrameSkip): mide ticks reales, salta frames completos
-   (incluido el render del VDP1, con Vdp1NoDraw manteniendo la semántica
-   de EDSR que los juegos esperan) y limita la velocidad cuando el juego
-   va sobrado. Los hooks de este core ya solo se llaman en frames NO
-   saltados.
+/* ── Auto-frameskip real ───────────────────────────────────────────────
+   El "frameskip" anterior no saltaba nada: vidsoft renderizaba todas las
+   capas y se componía/presentaba cada frame igual. Aquí la decisión se
+   toma al inicio del frame (Vdp2DrawStart) contra un deadline de 60 fps
+   (50 en PAL) de reloj real:
 
-   De los frames que sí se dibujan, la mitad cara de la salida —
-   Composite (mezcla VDP1+VDP2 por píxel) + subida a GPU + present +
-   ESPERA DE VSYNC — corre en un hilo propio fijado al núcleo 1:
+   - A tiempo → renderizar y presentar (el vsync de vita2d marca el paso).
+   - Con retraso de más de medio frame → saltar VIDSoftVdp2DrawScreens +
+     Composite + subida a GPU + present + espera de vsync (lo caro),
+     hasta FS_MAX_CONSEC frames seguidos. El VDP1 se sigue ejecutando
+     siempre (hay juegos que leen su framebuffer).
 
-     principal (núcleo 0): SH2 + SCU + VDP1 + capas VDP2  → handoff
-     render    (núcleo 1): Composite + upload + draw + vsync
-     audio     (núcleo 2): 68K + timers SCSP + mezcla + CDDA
+   Resultado: cuando la emulación va sobrada no se salta nada, y cuando
+   una escena pesa, el juego mantiene su velocidad sacrificando frames
+   dibujados — que es lo que se nota como "más fps" en la mano.        */
 
-   Handoff sin bloqueo: al terminar de dibujar un frame, si el hilo de
-   render está libre se intercambian los búferes (ping-pong del VDP2 y
-   swap del VDP1 — ambos desde el hilo principal, sin carreras) y se le
-   da la señal; si está ocupado, el frame simplemente no se presenta.
-   El hilo principal JAMÁS espera al vsync ni a la GPU.                */
+static int fs_auto = 1;
+static int fs_fixed = 0;
+static int fs_counter = 0;
+static int fs_consec = 0;
+static int fs_skip_now = 0;
+static int fs_skipped_total = 0;
+static SceUInt64 fs_deadline = 0;
+#define FS_MAX_CONSEC 4
 
-#ifndef SCE_KERNEL_CPU_MASK_USER_1
-#define SCE_KERNEL_CPU_MASK_USER_1 (0x02 << 16)
-#endif
-
-static SceUID render_thread_uid = -1;
-static SceUID render_sema = -1;
-static volatile int render_stop = 0;
-static volatile int render_busy = 0;
-static int presented_frames = 0;
-static int dropped_presents = 0;
-
-static void GPUYuiSwapBuffers(void);
-
-static int render_thread(SceSize args, void *argp)
+void VIDGPUConfigureFrameSkip(int auto_on, int fixed)
 {
-    (void)args; (void)argp;
-    for (;;)
-    {
-        sceKernelWaitSema(render_sema, 1, NULL);
-        if (render_stop)
-            break;
-
-        SceUInt64 t0 = TICK();
-        VIDSoftVdp2Composite();
-        acc_composite += TICK() - t0;
-
-        GPUYuiSwapBuffers();
-        presented_frames++;
-
-        render_busy = 0;
-    }
-    return 0;
+    fs_auto  = auto_on ? 1 : 0;
+    fs_fixed = fixed < 0 ? 0 : (fixed > 4 ? 4 : fixed);
+    fs_counter = fs_consec = fs_skip_now = 0;
+    fs_deadline = 0;
 }
 
 static int VIDGPUInit(void)
@@ -126,51 +98,11 @@ static int VIDGPUInit(void)
     gpu_tex_h = 0;
     acc_composite = acc_upload = acc_display = 0;
     timing_frame_count = 0;
-    presented_frames = dropped_presents = 0;
-
-    if (VIDSoftInit() != 0)
-        return -1;
-
-    /* Hilo de render en el núcleo 1. El swap del VDP1 pasa a hacerse en
-       el handoff (hilo principal), no dentro del composite. */
-    render_stop = 0;
-    render_busy = 0;
-    render_sema = sceKernelCreateSema("yab_render_sema", 0, 0, 1, NULL);
-    if (render_sema >= 0)
-    {
-        render_thread_uid = sceKernelCreateThread("yab_render", render_thread,
-                                                  96, 0x10000, 0,
-                                                  SCE_KERNEL_CPU_MASK_USER_1,
-                                                  NULL);
-        if (render_thread_uid >= 0)
-        {
-            vidsoft_external_vdp1_swap = 1;
-            sceKernelStartThread(render_thread_uid, 0, NULL);
-        }
-    }
-    /* Si el hilo no pudo crearse, render_thread_uid < 0 y DrawEnd hará
-       todo en el hilo principal (modo degradado). */
-    return 0;
+    return VIDSoftInit();
 }
 
 static void VIDGPUDeInit(void)
 {
-    /* Parar el hilo de render antes de liberar recursos que usa */
-    if (render_thread_uid >= 0)
-    {
-        render_stop = 1;
-        sceKernelSignalSema(render_sema, 1);
-        sceKernelWaitThreadEnd(render_thread_uid, NULL, NULL);
-        sceKernelDeleteThread(render_thread_uid);
-        render_thread_uid = -1;
-    }
-    if (render_sema >= 0)
-    {
-        sceKernelDeleteSema(render_sema);
-        render_sema = -1;
-    }
-    vidsoft_external_vdp1_swap = 0;
-
     if (gpu_display_tex)
     {
         vita2d_free_texture(gpu_display_tex);
@@ -251,51 +183,66 @@ void VIDGPUVdp2LogTiming(void)
 {
     if (timing_frame_count > 0)
     {
-        vita_log("  GPU: drawn=%d presented=%d dropped=%d composite=%lldus upload=%lldus display=%lldus\n",
-            timing_frame_count, presented_frames, dropped_presents,
-            acc_composite, acc_upload, acc_display);
+        vita_log("  GPU timing: composite=%lldus upload=%lldus display=%lldus frames=%d skipped=%d\n",
+            acc_composite, acc_upload, acc_display, timing_frame_count, fs_skipped_total);
     }
     acc_composite = acc_upload = acc_display = 0;
     timing_frame_count = 0;
-    presented_frames = 0;
-    dropped_presents = 0;
+    fs_skipped_total = 0;
 }
 
-/* Fin de frame dibujado (los saltados por el auto-frameskip interno de
-   vdp2.c ni siquiera llegan aquí). Handoff al hilo de render sin
-   bloquear jamás el hilo principal. */
-static void VIDGPUVdp2DrawEnd(void)
+/* Decide al inicio de cada frame si este se dibuja o se salta. */
+static void VIDGPUVdp2DrawStart(void)
 {
-    timing_frame_count++;
+    SceUInt64 now = TICK();
+    SceUInt64 period = yabsys.IsPal ? 20000 : 16667;
 
-    if (render_thread_uid >= 0)
+    if (fs_deadline == 0)
+        fs_deadline = now;
+
+    fs_skip_now = 0;
+    if (fs_auto)
     {
-        if (render_busy)
-        {
-            /* El render sigue con el frame anterior: este no se presenta.
-               Los búferes NO se intercambian, así que el siguiente frame
-               sobreescribe este sin carreras. */
-            dropped_presents++;
-            return;
-        }
-        /* Render libre: publicar el frame (swaps desde el hilo principal,
-           sin carreras) y despertar al hilo del núcleo 1. */
-        VIDSoftVdp1SwapFrameBuffer();
-        VIDSoftVdp2SwapCompositeBuffer();
-        render_busy = 1;
-        sceKernelSignalSema(render_sema, 1);
-        return;
+        if ((s64)(now - fs_deadline) > (s64)(period / 2) &&
+            fs_consec < FS_MAX_CONSEC)
+            fs_skip_now = 1;
+    }
+    else if (fs_fixed > 0)
+    {
+        fs_skip_now = (fs_counter != 0);
+        fs_counter = (fs_counter + 1) % (fs_fixed + 1);
     }
 
-    /* Modo degradado (sin hilo de render): todo en el hilo principal.
-       vidsoft_external_vdp1_swap quedó en 0: el composite hace su swap. */
+    if (fs_skip_now) { fs_consec++; fs_skipped_total++; }
+    else               fs_consec = 0;
+
+    fs_deadline += period;
+    /* Resincronizar tras pausas largas (cargas de CD, menús, etc.) */
+    if ((s64)(now - fs_deadline) > (s64)(8 * period))
+        fs_deadline = now + period;
+
+    VIDSoftVdp2DrawStart();
+}
+
+/* En frames saltados no se renderizan las capas del VDP2 (lo más caro). */
+static void VIDGPUVdp2DrawScreens(void)
+{
+    if (fs_skip_now)
+        return;
+    VIDSoftVdp2DrawScreens();
+}
+
+static void VIDGPUVdp2DrawEnd(void)
+{
+    if (!fs_skip_now)
     {
         SceUInt64 t0 = TICK();
         VIDSoftVdp2Composite();
         acc_composite += TICK() - t0;
+
         GPUYuiSwapBuffers();
-        presented_frames++;
     }
+    timing_frame_count++;
 }
 
 VideoInterface_struct VIDGPU = {
@@ -318,9 +265,9 @@ VideoInterface_struct VIDGPU = {
     VIDSoftVdp1SystemClipping,
     VIDSoftVdp1LocalCoordinate,
     VIDSoftVdp2Reset,
-    VIDSoftVdp2DrawStart,
+    VIDGPUVdp2DrawStart,
     VIDGPUVdp2DrawEnd,
-    VIDSoftVdp2DrawScreens,
+    VIDGPUVdp2DrawScreens,
     VIDSoftVdp2SetResolution,
     VIDSoftVdp2SetPriorityNBG0,
     VIDSoftVdp2SetPriorityNBG1,

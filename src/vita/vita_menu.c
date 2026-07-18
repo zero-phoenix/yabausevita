@@ -1343,15 +1343,7 @@ static int handle_roms_input(VitaMenuConfig *cfg, SceCtrlData *pad,
         g_file_sel += visible_items;
         if (g_file_sel >= g_file_count) g_file_sel = g_file_count - 1;
     }
-    /* L1/R1: página */
-    if (pressed & SCE_CTRL_L1) {
-        g_file_sel -= visible_items - 1;
-        if (g_file_sel < 0) g_file_sel = 0;
-    }
-    if (pressed & SCE_CTRL_R1) {
-        g_file_sel += visible_items - 1;
-        if (g_file_sel >= g_file_count) g_file_sel = g_file_count - 1;
-    }
+
 
     /* X: Seleccionar */
     if (pressed & SCE_CTRL_CROSS) {
@@ -1582,14 +1574,7 @@ static void handle_bios_input(VitaMenuConfig *cfg, SceCtrlData *pad,
     if (pressed & SCE_CTRL_DOWN) {
         if (g_bios_sel < g_bios_count - 1) g_bios_sel++;
     }
-    if (pressed & SCE_CTRL_L1) {
-        g_bios_sel -= visible - 1;
-        if (g_bios_sel < 0) g_bios_sel = 0;
-    }
-    if (pressed & SCE_CTRL_R1) {
-        g_bios_sel += visible - 1;
-        if (g_bios_sel >= g_bios_count) g_bios_sel = g_bios_count - 1;
-    }
+
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1881,17 +1866,7 @@ static void handle_config_input(VitaMenuConfig *cfg, SceCtrlData *pad,
             if (g_cfg_sel < 0) { g_cfg_sel = 0; break; }
         } while (cfg_is_section[g_cfg_sel]);
     }
-    if (pressed & SCE_CTRL_L1) {
-        g_cfg_sel -= visible;
-        while (g_cfg_sel >= 0 && cfg_is_section[g_cfg_sel]) g_cfg_sel--;
-        if (g_cfg_sel < 0) g_cfg_sel = 0;
-        while (cfg_is_section[g_cfg_sel]) g_cfg_sel++;
-    }
-    if (pressed & SCE_CTRL_R1) {
-        g_cfg_sel += visible;
-        if (g_cfg_sel >= CFG_COUNT) g_cfg_sel = CFG_COUNT - 1;
-        while (cfg_is_section[g_cfg_sel]) g_cfg_sel--;
-    }
+
 
     /* Izquierda/Derecha para cambiar valores */
     int left = pressed & SCE_CTRL_LEFT;
@@ -2388,17 +2363,16 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
         if (dbg) { fprintf(dbg, "After tab switch: pressed=%04x\n", pressed); fflush(dbg); }
 
         if (!(pad.buttons & (SCE_CTRL_L1 | SCE_CTRL_R1))) {
-            /* Solo cambiar pestaña si no estamos en la lista */
-            /* (L1/R1 se usan para paginación dentro de pestañas) */
+            /* Solo cambiar pestaña si no estamos en combinaciones */
         }
 
-        /* Start: cambiar pestaña */
-        if (pressed & SCE_CTRL_START) {
+        /* R: cambiar pestaña (siguiente) */
+        if (pressed & SCE_CTRL_R1) {
             g_active_tab = (g_active_tab + 1) % VMENU_TAB_COUNT;
         }
 
-        /* Select: pestaña anterior */
-        if (pressed & SCE_CTRL_SELECT) {
+        /* L: pestaña anterior */
+        if (pressed & SCE_CTRL_L1) {
             g_active_tab = (g_active_tab - 1 + VMENU_TAB_COUNT) % VMENU_TAB_COUNT;
         }
 
