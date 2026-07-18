@@ -18,6 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
+#include <string.h>
+
+#ifdef __vita__
+#include <psp2/kernel/threadmgr.h>
+#endif
 #include <stdlib.h>
 #include "vdp2.h"
 #include "debug.h"
@@ -417,6 +422,9 @@ void Vdp2VBlankOUT(void) {
             diffticks = curticks-lastticks;
             if ((onesecondticks+diffticks) >= (yabsys.OneFrameTime * (u64)framecount))
                break;
+#ifdef __vita__
+            sceKernelDelayThread(100);
+#endif
          }
       }
 
