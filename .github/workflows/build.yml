@@ -53,7 +53,16 @@ jobs:
         run: |
           export VITASDK=/usr/local/vitasdk
           export PATH="/usr/local/vitasdk/bin:$PATH"
-          cmake --build build --verbose -- -j$(nproc)
+          set -o pipefail
+          cmake --build build -- -j$(nproc) 2>&1 | tee build/build_log.txt
+
+      - name: Errores al Step Summary (solo si falla)
+        if: failure()
+        run: |
+          echo '## Errores de compilacion' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -E "error:|Error |undefined reference|collect2" build/build_log.txt | head -50 >> $GITHUB_STEP_SUMMARY || echo "(sin lineas de error en build_log.txt)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Verify VPK
         run: |

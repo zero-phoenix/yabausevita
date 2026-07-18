@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 #include <vita2d.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/kernel/threadmgr.h>
