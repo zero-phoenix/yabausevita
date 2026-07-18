@@ -242,6 +242,16 @@ static void VIDGPUVdp2DrawEnd(void)
 
         GPUYuiSwapBuffers();
     }
+    else
+    {
+        /* Enforce pacing on skipped frames to prevent desyncing from the 68K audio thread.
+           Without this, the SH2 can run at 130+ FPS, flooding the audio queue and deadlocking. */
+        SceUInt64 now = TICK();
+        if (now < fs_deadline)
+        {
+            sceKernelDelayThread((SceUInt32)(fs_deadline - now));
+        }
+    }
     timing_frame_count++;
 }
 

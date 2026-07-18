@@ -2362,17 +2362,17 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
 
         if (dbg) { fprintf(dbg, "After tab switch: pressed=%04x\n", pressed); fflush(dbg); }
 
-        if (!(pad.buttons & (SCE_CTRL_L1 | SCE_CTRL_R1))) {
+        if (!(pad.buttons & (SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER))) {
             /* Solo cambiar pestaña si no estamos en combinaciones */
         }
 
         /* R: cambiar pestaña (siguiente) */
-        if (pressed & SCE_CTRL_R1) {
+        if (pressed & SCE_CTRL_RTRIGGER) {
             g_active_tab = (g_active_tab + 1) % VMENU_TAB_COUNT;
         }
 
         /* L: pestaña anterior */
-        if (pressed & SCE_CTRL_L1) {
+        if (pressed & SCE_CTRL_LTRIGGER) {
             g_active_tab = (g_active_tab - 1 + VMENU_TAB_COUNT) % VMENU_TAB_COUNT;
         }
 
