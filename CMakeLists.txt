@@ -18,7 +18,7 @@ include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 set(VITA_APP_NAME "YabauseVita")
 set(VITA_TITLEID  "YABA00001")
-set(VITA_VERSION  "01.03")
+set(VITA_VERSION  "01.04")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c

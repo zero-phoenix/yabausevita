@@ -9,4 +9,8 @@
 
 extern SoundInterface_struct SNDVita;
 
+/* Activa la generación real de sonido en el hilo de audio dedicado.
+   Llamar después de YabauseInit + ScspSetThreaded(1). */
+void SNDVitaEnableEngine(void);
+
 #endif /* SND_VITA_H */

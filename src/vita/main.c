@@ -307,7 +307,12 @@ int main(int argc, char *argv[])
     {
         ScspSetVolume(cfg.audio_volume);
         ScspUnMuteAudio();
-        vita_log("Audio ON: vol=%d%%, 68K=Q68\n", cfg.audio_volume);
+        /* Motor de sonido en hilo dedicado (otro núcleo): 68K + timers +
+           mezcla SCSP fuera del hilo principal. Orden importante:
+           primero el modo threaded, luego encender el motor. */
+        ScspSetThreaded(1);
+        SNDVitaEnableEngine();
+        vita_log("Audio ON (hilo dedicado): vol=%d%%, 68K=Q68\n", cfg.audio_volume);
     }
 
     vita_log("QuickLoading game\n");

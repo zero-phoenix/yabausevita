@@ -2708,6 +2708,27 @@ static int scsp_alloc_bufs() {
 static s32 FASTCALL (*m68kexecptr)(s32 cycles);  // M68K->Exec or M68KExecBP
 static s32 savedcycles;  // Cycles left over from the last M68KExec() call
 
+/* ── Modo "hilo de audio dedicado" (PS Vita) ─────────────────────────────
+   Con scsp_threaded=1, TODO el subsistema de sonido (timers SCSP, ejecución
+   del 68K y mezcla de muestras) corre en un hilo aparte en otro núcleo,
+   clockeado por el puerto de audio a 44100 Hz reales (ScspThreadedStep).
+   El hilo principal queda libre para SH2+video, y la música suena a
+   velocidad correcta aunque el video vaya por debajo de 60 fps.
+
+   Cruces entre hilos, resueltos así:
+   - MINT (interrupción SCSP→SCU): el hilo de audio no toca el SCU; deja
+     scsp_pending_mint y el hilo principal la entrega en ScspExec().
+   - M68KReset() desde el hilo principal (SMPC): se difiere con
+     scsp_pending_m68kreset y la aplica el hilo de audio antes de ejecutar.
+   - Realloc de búferes en ScspChangeVideoFormat: pausa el modo threaded y
+     espera (spin corto) a que el paso en curso termine.
+   - Escrituras SH2→SoundRAM/registros SCSP concurrentes: datos acotados
+     (arrays fijos); una carrera produce a lo sumo un click de audio.     */
+static volatile int scsp_threaded = 0;
+static volatile int scsp_thread_busy = 0;
+static volatile int scsp_pending_mint = 0;
+static volatile int scsp_pending_m68kreset = 0;
+
 //////////////////////////////////////////////////////////////////////////////
 
 u32 FASTCALL c68k_byte_read(const u32 adr) {
@@ -2756,6 +2777,16 @@ void c68k_interrupt_handler(u32 level) {
 void scu_interrupt_handler(void) {
   // send interrupt to scu
   ScuSendSoundRequest();
+}
+
+/* En modo threaded la MINT no puede tocar el SCU desde el hilo de audio:
+   se difiere y la entrega el hilo principal en ScspExec(). */
+static void scu_interrupt_trampoline(void) {
+   if (scsp_threaded) {
+      scsp_pending_mint = 1;
+      return;
+   }
+   scu_interrupt_handler();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2870,7 +2901,7 @@ int ScspInit(int coreid) {
 
    yabsys.IsM68KRunning = 0;
 
-   scsp_init(SoundRam, &c68k_interrupt_handler, &scu_interrupt_handler);
+   scsp_init(SoundRam, &c68k_interrupt_handler, &scu_interrupt_trampoline);
    ScspInternalVars->scsptiming1 = 0;
    ScspInternalVars->scsptiming2 = 0;
 
@@ -2972,9 +3003,19 @@ void ScspDeInit(void) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void M68KReset(void) {
+static void M68KResetInternal(void) {
    M68K->Reset();
    savedcycles = 0;
+}
+
+void M68KReset(void) {
+   /* En modo threaded el 68K vive en el hilo de audio: diferir el reset
+      para que lo aplique ese hilo antes de su próximo paso de ejecución. */
+   if (scsp_threaded) {
+      scsp_pending_m68kreset = 1;
+      return;
+   }
+   M68KResetInternal();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2986,6 +3027,16 @@ void ScspReset(void) {
 //////////////////////////////////////////////////////////////////////////////
 
 int ScspChangeVideoFormat(int type) {
+   /* Realloc de búferes: si el hilo de audio está mezclando, pausar el
+      modo threaded y esperar a que termine su paso (≤ ~12 ms) para no
+      liberar memoria bajo sus pies. */
+   int was_threaded = scsp_threaded;
+   if (was_threaded) {
+      scsp_threaded = 0;
+      while (scsp_thread_busy)
+         ; /* spin corto y acotado */
+   }
+
    scspsoundlen = 44100 / (type ? 50 : 60);
    scspsoundbufsize = scspsoundlen * scspsoundbufs;
 
@@ -2993,6 +3044,9 @@ int ScspChangeVideoFormat(int type) {
       return -1;
 
    SNDCore->ChangeVideoFormat(type ? 50 : 60);
+
+   if (was_threaded)
+      scsp_threaded = 1;
 
    return 0;
 }
@@ -3007,7 +3061,12 @@ __attribute__((noinline))
 static s32 FASTCALL M68KExecBP(s32 cycles);
 
 void M68KExec(s32 cycles) {
-   s32 newcycles = savedcycles - cycles;
+   s32 newcycles;
+   /* En modo threaded el 68K lo ejecuta el hilo de audio (ScspThreadedStep):
+      las llamadas por deciline del hilo principal no deben hacer nada. */
+   if (scsp_threaded)
+      return;
+   newcycles = savedcycles - cycles;
    if (LIKELY(yabsys.IsM68KRunning))
    {
       if (LIKELY(newcycles < 0))
@@ -3093,6 +3152,19 @@ void ScspExec() {
 	s16 stereodata16[(44100 / 50)*2];
    u32 audiosize;
 
+   /* Modo threaded: timers, 68K y mezcla corren en el hilo de audio.
+      Aquí (hilo principal, una vez por línea) solo se entregan las
+      interrupciones MINT hacia el SCU que el hilo de audio difirió. */
+   if (scsp_threaded)
+   {
+      if (scsp_pending_mint)
+      {
+         scsp_pending_mint = 0;
+         scu_interrupt_handler();
+      }
+      return;
+   }
+
    ScspInternalVars->scsptiming2 += ((735<<16) + 263/2) / 263;
    scsp_update_timer(ScspInternalVars->scsptiming2 >> 16); // Pass integer part
    ScspInternalVars->scsptiming2 &= 0xFFFF; // Keep fractional part
@@ -3162,6 +3234,62 @@ void ScspExec() {
 
    }
 #endif
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void ScspSetThreaded(int on) {
+   scsp_threaded = on ? 1 : 0;
+}
+
+/* Un paso del motor de sonido, llamado SOLO desde el hilo de audio dedicado.
+   Genera `len` muestras estéreo s16 intercaladas en `out` (len <= 735):
+   avanza los timers del SCSP y el 68K en rebanadas de 64 muestras (buena
+   granularidad de IRQ para el driver) y mezcla los 32 slots + CDDA.
+   A 44100 Hz el 68K de 11.2896 MHz ejecuta exactamente 256 ciclos/muestra. */
+void ScspThreadedStep(s16 *out, u32 len) {
+   u32 done = 0;
+
+   scsp_thread_busy = 1;
+
+   if (!scsp_threaded) {
+      /* pausado (p.ej. realloc en curso): entregar silencio */
+      memset(out, 0, len * 2 * sizeof(s16));
+      scsp_thread_busy = 0;
+      return;
+   }
+
+   if (scsp_pending_m68kreset) {
+      scsp_pending_m68kreset = 0;
+      M68KResetInternal();
+   }
+
+   if (len > scspsoundlen)
+      len = scspsoundlen;
+
+   while (done < len) {
+      u32 chunk = 64;
+      if (done + chunk > len)
+         chunk = len - done;
+
+      scsp_update_timer(chunk);
+
+      if (yabsys.IsM68KRunning) {
+         s32 cycles = (s32)chunk * 256;
+         s32 newcycles = savedcycles - cycles;
+         if (newcycles < 0)
+            newcycles += (*m68kexecptr)(-newcycles);
+         savedcycles = newcycles;
+      }
+      done += chunk;
+   }
+
+   memset(scspchannel[0].data32, 0, sizeof(u32) * len);
+   memset(scspchannel[1].data32, 0, sizeof(u32) * len);
+   scsp_update((s32 *)scspchannel[0].data32, (s32 *)scspchannel[1].data32, len);
+   ScspConvert32uto16s((s32 *)scspchannel[0].data32, (s32 *)scspchannel[1].data32, out, len);
+
+   scsp_thread_busy = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////

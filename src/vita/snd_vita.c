@@ -1,17 +1,28 @@
-/*  snd_vita.c — backend de sonido PS Vita (sceAudioOut) para Yabause
+/*  snd_vita.c — motor de sonido en hilo dedicado para PS Vita
 
-    Basado en el patrón probado de src/psp/psp-sound.c (Andrew Church):
-    doble búfer con handshake write_ready entre el hilo del emulador
-    (productor: SCSP entrega chunks vía UpdateAudio) y un hilo de
-    reproducción (consumidor: sceAudioOutOutput, que bloquea hasta que
-    el búfer anterior terminó — el propio puerto hace de reloj).
+    ARQUITECTURA (v01.04):
 
-    SCSP genera 44100 Hz estéreo con muestras s32 por canal; aquí se
-    saturan a s16 y se intercalan L,R como espera sceAudioOut.
+    La v01.03 ejecutaba 68K + timers SCSP + mezcla de 32 slots en el HILO
+    PRINCIPAL, clockeado a 44100 Hz de tiempo real por GetAudioSpace desde
+    ScspExec (que corre una vez por línea de video). Ese impuesto fijo de
+    CPU hundía la emulación entera (juego a ~0 fps, música arrastrada).
 
-    Mientras suena el búfer A, el emulador tiene ~11.6 ms para llenar
-    el búfer B: GetAudioSpace() devuelve el hueco restante del búfer
-    en escritura, y scsp.c entrega en trozos parciales hasta llenarlo. */
+    Ahora el subsistema de sonido completo corre en UN HILO PROPIO fijado
+    a otro núcleo de la Vita (la consola tiene 3 núcleos para apps y el
+    emulador solo usaba uno):
+
+        hilo audio:  ScspThreadedStep(512 muestras)   ← timers + 68K + mezcla
+                     sceAudioOutOutput(chunk)          ← bloquea ~11.6 ms
+                     (el puerto de audio ES el reloj de 44100 Hz)
+
+    - El hilo principal (SH2 + video) queda tan libre como en v01.02.
+    - La música suena SIEMPRE a velocidad correcta, aunque el video vaya
+      por debajo de 60 fps: el 68K avanza en tiempo real en su núcleo.
+    - Si la generación tarda más que el búfer (escena extrema), el puerto
+      hace un hueco de silencio y se recupera solo: nunca frena al juego.
+
+    La sincronización con el hilo principal (MINT→SCU, M68KReset, realloc
+    PAL/NTSC) está resuelta dentro de scsp.c — ver ScspThreadedStep.     */
 
 #include <psp2/audioout.h>
 #include <psp2/kernel/threadmgr.h>
@@ -22,9 +33,13 @@
 #include "snd_vita.h"
 
 #define PLAYBACK_RATE 44100
-#define BUFFER_SIZE   512   /* muestras por búfer (~11.6 ms de latencia) */
+#define CHUNK_SAMPLES 512            /* ~11.6 ms por chunk; múltiplo de 64 */
 
-/* ── Interfaz ──────────────────────────────────────────────────────── */
+#ifndef SCE_KERNEL_CPU_MASK_USER_2
+#define SCE_KERNEL_CPU_MASK_USER_2 (0x04 << 16)
+#endif
+
+/* ── Interfaz Yabause ─────────────────────────────────────────────── */
 
 static int  vita_snd_init(void);
 static void vita_snd_deinit(void);
@@ -38,7 +53,7 @@ static void vita_snd_set_volume(int volume);
 
 SoundInterface_struct SNDVita = {
     SNDCORE_VITA,
-    "Vita Sound Interface",
+    "Vita Sound Interface (threaded)",
     vita_snd_init,
     vita_snd_deinit,
     vita_snd_reset,
@@ -50,30 +65,18 @@ SoundInterface_struct SNDVita = {
     vita_snd_set_volume,
 };
 
-/* ── Estado ────────────────────────────────────────────────────────── */
+/* ── Estado ───────────────────────────────────────────────────────── */
 
 static int          port = -1;
 static SceUID       thread_uid = -1;
 static volatile int stop_flag = 0;
-
-/* Handshake (un productor / un consumidor, como en psp-sound.c):
-   write_ready=1 → el emulador puede escribir en buffers[next_free].
-   write_ready=0 → hay un búfer completo listo para reproducirse.   */
-static volatile int write_ready = 1;
-static volatile int next_free = 0;
-static int          saved_samples = 0;   /* muestras ya escritas en el búfer actual */
+static volatile int engine_on = 0;   /* 1: generar audio real (modo threaded) */
 
 static int          muted = 0;
 static int          cur_volume = 100;
 
-static s16 buffers[2][BUFFER_SIZE * 2];  /* estéreo intercalado L,R */
-
-static inline s16 clamp16(s32 v)
-{
-    if (v >  0x7FFF) return  0x7FFF;
-    if (v < -0x8000) return -0x8000;
-    return (s16)v;
-}
+static s16 chunk_buf[CHUNK_SAMPLES * 2];
+static s16 silence[CHUNK_SAMPLES * 2];
 
 static void apply_volume(void)
 {
@@ -87,27 +90,36 @@ static void apply_volume(void)
                                  SCE_AUDIO_VOLUME_FLAG_R_CH), vols);
 }
 
-/* ── Hilo de reproducción ─────────────────────────────────────────── */
+/* ── Hilo del motor de audio ──────────────────────────────────────── */
 
-static int playback_thread(SceSize args, void *argp)
+static int audio_engine_thread(SceSize args, void *argp)
 {
     (void)args; (void)argp;
     while (!stop_flag)
     {
-        if (write_ready)
+        if (engine_on)
         {
-            /* El emulador aún no completó el búfer: esperar un poco.
-               (Si va lento hay un hueco de silencio natural, sin cuelgue.) */
-            sceKernelDelayThread(200);
-            continue;
+            /* Genera 512 muestras (timers + 68K + mezcla, en ESTE núcleo)
+               y las entrega; sceAudioOutOutput bloquea hasta que el chunk
+               anterior terminó: cadencia exacta de 44100 Hz. */
+            ScspThreadedStep(chunk_buf, CHUNK_SAMPLES);
+            sceAudioOutOutput(port, chunk_buf);
         }
-        /* Bloquea hasta que el búfer anterior terminó de sonar:
-           marca el ritmo a 44100 Hz sin busy-wait. */
-        sceAudioOutOutput(port, buffers[next_free]);
-        next_free ^= 1;
-        write_ready = 1;
+        else
+        {
+            /* Antes de activar el motor (menú, carga): mantener el puerto
+               alimentado con silencio, misma cadencia, cero costo. */
+            sceAudioOutOutput(port, silence);
+        }
     }
     return 0;
+}
+
+/* Llamado por main.c tras YabauseInit, cuando ScspSetThreaded(1) ya está
+   activo: a partir de aquí el hilo genera sonido real. */
+void SNDVitaEnableEngine(void)
+{
+    engine_on = 1;
 }
 
 /* ── Implementación de la interfaz ────────────────────────────────── */
@@ -115,25 +127,26 @@ static int playback_thread(SceSize args, void *argp)
 static int vita_snd_init(void)
 {
     if (port >= 0)
-        return 0;   /* ya inicializado */
+        return 0;
 
-    memset(buffers, 0, sizeof(buffers));
-    saved_samples = 0;
-    next_free = 0;
-    write_ready = 1;
+    memset(silence, 0, sizeof(silence));
+    memset(chunk_buf, 0, sizeof(chunk_buf));
     stop_flag = 0;
+    engine_on = 0;
 
     port = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM,
-                               BUFFER_SIZE, PLAYBACK_RATE,
+                               CHUNK_SAMPLES, PLAYBACK_RATE,
                                SCE_AUDIO_OUT_MODE_STEREO);
     if (port < 0)
         return -1;
 
     apply_volume();
 
-    thread_uid = sceKernelCreateThread("yab_snd", playback_thread,
-                                       96,        /* prioridad alta (audio) */
-                                       0x10000, 0, 0, NULL);
+    /* Prioridad alta y OTRO núcleo: el 68K+SCSP no roban ni un ciclo
+       al hilo principal del emulador. */
+    thread_uid = sceKernelCreateThread("yab_sndengine", audio_engine_thread,
+                                       96, 0x20000, 0,
+                                       SCE_KERNEL_CPU_MASK_USER_2, NULL);
     if (thread_uid < 0)
     {
         sceAudioOutReleasePort(port);
@@ -147,6 +160,7 @@ static int vita_snd_init(void)
 static void vita_snd_deinit(void)
 {
     if (port < 0) return;
+    engine_on = 0;
     stop_flag = 1;
     if (thread_uid >= 0)
     {
@@ -160,7 +174,6 @@ static void vita_snd_deinit(void)
 
 static int vita_snd_reset(void)
 {
-    saved_samples = 0;
     return 0;
 }
 
@@ -170,33 +183,17 @@ static int vita_snd_change_video_format(int vertfreq)
     return 0;
 }
 
+/* Con el motor threaded, la ruta clásica ScspExec→UpdateAudio del hilo
+   principal queda desactivada (ScspExec retorna temprano). Estas dos
+   funciones quedan inertes por si algo las llama antes de activar. */
 static void vita_snd_update_audio(u32 *left, u32 *right, u32 num_samples)
 {
-    if (!left || !right || !write_ready ||
-        num_samples == 0 || num_samples > (u32)(BUFFER_SIZE - saved_samples))
-        return;
-
-    s32 *in_l = (s32 *)left;
-    s32 *in_r = (s32 *)right;
-    s16 *out  = &buffers[next_free][saved_samples * 2];
-
-    for (u32 i = 0; i < num_samples; i++)
-    {
-        *out++ = clamp16(*in_l++);
-        *out++ = clamp16(*in_r++);
-    }
-    saved_samples += num_samples;
-
-    if (saved_samples >= BUFFER_SIZE)
-    {
-        saved_samples = 0;
-        write_ready = 0;   /* búfer completo → el hilo lo reproduce */
-    }
+    (void)left; (void)right; (void)num_samples;
 }
 
 static u32 vita_snd_get_audio_space(void)
 {
-    return write_ready ? (u32)(BUFFER_SIZE - saved_samples) : 0;
+    return 0;
 }
 
 static void vita_snd_mute(void)   { muted = 1; apply_volume(); }

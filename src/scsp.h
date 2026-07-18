@@ -82,6 +82,8 @@ void FASTCALL SoundRamWriteLong(u32 addr, u32 val);
 int ScspInit(int coreid);
 int ScspChangeSoundCore(int coreid);
 void ScspDeInit(void);
+void ScspSetThreaded(int on);
+void ScspThreadedStep(s16 *out, u32 len);
 void M68KReset(void);
 void ScspReset(void);
 int ScspChangeVideoFormat(int type);

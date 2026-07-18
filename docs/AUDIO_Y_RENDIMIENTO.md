@@ -1,4 +1,48 @@
-# Audio y rendimiento (v01.03)
+# Audio y rendimiento (v01.03 → v01.04)
+
+## v01.04: por qué v01.03 iba a ~0 fps, y la solución
+
+**Diagnóstico.** En v01.03 el subsistema de sonido completo corría en el
+hilo principal, y `ScspExec` (una vez por línea, 15 780 veces/segundo)
+llamaba al mezclador de 32 slots (`scsp_update`) clockeado a 44 100 Hz de
+**tiempo real** por `GetAudioSpace` — un impuesto fijo de CPU
+independiente de la velocidad de emulación. Encima, el 68K se ejecutaba
+con el intérprete C de Q68 (en PSP usaba un JIT de ensamblador MIPS,
+`q68-jit-psp.S`, que en ARM no existe) repartido en 157 800 llamadas por
+segundo. Resultado: el hilo principal se ahogaba — juego a ~0 fps, cargas
+lentas y música arrastrada. (En v01.02 nada de esto corría: el dummy de
+sonido entregaba ~85 muestras cada 55 líneas y el 68K era un stub.)
+
+**Solución estructural: hilo de audio dedicado en otro núcleo.** La Vita
+tiene 3 núcleos para aplicaciones y el emulador usaba uno. Ahora TODO el
+audio (timers SCSP + 68K + mezcla + CDDA) corre en un hilo propio fijado
+al tercer núcleo (`SCE_KERNEL_CPU_MASK_USER_2`), clockeado por el propio
+puerto de audio (`sceAudioOutOutput` bloquea ~11.6 ms por chunk de 512
+muestras — cadencia exacta de 44 100 Hz sin busy-wait):
+
+- El hilo principal (SH2 + video) queda **tan libre como en v01.02**.
+- La música suena **siempre a velocidad correcta**, aunque el video vaya
+  por debajo de 60 fps: el 68K avanza en tiempo real en su núcleo
+  (256 ciclos por muestra = 11.2896 MHz exactos, en rebanadas de 64
+  muestras para buena granularidad de IRQ).
+- Si una escena extrema retrasa la generación, el puerto mete un hueco de
+  silencio y se recupera solo — nunca frena al juego.
+
+**Sincronización entre hilos** (en `scsp.c`):
+
+- `MINT` (interrupción SCSP→SCU): el hilo de audio no toca el SCU; deja
+  `scsp_pending_mint` y el hilo principal la entrega en `ScspExec`.
+- `M68KReset` desde SMPC (hilo principal): se difiere con un flag y lo
+  aplica el hilo de audio antes de su siguiente paso.
+- Realloc de búferes al cambiar PAL/NTSC: pausa el modo threaded y espera
+  (spin acotado) a que el paso en curso termine.
+- Escrituras SH2→SoundRAM concurrentes: `q68_touch_memory` es no-op sin
+  JIT; los datos son arrays acotados — una carrera produce a lo sumo un
+  click, jamás corrupción de memoria.
+
+---
+
+# Registro histórico v01.03 (arquitectura anterior)
 
 ## Audio original del juego
 
