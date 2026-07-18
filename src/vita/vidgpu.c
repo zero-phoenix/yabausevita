@@ -111,6 +111,7 @@ static int render_thread(SceSize args, void *argp)
 static int VIDGPUInit(void)
 {
     vita2d_init_advanced(0x800000);
+    vita2d_set_clear_color(RGBA8(0, 0, 0, 255));
 
     /* Clear both front/back buffers to eliminate menu ghosting */
     for (int i = 0; i < 2; i++)
