@@ -25,7 +25,10 @@ add_definitions(-DVERSION="0.9.10")
 # HAVE_GETTIMEOFDAY: sin él, YabauseGetTicks() no tiene rama válida en
 #   Vita (retorna basura) y tickfreq queda en 0 — el auto-frameskip
 #   interno calculaba sobre basura.
-add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY)
+# HAVE_SYS_TIME_H: yabause.c guarda el include de <sys/time.h> con esta
+#   macro (no con HAVE_GETTIMEOFDAY); sin ella gettimeofday queda sin
+#   declarar y GCC 15 lo trata como error.
+add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY -DHAVE_SYS_TIME_H)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
