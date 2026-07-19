@@ -190,22 +190,20 @@ static void GPUYuiSwapBuffers(void)
 
     SceUInt64 t0 = TICK();
 
-    if (gpu_tex_w != srcw || gpu_tex_h != srch)
+    if (!gpu_display_tex)
     {
-        if (gpu_display_tex)
-            vita2d_free_texture(gpu_display_tex);
-        /* dispbuffer (vidsoft) empaqueta 0xAABBGGRR: R en el byte bajo
-           (ver COLSAT2YAB32/Vdp2ColorRamGetColor). En memoria little-endian
-           los bytes quedan R,G,B,A == A8B8G8R8. Usar A8R8G8B8 aquí
-           intercambiaba rojo y azul (tonalidades raras). */
-        gpu_display_tex = vita2d_create_empty_texture_format(srcw, srch,
+        /* Occam's razor: allocate a single maximum-size texture to prevent VRAM fragmentation
+           and memory leaks caused by repeatedly allocating and freeing textures when the
+           emulated resolution changes. Saturn max res is 704x512. */
+        gpu_display_tex = vita2d_create_empty_texture_format(1024, 512,
             SCE_GXM_TEXTURE_FORMAT_A8B8G8R8);
-        gpu_tex_w = srcw;
-        gpu_tex_h = srch;
         if (!gpu_display_tex) { gpu_tex_w = gpu_tex_h = 0; return; }
         vita2d_texture_set_filters(gpu_display_tex,
             SCE_GXM_TEXTURE_FILTER_POINT, SCE_GXM_TEXTURE_FILTER_POINT);
     }
+    
+    gpu_tex_w = srcw;
+    gpu_tex_h = srch;
 
     uint32_t *tp = (uint32_t *)vita2d_texture_get_datap(gpu_display_tex);
     uint32_t stride = vita2d_texture_get_stride(gpu_display_tex) / 4;
@@ -233,15 +231,13 @@ static void GPUYuiSwapBuffers(void)
     vita2d_start_drawing();
     vita2d_clear_screen();
     /* Escalado proporcional a la altura máxima de la Vita (544 px),
-       centrado horizontal, sin estirar (misma escala en X e Y).
-       El filtro POINT (arriba) mantiene los píxeles nítidos, sin blur.
-       Toda resolución del Saturn (320x224...704x480) cabe a lo ancho. */
+       centrado horizontal, sin estirar (misma escala en X e Y). */
     {
         float scale = 544.0f / (float)srch;
         float drww  = (float)srcw * scale;
         float offx  = (960.0f - drww) * 0.5f;
         if (offx < 0.0f) offx = 0.0f;
-        vita2d_draw_texture_scale(gpu_display_tex, offx, 0.0f, scale, scale);
+        vita2d_draw_texture_part_scale(gpu_display_tex, offx, 0.0f, 0, 0, srcw, srch, scale, scale);
     }
     vita2d_end_drawing();
     vita2d_swap_buffers();
