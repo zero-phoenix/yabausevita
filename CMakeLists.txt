@@ -29,8 +29,8 @@ add_definitions(-DVERSION="0.9.10")
 #   macro (no con HAVE_GETTIMEOFDAY); sin ella gettimeofday queda sin
 #   declarar y GCC 15 lo trata como error.
 add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY -DHAVE_SYS_TIME_H)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -flto -ftree-vectorize -funroll-loops -fgcse-after-reload -fweb -frename-registers")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
@@ -106,13 +106,13 @@ set_source_files_properties(src/vita/libchdr/unity.c PROPERTIES COMPILE_FLAGS "-
 set_source_files_properties(src/vita/main.c PROPERTIES COMPILE_FLAGS "-fno-lto")
 
 # Extra optimization for SH2 cores and video renderer
-set_source_files_properties(src/vita/sh2lru.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops -fgcse-after-reload")
-set_source_files_properties(src/vita/sh2fast.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
-set_source_files_properties(src/sh2int.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
-set_source_files_properties(src/vidsoft.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops -fgcse-after-reload")
+set_source_files_properties(src/vita/sh2lru.c PROPERTIES COMPILE_FLAGS "-Ofast -funroll-loops -fgcse-after-reload")
+set_source_files_properties(src/vita/sh2fast.c PROPERTIES COMPILE_FLAGS "-Ofast -funroll-loops")
+set_source_files_properties(src/sh2int.c PROPERTIES COMPILE_FLAGS "-Ofast -funroll-loops")
+set_source_files_properties(src/vidsoft.c PROPERTIES COMPILE_FLAGS "-Ofast -funroll-loops -fgcse-after-reload")
 # Q68 (CPU de sonido 68000) y SCSP: intérpretes calientes con audio activo
-set_source_files_properties(src/q68/q68-core.c PROPERTIES COMPILE_FLAGS "-O3 -funroll-loops")
-set_source_files_properties(src/scsp.c PROPERTIES COMPILE_FLAGS "-O3")
+set_source_files_properties(src/q68/q68-core.c PROPERTIES COMPILE_FLAGS "-Ofast -funroll-loops")
+set_source_files_properties(src/scsp.c PROPERTIES COMPILE_FLAGS "-Ofast")
 
 target_link_libraries(${VITA_APP_NAME}
     vita2d
