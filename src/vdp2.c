@@ -404,6 +404,13 @@ void Vdp2VBlankOUT(void) {
       curticks = YabauseGetTicks();
       diffticks = curticks-lastticks;
 
+      // FIX: If emulator was suspended or lagged heavily (>100ms), reset timers
+      if (diffticks > 100000) {
+          onesecondticks = 0;
+          framecount = 1;
+          diffticks = yabsys.OneFrameTime; // fake exactly 1 frame passed
+      }
+
       if ((onesecondticks+diffticks) > ((yabsys.OneFrameTime * (u64)framecount) + (yabsys.OneFrameTime / 2)) &&
           framesskipped < 9)
       {
