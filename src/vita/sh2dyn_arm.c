@@ -1,6 +1,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <psp2/kernel/sysmem.h>
+
+#ifndef SCE_KERNEL_MEMBLOCK_TYPE_USER_RWX
+#define SCE_KERNEL_MEMBLOCK_TYPE_USER_RWX 0x0C20D060
+#endif
 #include "sh2core.h"
 #include "sh2int.h"
 #include "sh2idle.h"
@@ -122,6 +126,7 @@ static inline uint32_t arm_imm8(uint32_t v) {
 #define MVN_I(cc, rd, imm)      DP3_I(cc, 0xF, 0, rd, 0,  imm)
 #define ADD_I(cc, rd, rn, imm)  DP3_I(cc, 0x4, 0, rd, rn, imm)
 #define SUB_I(cc, rd, rn, imm)  DP3_I(cc, 0x2, 0, rd, rn, imm)
+#define SUBS_I(cc, rd, rn, imm) DP3_I(cc, 0x2, 1, rd, rn, imm)
 #define AND_I(cc, rd, rn, imm)  DP3_I(cc, 0x0, 0, rd, rn, imm)
 #define ORR_I(cc, rd, rn, imm)  DP3_I(cc, 0xC, 0, rd, rn, imm)
 #define EOR_I(cc, rd, rn, imm)  DP3_I(cc, 0x1, 0, rd, rn, imm)
