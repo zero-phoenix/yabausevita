@@ -55,7 +55,8 @@ extern "C" {
 /* ── Modos de CPU ──────────────────────────────────────────── */
 #define VMENU_CPU_INTERP     0
 #define VMENU_CPU_RECOMP     1
-#define VMENU_CPU_COUNT      2
+#define VMENU_CPU_DYNARM     2
+#define VMENU_CPU_COUNT      3
 
 /* ── Relación de aspecto ───────────────────────────────────── */
 #define VMENU_ASPECT_4_3     0

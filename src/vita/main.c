@@ -275,7 +275,13 @@ int main(int argc, char *argv[])
     yabauseinit_struct yinit;
     memset(&yinit, 0, sizeof(yinit));
     yinit.percoretype   = PERCORE_DUMMY;
-    yinit.sh2coretype   = (cfg.cpu_mode == VMENU_CPU_RECOMP) ? 3 : 2; /* 2=SH2Fast, 3=SH2LRU */
+    if (cfg.cpu_mode == VMENU_CPU_DYNARM) {
+        yinit.sh2coretype = 4; // SH2DYN_ARM_ID
+    } else if (cfg.cpu_mode == VMENU_CPU_RECOMP) {
+        yinit.sh2coretype = 3; // SH2LRU
+    } else {
+        yinit.sh2coretype = 2; // SH2Fast (Interprete rapido)
+    }
     yinit.vidcoretype   = VIDCORE_GPU;
     /* Audio real: backend sceAudioOut + 68K Q68 ejecutando el driver de
        sonido del juego (SFX/música secuenciada) + música CDDA del CD.

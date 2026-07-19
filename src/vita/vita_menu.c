@@ -1030,7 +1030,7 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->vsync = 1;
     cfg->audio_enabled = 1;
     cfg->audio_volume = 80;
-    cfg->cpu_mode = VMENU_CPU_RECOMP;
+    cfg->cpu_mode = VMENU_CPU_DYNARM;
     cfg->frame_skip = 0;   /* con auto-frameskip real ya no hace falta fijo */
     cfg->auto_frameskip = 1;
     cfg->sh2_sync = 1;
@@ -1765,8 +1765,9 @@ static void draw_config_tab(VitaMenuConfig *cfg) {
                 break;
             case CFG_OPT_CPU:
                 switch (cfg->cpu_mode) {
-                    case VMENU_CPU_INTERP: safe_strcpy(val_str, "Interprete", sizeof(val_str)); break;
-                    case VMENU_CPU_RECOMP: safe_strcpy(val_str, "Recompilador", sizeof(val_str)); break;
+                    case VMENU_CPU_INTERP: safe_strcpy(val_str, "Int. Rapido (SH2Fast)", sizeof(val_str)); break;
+                    case VMENU_CPU_RECOMP: safe_strcpy(val_str, "Recompilador (SH2LRU)", sizeof(val_str)); break;
+                    case VMENU_CPU_DYNARM: safe_strcpy(val_str, "JIT Nativo (SH2DynARM)", sizeof(val_str)); break;
                     default: safe_strcpy(val_str, "?", sizeof(val_str)); break;
                 }
                 break;
