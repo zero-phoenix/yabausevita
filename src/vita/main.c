@@ -49,7 +49,8 @@ M68K_struct *M68KCoreList[] = { &M68KDummy, &M68KQ68, NULL };
 
 extern SH2Interface_struct SH2Interpreter;
 extern SH2Interface_struct SH2DebugInterpreter;
-SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, &SH2Fast, &SH2LRU, NULL };
+extern SH2Interface_struct SH2DynARM;
+SH2Interface_struct *SH2CoreList[] = { &SH2Interpreter, &SH2DebugInterpreter, &SH2Fast, &SH2LRU, &SH2DynARM, NULL };
 
 extern PerInterface_struct PERDummy;
 PerInterface_struct *PERCoreList[] = { &PERDummy, NULL };
@@ -62,7 +63,8 @@ extern SoundInterface_struct SNDDummy;
 SoundInterface_struct *SNDCoreList[] = { &SNDDummy, &SNDVita, NULL };
 
 extern VideoInterface_struct VIDSoft;
-VideoInterface_struct *VIDCoreList[] = { &VIDSoft, &VIDGPU, NULL };
+extern VideoInterface_struct VIDVitaGL;
+VideoInterface_struct *VIDCoreList[] = { &VIDSoft, &VIDGPU, &VIDVitaGL, NULL };
 
 void YuiErrorMsg(const char *string)
 {
