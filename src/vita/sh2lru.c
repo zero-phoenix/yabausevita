@@ -10,7 +10,7 @@ extern int SH2InterpreterInit(void);
 
 #define SH2LRU_ID 3
 #define BLOCK_MAX 24
-#define CACHE_BITS 7
+#define CACHE_BITS 9
 #define CACHE_SIZE (1 << CACHE_BITS)
 #define CACHE_MASK (CACHE_SIZE - 1)
 
@@ -21,6 +21,14 @@ typedef struct {
 } BlockEntry;
 
 static BlockEntry block_cache[CACHE_SIZE];
+
+// Improved hash function: reduces collisions in scattered code
+static INLINE u32 block_hash(u32 pc)
+{
+    // XOR shift hashing: mixes high and low bits
+    // Better than simple (pc >> 1) & MASK
+    return ((pc >> 2) ^ (pc >> 10) ^ (pc >> 18)) & CACHE_MASK;
+}
 
 static int sh2lru_init(void)
 {
@@ -66,7 +74,7 @@ static void FASTCALL sh2lru_exec(SH2_struct *context, u32 cycles)
     while (context->cycles < end_cycles)
     {
         u32 pc = context->regs.PC;
-        u32 hash = (pc >> 1) & CACHE_MASK;
+        u32 hash = block_hash(pc);
         BlockEntry *blk = &block_cache[hash];
 
         if (blk->start_pc != pc)

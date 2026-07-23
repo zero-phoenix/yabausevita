@@ -50,7 +50,7 @@ extern int vita_log(const char *fmt, ...);
 /* ── Estado ────────────────────────────────────────────────── */
 
 #define CHD_MAX_TRACKS   99
-#define HUNK_CACHE_SIZE  8
+#define HUNK_CACHE_SIZE  16  // Expanded from 8 to 16 hunks for better hit rate
 
 typedef struct
 {
@@ -98,16 +98,46 @@ static int parse_track_type(const char *type, u32 *datasize, int *mode)
 
 /* ── Caché de hunks ────────────────────────────────────────── */
 
+/* Pre-allocate all cache buffers at init time to avoid malloc() in hot path */
+static void cache_preallocate(void)
+{
+    for (int i = 0; i < HUNK_CACHE_SIZE; i++)
+    {
+        if (!s_cache_buf[i] && s_hdr)
+        {
+            s_cache_buf[i] = (u8 *)malloc(s_hdr->hunkbytes);
+            if (!s_cache_buf[i])
+            {
+                CHDLOG("CHD: Warning - pre-alloc failed for cache slot %d\n", i);
+            }
+        }
+    }
+}
+
 static void cache_reset(void)
 {
     int i;
     for (i = 0; i < HUNK_CACHE_SIZE; i++)
     {
-        if (s_cache_buf[i]) { free(s_cache_buf[i]); s_cache_buf[i] = NULL; }
+        // Don't free buffers; reuse them (pre-allocated at init)
+        // This avoids malloc/free in critical path
         s_cache_hunk[i] = 0xFFFFFFFF;
         s_cache_age[i] = 0;
     }
     s_age_counter = 0;
+}
+
+static void cache_cleanup(void)
+{
+    // Called only at shutdown
+    for (int i = 0; i < HUNK_CACHE_SIZE; i++)
+    {
+        if (s_cache_buf[i])
+        {
+            free(s_cache_buf[i]);
+            s_cache_buf[i] = NULL;
+        }
+    }
 }
 
 static const u8 *cache_get_hunk(u32 hunknum)
@@ -298,6 +328,9 @@ static int CHDCDInit(const char *path)
 
     s_frames_per_hunk = s_hdr->hunkbytes / CD_FRAME_SIZE;
 
+    // Pre-allocate cache buffers now that s_hdr is loaded
+    cache_preallocate();
+
     if (build_track_table() != 0)
     {
         chd_close(s_chd);
@@ -305,8 +338,8 @@ static int CHDCDInit(const char *path)
         return -1;
     }
 
-    CHDLOG("CHD: abierto OK: v%u hunkbytes=%u frames/hunk=%u\n",
-           s_hdr->version, s_hdr->hunkbytes, s_frames_per_hunk);
+    CHDLOG("CHD: abierto OK: v%u hunkbytes=%u frames/hunk=%u (cache=%d hunks)\n",
+           s_hdr->version, s_hdr->hunkbytes, s_frames_per_hunk, HUNK_CACHE_SIZE);
     return 0;
 }
 
@@ -318,6 +351,7 @@ static int CHDCDDeInit(void)
         s_chd = NULL;
     }
     s_hdr = NULL;
+    cache_cleanup();  // Free pre-allocated buffers
     cache_reset();
     s_numtracks = 0;
     return 0;

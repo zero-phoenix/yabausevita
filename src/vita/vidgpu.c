@@ -216,12 +216,14 @@ static void GPUYuiSwapBuffers(void)
     }
     else
     {
+        /* Optimized: use memcpy per row instead of pixel-by-pixel loop.
+           memcpy() is heavily optimized in libc: SIMD, pipelining, cache-friendly.
+           Much better than manual loop which destroys cache locality. */
         for (int y = 0; y < srch; y++)
         {
             uint32_t *row = tp + y * stride;
             u32 *src = dispbuffer + y * srcw;
-            for (int x = 0; x < srcw; x++)
-                row[x] = src[x];
+            memcpy(row, src, (size_t)srcw * sizeof(uint32_t));
         }
     }
 
