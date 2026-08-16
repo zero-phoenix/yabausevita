@@ -915,7 +915,7 @@ static int decode_block(u32 pc) {
     int pending_branch = 0;
     u32 branch_target = 0;
     u32 bsr_pr = 0;
-    u32* pre_branch_jit_ptr = 0;
+    uint32_t* pre_branch_jit_ptr = 0;
 
     while (total < max_i && !fallback) {
         u16 inst = (u16)cached_fetch(cur);
