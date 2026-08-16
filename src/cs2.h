@@ -25,6 +25,10 @@
 #include "cdbase.h"
 #include "cs0.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_BLOCKS      200
 #define MAX_SELECTORS   24
 #define MAX_FILES       256
@@ -97,12 +101,20 @@ typedef struct
 
 typedef struct
 {
+   u8 vidplaymode;
+   u8 dectimingmode;
+   u8 outmode;
+   u8 slmode;
+} mpegmode_struct;
+
+typedef struct
+{
    u8 audcon;
    u8 audlay;
-   u8 audbufdivnum;
+   u8 audbufnum;
    u8 vidcon;
    u8 vidlay;
-   u8 vidbufdivnum;
+   u8 vidbufnum;
 } mpegcon_struct;
 
 typedef struct
@@ -140,13 +152,6 @@ typedef struct {
   u8 track;
   u8 index;
 
-  // mpeg specific stats
-  u8 actionstatus;
-  u8 pictureinfo;
-  u8 mpegaudiostatus;
-  u16 mpegvideostatus;
-  u16 vcounter;
-
   // authentication variables
   u16 satauth;
   u16 mpgauth;
@@ -167,8 +172,11 @@ typedef struct {
   int isdiskchanged;
   int isbufferfull;
   int speed1x;
+  int isaudio;
   u8 transfileinfo[12];
   u8 lastbuffer;
+  u8 transscodeq[5 * 2];
+  u8 transscoderw[12 * 2];
 
   filter_struct filter[MAX_SELECTORS];
   filter_struct *outconcddev;
@@ -193,7 +201,16 @@ typedef struct {
 
   u32 blockfreespace;
   block_struct block[MAX_BLOCKS];
-  block_struct workblock;
+  struct 
+  {
+     s32 size;
+     u32 FAD;
+     u8 cn;
+     u8 fn;
+     u8 sm;
+     u8 ci;
+     u8 data[2448];
+  } workblock;
 
   u32 curdirsect;
   u32 curdirsize;
@@ -205,17 +222,32 @@ typedef struct {
 
   u32 mpegintmask;
 
+  mpegmode_struct mpegmode;
   mpegcon_struct mpegcon[2];
   mpegstm_struct mpegstm[2];
 
   int _command;
-  u32 _periodiccycles;
-  u32 _periodictiming;
+  u32 _statuscycles;
+  u32 _statustiming;
+  u32 _periodiccycles;  // microseconds * 3
+  u32 _periodictiming;  // microseconds * 3
   u32 _commandtiming;
   CDInterface * cdi;
 
   int carttype;
-  int playtype;  
+  int playtype; 
+
+  // mpeg specific stats
+  u8 actionstatus;
+  u8 pictureinfo;
+  u8 mpegaudiostatus;
+  u16 mpegvideostatus;
+  u16 vcounter;
+
+  u8 _seekToStop;
+
+  u8 nextStatus;
+
 } Cs2;
 
 typedef struct {
@@ -233,65 +265,68 @@ typedef struct {
    u32 ssh2stack;
    u32 firstprogaddr;
    u32 firstprogsize;
+   u64 gameid;
 } ip_struct;
 
 extern Cs2 * Cs2Area;
 extern ip_struct * cdip;
 
-int Cs2Init(int, int, const char *, const char *, const char *);
+int Cs2Init(int coreid, const char *cdpath, const char *mpegpath);
 int Cs2ChangeCDCore(int coreid, const char *cdpath);
 void Cs2DeInit(void);
 
-u8 FASTCALL 	Cs2ReadByte(u32);
-u16 FASTCALL 	Cs2ReadWord(u32);
-u32 FASTCALL 	Cs2ReadLong(u32);
-void FASTCALL 	Cs2WriteByte(u32, u8);
-void FASTCALL 	Cs2WriteWord(u32, u16);
-void FASTCALL 	Cs2WriteLong(u32, u32);
+u8 FASTCALL 	Cs2ReadByte(SH2_struct *context, u8*, u32);
+u16 FASTCALL 	Cs2ReadWord(SH2_struct *context, u8*, u32);
+u32 FASTCALL 	Cs2ReadLong(SH2_struct *context, u8*, u32);
+void FASTCALL 	Cs2WriteByte(SH2_struct *context, u8*, u32, u8);
+void FASTCALL 	Cs2WriteWord(SH2_struct *context, u8*, u32, u16);
+void FASTCALL 	Cs2WriteLong(SH2_struct *context, u8*, u32, u32);
 
 void Cs2Exec(u32);
+int Cs2GetTimeToNextSector(void);
 void Cs2Execute(void);
 void Cs2Reset(void);
 void Cs2SetTiming(int);
-void Cs2Command(void);
 void Cs2SetCommandTiming(u8 cmd);
 
 //   command name                             command code
 void Cs2GetStatus(void);                   // 0x00
 void Cs2GetHardwareInfo(void);             // 0x01
 void Cs2GetToc(void);                      // 0x02
-void Cs2GetSessionInfo();                  // 0x03
+void Cs2GetSessionInfo(void);              // 0x03
 void Cs2InitializeCDSystem(void);          // 0x04
-// Open Tray                               // 0x05
+void Cs2OpenTray(void);                    // 0x05
 void Cs2EndDataTransfer(void);             // 0x06
 void Cs2PlayDisc(void);                    // 0x10
 void Cs2SeekDisc(void);                    // 0x11
-// Scan Disc                               // 0x12
+void Cs2ScanDisc(void);                    // 0x12
 void Cs2GetSubcodeQRW(void);               // 0x20
 void Cs2SetCDDeviceConnection(void);       // 0x30
-// get CD Device Connection                // 0x31
+void Cs2GetCDDeviceConnection(void);       // 0x31
 void Cs2GetLastBufferDestination(void);    // 0x32
 void Cs2SetFilterRange(void);              // 0x40
-// get Filter Range                        // 0x41
+void Cs2GetFilterRange(void);              // 0x41
 void Cs2SetFilterSubheaderConditions(void);// 0x42
 void Cs2GetFilterSubheaderConditions(void);// 0x43
 void Cs2SetFilterMode(void);               // 0x44
 void Cs2GetFilterMode(void);               // 0x45
 void Cs2SetFilterConnection(void);         // 0x46
-// Get Filter Connection                   // 0x47
+void Cs2GetFilterConnection(void);         // 0x47
 void Cs2ResetSelector(void);               // 0x48
 void Cs2GetBufferSize(void);               // 0x50
 void Cs2GetSectorNumber(void);             // 0x51
 void Cs2CalculateActualSize(void);         // 0x52
 void Cs2GetActualSize(void);               // 0x53
 void Cs2GetSectorInfo(void);               // 0x54
+void Cs2ExecFadSearch(void);               // 0x55
+void Cs2GetFadSearchResults(void);         // 0x56
 void Cs2SetSectorLength(void);             // 0x60
 void Cs2GetSectorData(void);               // 0x61
 void Cs2DeleteSectorData(void);            // 0x62
 void Cs2GetThenDeleteSectorData(void);     // 0x63
 void Cs2PutSectorData(void);               // 0x64
-// Copy Sector Data                        // 0x65
-// Move Sector Data                        // 0x66
+void Cs2CopySectorData(void);              // 0x65
+void Cs2MoveSectorData(void);              // 0x66
 void Cs2GetCopyError(void);                // 0x67
 void Cs2ChangeDirectory(void);             // 0x70
 void Cs2ReadDirectory(void);               // 0x71
@@ -328,14 +363,15 @@ void Cs2MpegSetVideoEffects(void);         // 0xA4
 // MPEG Write Sector                       // 0xAA
 // MPEG Get LSI                            // 0xAE
 void Cs2MpegSetLSI(void);                  // 0xAF
-void Cs2CmdE0(void);                       // 0xE0
-void Cs2CmdE1(void);                       // 0xE1
-void Cs2CmdE2(void);                       // 0xE2
+void Cs2AuthenticateDevice(void);          // 0xE0
+void Cs2IsDeviceAuthenticated(void);       // 0xE1
+void Cs2GetMPEGRom(void);                  // 0xE2
 
 u8 Cs2FADToTrack(u32 val);
 u32 Cs2TrackToFAD(u16 trackandindex);
+void Cs2FADToMSF(u32 val, u8 *m, u8 *s, u8 *f);
 void Cs2SetupDefaultPlayStats(u8 track_number, int writeFAD);
-block_struct * Cs2AllocateBlock(u8 * blocknum);
+block_struct * Cs2AllocateBlock(u8 * blocknum, s32 sectsize);
 void Cs2FreeBlock(block_struct * blk);
 void Cs2SortBlocks(partition_struct * part);
 partition_struct * Cs2GetPartition(filter_struct * curfilter);
@@ -348,7 +384,21 @@ partition_struct * Cs2ReadUnFilteredSector(u32 rufsFAD);
 int Cs2ReadFilteredSector(u32 rfsFAD, partition_struct **partition);
 u8 Cs2GetIP(int autoregion);
 u8 Cs2GetRegionID(void);
-int Cs2SaveState(FILE *);
-int Cs2LoadState(FILE *, int, int);
+int Cs2SaveState(void ** stream);
+int Cs2LoadState(const void * stream, int version, int size);
+u32 Cs2GetMasterStackAdress(void);
+u32 Cs2GetSlaveStackAdress(void);
+u64 Cs2GetGameId();
+char * Cs2GetCurrentGmaecode();
+
+u32 Cs2GetMasterExecutionAdress();
+
+// external CD drive command
+void Cs2ForceOpenTray();
+int Cs2ForceCloseTray( int coreid, const char * cdpath );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

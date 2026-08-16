@@ -22,6 +22,11 @@
 #define SCU_H
 
 #include "core.h"
+#include "sh2core.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct
 {
@@ -37,6 +42,21 @@ typedef struct
    u16 mask;
    u32 statusbit;
 } scuinterrupt_struct;
+
+  typedef struct
+  {
+    int mode;
+    u32 ReadAddress;
+    u32 WriteAddress;
+    s32 TransferNumber;
+    u32 AddValue;
+    u32 ModeAddressUpdate;
+    u32 ReadAdd;
+    u32 WriteAdd;
+    u32 InDirectAdress;
+    u32 id;
+    u32 consumedCycles;
+  } scudmainfo_struct;
 
 typedef struct
 {
@@ -95,6 +115,21 @@ typedef struct
    u32 timer1;
    scuinterrupt_struct interrupts[30];
    u32 NumberOfInterrupts;
+   s32 timer1_counter;
+   u32 timer0_set;
+   u32 timer1_set;
+   s32 timer1_preset;
+
+   s32 dma0_time;
+   s32 dma1_time;
+   s32 dma2_time;
+
+   s32 ITEdge;
+
+    scudmainfo_struct dma0;
+    scudmainfo_struct dma1;
+    scudmainfo_struct dma2;
+
 } Scu;
 
 extern Scu * ScuRegs;
@@ -161,8 +196,8 @@ typedef struct {
   u8 DataRamPage;
   u8 DataRamReadAddress;
   u8 CT[4];
-  u32 RX;
-  u32 RY;
+  s32 RX;
+  s32 RY;
   u32 RA0;
   u32 WA0;
 
@@ -239,30 +274,28 @@ typedef struct {
     s64 all;
   } MUL;
 #endif
-
-} scudspregs_struct;
-
-typedef struct
-{
-   int mode;
-   u32 ReadAddress;
-   u32 WriteAddress;
-   u32 TransferNumber;
-   u32 AddValue;
-   u32 ModeAddressUpdate;
-} scudmainfo_struct;
+    u32 dsp_dma_instruction;
+    s32 dsp_dma_wait;
+    u32 dsp_dma_size;
+    u32 WA0M;
+    u32 RA0M;
+    u32 dmy;
+  } scudspregs_struct;
 
 int ScuInit(void);
 void ScuDeInit(void);
-void ScuReset(void);
+void ScuReset(u8 powering_up);
 void ScuExec(u32 timing);
+extern u8 ScuCPUBAccess();
 
-u8 FASTCALL	ScuReadByte(u32);
-u16 FASTCALL	ScuReadWord(u32);
-u32 FASTCALL	ScuReadLong(u32);
-void FASTCALL	ScuWriteByte(u32, u8);
-void FASTCALL	ScuWriteWord(u32, u16);
-void FASTCALL	ScuWriteLong(u32, u32);
+u8 FASTCALL	ScuReadByte(SH2_struct *sh,u8*, u32);
+u16 FASTCALL	ScuReadWord(SH2_struct *sh,u8*, u32);
+u32 FASTCALL	ScuReadLong(SH2_struct *sh,u8*, u32);
+void FASTCALL	ScuWriteByte(SH2_struct *sh,u8*, u32, u8);
+void FASTCALL	ScuWriteWord(SH2_struct *sh,u8*, u32, u16);
+void FASTCALL	ScuWriteLong(SH2_struct *sh,u8*, u32, u32);
+
+void ScuAcceptInterrupt(SH2_struct *sh);
 
 void ScuSendVBlankIN(void);
 void ScuSendVBlankOUT(void);
@@ -304,9 +337,13 @@ void ScuDspSetRegisters(scudspregs_struct *regs);
 void ScuDspSetBreakpointCallBack(void (*func)(u32));
 int ScuDspAddCodeBreakpoint(u32 addr);
 int ScuDspDelCodeBreakpoint(u32 addr);
-scucodebreakpoint_struct *ScuDspGetBreakpointList();
-void ScuDspClearCodeBreakpoints();
-int ScuSaveState(FILE *fp);
-int ScuLoadState(FILE *fp, int version, int size);
+scucodebreakpoint_struct *ScuDspGetBreakpointList(void);
+void ScuDspClearCodeBreakpoints(void);
+int ScuSaveState(void ** stream);
+int ScuLoadState(const void * stream, int version, int size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
