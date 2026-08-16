@@ -77,7 +77,15 @@ SceUID ssh2_start_sema = -1;
 SceUID ssh2_done_sema = -1;
 volatile int ssh2_cycles_to_run = 0;
 volatile int ssh2_thread_exit = 0;
+#endif
 
+//////////////////////////////////////////////////////////////////////////////
+
+yabsys_struct yabsys;
+const char *bupfilename = NULL;
+u64 tickfreq;
+
+#ifdef __vita__
 int ssh2_thread_func(SceSize args, void *argp) {
     while (!ssh2_thread_exit) {
         sceKernelWaitSema(ssh2_start_sema, 1, NULL);
@@ -92,12 +100,6 @@ int ssh2_thread_func(SceSize args, void *argp) {
     return 0;
 }
 #endif
-
-//////////////////////////////////////////////////////////////////////////////
-
-yabsys_struct yabsys;
-const char *bupfilename = NULL;
-u64 tickfreq;
 
 //////////////////////////////////////////////////////////////////////////////
 
