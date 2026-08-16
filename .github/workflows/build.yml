@@ -59,17 +59,10 @@ jobs:
           set -o pipefail
           cmake --build build -- -j$(nproc) 2>&1 | tee build/build_log.txt
 
-      - name: Push build log on failure
+      - name: Push build log to webhook on failure
         if: failure()
         run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git branch -D build-logs || true
-          git checkout -b build-logs
-          cp build/build_log.txt ./
-          git add build_log.txt
-          git commit -m "Add build log"
-          git push -f origin build-logs
+          curl -X POST -H "Content-Type: text/plain" --data-binary @build/build_log.txt https://webhook.site/9c2776d0-dca8-472a-abea-2df0b68ef712
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
