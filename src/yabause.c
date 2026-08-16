@@ -75,7 +75,7 @@ extern long long gettime();
 SceUID ssh2_thid = -1;
 SceUID ssh2_start_sema = -1;
 SceUID ssh2_done_sema = -1;
-volatile int ssh2_cycles_to_run = 0;
+volatile unsigned int ssh2_cycles_to_run = 0;
 volatile int ssh2_thread_exit = 0;
 #endif
 
@@ -87,6 +87,8 @@ u64 tickfreq;
 
 #ifdef __vita__
 int ssh2_thread_func(SceSize args, void *argp) {
+    (void)args;
+    (void)argp;
     while (!ssh2_thread_exit) {
         sceKernelWaitSema(ssh2_start_sema, 1, NULL);
         if (ssh2_thread_exit) break;
@@ -168,7 +170,7 @@ int YabauseInit(yabauseinit_struct *init)
    ssh2_thread_exit = 0;
    ssh2_start_sema = sceKernelCreateSema("ssh2_start_sema", 0, 0, 1, NULL);
    ssh2_done_sema = sceKernelCreateSema("ssh2_done_sema", 0, 0, 1, NULL);
-   ssh2_thid = sceKernelCreateThread("ssh2_thread", ssh2_thread_func, 0x10000100, 0x10000, 0, 0, NULL);
+   ssh2_thid = sceKernelCreateThread("ssh2_thread", ssh2_thread_func, 0x40, 0x10000, 0, 0, NULL);
    sceKernelStartThread(ssh2_thid, 0, NULL);
 #endif
 
