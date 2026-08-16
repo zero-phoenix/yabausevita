@@ -40,6 +40,7 @@ set(VITA_VERSION  "01.05")
 
 set(YABAUSE_CORE_SOURCES
     src/bios.c
+    src/junzip.c
     src/cdbase.c
     src/cheat.c
     src/coffelf.c

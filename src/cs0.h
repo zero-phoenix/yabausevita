@@ -1,3 +1,4 @@
+#include "sh2core.h"
 /*  Copyright 2004-2005 Theo Berkau
     Copyright 2005 Guillaume Duhamel
 
