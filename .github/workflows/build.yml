@@ -34,7 +34,7 @@ jobs:
           export PATH="$VITASDK/bin:$PATH"
           cd vdpm
           ./bootstrap-vitasdk.sh
-          ./install-all.sh
+          yes | ./install-all.sh
 
       - name: Verify vita2d
         run: |
