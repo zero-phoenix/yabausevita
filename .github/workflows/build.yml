@@ -56,13 +56,19 @@ jobs:
           set -o pipefail
           cmake --build build -- -j$(nproc) 2>&1 | tee build/build_log.txt
 
-      - name: Errores al Step Summary (solo si falla)
+      - name: Push build log on failure
         if: failure()
         run: |
-          echo '## Errores de compilacion' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          grep -E "error:|Error |undefined reference|collect2" build/build_log.txt | head -50 >> $GITHUB_STEP_SUMMARY || echo "(sin lineas de error en build_log.txt)" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git branch -D build-logs || true
+          git checkout -b build-logs
+          cp build/build_log.txt ./
+          git add build_log.txt
+          git commit -m "Add build log"
+          git push -f origin build-logs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify VPK
         run: |
