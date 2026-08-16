@@ -91,7 +91,7 @@ jobs:
           files: build/YabauseVita-Release.zip
           tag_name: build-${{ github.sha }}
           name: Auto-Build ${{ github.sha }}
-          body: "YabauseVita - Optimización Extrema del Motor JIT ARM (Traducción Nativa de Saltos BRA y BSR)."
+          body: "YabauseVita - Operación Quimera: Arquitectura SMP Dual-Core (Multi-Threading nativo para Master y Slave SH2)."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
