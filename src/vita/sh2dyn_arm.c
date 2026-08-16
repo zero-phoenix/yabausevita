@@ -911,6 +911,11 @@ static int decode_block(u32 pc) {
     int total = 0;
     int max_i = 48;
     int fallback = 0;
+    
+    int pending_branch = 0;
+    u32 branch_target = 0;
+    u32 bsr_pr = 0;
+    uint32_t* pre_branch_jit_ptr = NULL;
 
     while (total < max_i && !fallback) {
         u16 inst = (u16)cached_fetch(cur);
@@ -1106,10 +1111,21 @@ static int decode_block(u32 pc) {
         case 0x9: emitted = e_MOVWI(inst); break;
 
         /* ── A: BRA ────────────────────────────────────────- */
-        case 0xA: fallback = 1; break;
+        case 0xA:
+            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? 0xFFFFF000 : 0))) * 2);
+            pending_branch = 1;
+            emitted = 1;
+            pre_branch_jit_ptr = jit_ptr;
+            break;
 
         /* ── B: BSR ────────────────────────────────────────- */
-        case 0xB: fallback = 1; break;
+        case 0xB:
+            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? 0xFFFFF000 : 0))) * 2);
+            bsr_pr = cur + 4;
+            pending_branch = 3;
+            emitted = 1;
+            pre_branch_jit_ptr = jit_ptr;
+            break;
 
         /* ── C: GBR ops, TRAPA, imm logicals ─────────────── */
         case 0xC:
@@ -1131,12 +1147,30 @@ static int decode_block(u32 pc) {
         default: fallback = 1; break;
         }
 
-        if (fallback || emitted == 0) { fallback = 1; break; }
+        if (fallback || emitted == 0) { 
+            if (pending_branch == 2 || pending_branch == 4) {
+                jit_ptr = pre_branch_jit_ptr;
+                total--;
+            }
+            fallback = 1; 
+            break; 
+        }
+        
         total++;
         cur += 2;
 
-        /* If the emitted code modifies PC (branch), we could detect it here.
-           For now we rely on fallback for any branch instruction. */
+        if (pending_branch == 2 || pending_branch == 4) {
+            emit_mov_imm(1, branch_target);
+            emit_store_pc(1);
+            if (pending_branch == 4) {
+                emit_mov_imm(1, bsr_pr);
+                emit(STR_I(1, 4, PR_OFF));
+            }
+            break;
+        }
+        
+        if (pending_branch == 1) pending_branch = 2;
+        else if (pending_branch == 3) pending_branch = 4;
     }
 
     if (total == 0) { jit_ptr = jit_block_start; return 0; }
