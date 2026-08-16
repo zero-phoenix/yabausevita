@@ -68,6 +68,31 @@ extern long long gettime();
 #define DONT_PROFILE
 #include "profile.h"
 
+#ifdef __vita__
+#include <psp2/kernel/threadmgr.h>
+#include <psp2/kernel/processmgr.h>
+
+SceUID ssh2_thid = -1;
+SceUID ssh2_start_sema = -1;
+SceUID ssh2_done_sema = -1;
+volatile int ssh2_cycles_to_run = 0;
+volatile int ssh2_thread_exit = 0;
+
+int ssh2_thread_func(SceSize args, void *argp) {
+    while (!ssh2_thread_exit) {
+        sceKernelWaitSema(ssh2_start_sema, 1, NULL);
+        if (ssh2_thread_exit) break;
+        if (yabsys.IsSSH2Running) {
+            PROFILE_START("SSH2");
+            SH2Exec(SSH2, ssh2_cycles_to_run);
+            PROFILE_STOP("SSH2");
+        }
+        sceKernelSignalSema(ssh2_done_sema, 1);
+    }
+    return 0;
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 
 yabsys_struct yabsys;
@@ -136,6 +161,14 @@ int YabauseInit(yabauseinit_struct *init)
       YabSetError(YAB_ERR_CANNOTINIT, _("SH2"));
       return -1;
    }
+
+#ifdef __vita__
+   ssh2_thread_exit = 0;
+   ssh2_start_sema = sceKernelCreateSema("ssh2_start_sema", 0, 0, 1, NULL);
+   ssh2_done_sema = sceKernelCreateSema("ssh2_done_sema", 0, 0, 1, NULL);
+   ssh2_thid = sceKernelCreateThread("ssh2_thread", ssh2_thread_func, 0x10000100, 0x10000, 0, 0, NULL);
+   sceKernelStartThread(ssh2_thid, 0, NULL);
+#endif
 
    if ((BiosRom = T2MemoryInit(0x80000)) == NULL)
       return -1;
@@ -260,6 +293,23 @@ int YabauseInit(yabauseinit_struct *init)
 //////////////////////////////////////////////////////////////////////////////
 
 void YabauseDeInit(void) {
+   if (yabsys.IsInit)
+   {
+#ifdef __vita__
+      ssh2_thread_exit = 1;
+      if (ssh2_start_sema >= 0) {
+          sceKernelSignalSema(ssh2_start_sema, 1);
+      }
+      if (ssh2_thid >= 0) {
+          sceKernelWaitThreadEnd(ssh2_thid, NULL, NULL);
+          sceKernelDeleteThread(ssh2_thid);
+      }
+      if (ssh2_start_sema >= 0) sceKernelDeleteSema(ssh2_start_sema);
+      if (ssh2_done_sema >= 0) sceKernelDeleteSema(ssh2_done_sema);
+#endif
+
+      CheatDeInit();
+   }
    SH2DeInit();
 
    if (BiosRom)
@@ -417,6 +467,20 @@ int YabauseEmulate(void) {
 
 #else // !NO_DECILINE
 
+#ifdef __vita__
+      ssh2_cycles_to_run = sh2cycles;
+      if (ssh2_start_sema >= 0) {
+          sceKernelSignalSema(ssh2_start_sema, 1);
+      }
+
+      PROFILE_START("MSH2");
+      SH2Exec(MSH2, sh2cycles);
+      PROFILE_STOP("MSH2");
+
+      if (ssh2_done_sema >= 0) {
+          sceKernelWaitSema(ssh2_done_sema, 1, NULL);
+      }
+#else
       PROFILE_START("MSH2");
       SH2Exec(MSH2, sh2cycles);
       PROFILE_STOP("MSH2");
@@ -425,6 +489,7 @@ int YabauseEmulate(void) {
       if (yabsys.IsSSH2Running)
          SH2Exec(SSH2, sh2cycles);
       PROFILE_STOP("SSH2");
+#endif
 
 #endif
 
