@@ -62,7 +62,8 @@ jobs:
       - name: Push build log to webhook on failure
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: text/plain" --data-binary @build/build_log.txt https://webhook.site/9c2776d0-dca8-472a-abea-2df0b68ef712
+          grep -E -C 5 "error:|Error |undefined reference|collect2" build/build_log.txt | head -n 100 > build/errors.txt || echo "No errors found" > build/errors.txt
+          curl -X POST -H "Content-Type: text/plain" --data-binary @build/errors.txt https://webhook.site/9c2776d0-dca8-472a-abea-2df0b68ef712
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
