@@ -11,6 +11,7 @@ A diferencia de otras soluciones basadas en RetroArch o Adrenaline (emulador de 
 - **[NUEVO]** Motor JIT ARM Dinámico con soporte para ejecución en RAM (Memoria RWX).
 - **[NUEVO]** Recompilador Dinámico `SH2DynARM` (ID 4) capaz de traducir instrucciones SH-2 (ALU, MOV, etc.) a código ARM nativo, acelerando el procesamiento matemático.
 - **[NUEVO]** Traducción Nativa de Saltos y Delay Slots: Los saltos `BRA` y `BSR` de la Sega Saturn se compilan de forma transparente y sin interrumpir el bloque del JIT, evitando la penalización de rendimiento del fallback a C (El "Santo Grial" del emulador).
+- **[NUEVO]** Arquitectura SMP (Symmetric Multi-Processing): El Master SH2 y el Slave SH2 corren de manera paralela y asíncrona distribuidos en los múltiples núcleos de hardware de la PS Vita mediante hilos nativos (`sceKernelCreateThread`), duplicando el rendimiento de procesamiento bruto de la consola.
 
 ## Instalación
 
