@@ -69,12 +69,28 @@ jobs:
           test -f build/YabauseVita.vpk && echo "OK: VPK exists"
           unzip -l build/YabauseVita.vpk
 
+      - name: Create Zip Archive
+        run: |
+          cd build
+          zip YabauseVita-Release.zip YabauseVita.vpk
+
       - name: Upload VPK artifact
         uses: actions/upload-artifact@v4
         with:
           name: YabauseVita-vpk
           path: build/YabauseVita.vpk
           if-no-files-found: error
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/main'
+        with:
+          files: build/YabauseVita-Release.zip
+          tag_name: build-${{ github.sha }}
+          name: Auto-Build ${{ github.sha }}
+          body: "YabauseVita - Optimización Extrema del Motor JIT ARM (Traducción Nativa de Saltos BRA y BSR)."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build directory (debug)
         if: always()

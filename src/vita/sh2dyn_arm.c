@@ -915,7 +915,7 @@ static int decode_block(u32 pc) {
     int pending_branch = 0;
     u32 branch_target = 0;
     u32 bsr_pr = 0;
-    uint32_t* pre_branch_jit_ptr = NULL;
+    u32* pre_branch_jit_ptr = 0;
 
     while (total < max_i && !fallback) {
         u16 inst = (u16)cached_fetch(cur);
@@ -1112,7 +1112,7 @@ static int decode_block(u32 pc) {
 
         /* ── A: BRA ────────────────────────────────────────- */
         case 0xA:
-            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? 0xFFFFF000 : 0))) * 2);
+            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? (-4096) : 0))) * 2);
             pending_branch = 1;
             emitted = 1;
             pre_branch_jit_ptr = jit_ptr;
@@ -1120,7 +1120,7 @@ static int decode_block(u32 pc) {
 
         /* ── B: BSR ────────────────────────────────────────- */
         case 0xB:
-            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? 0xFFFFF000 : 0))) * 2);
+            branch_target = cur + 4 + (((s32)((inst & 0x0FFF) | ((inst & 0x0800) ? (-4096) : 0))) * 2);
             bsr_pr = cur + 4;
             pending_branch = 3;
             emitted = 1;
