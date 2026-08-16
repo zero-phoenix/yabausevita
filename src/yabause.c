@@ -297,8 +297,6 @@ int YabauseInit(yabauseinit_struct *init)
 //////////////////////////////////////////////////////////////////////////////
 
 void YabauseDeInit(void) {
-   if (yabsys.IsInit)
-   {
 #ifdef __vita__
       ssh2_thread_exit = 1;
       if (ssh2_start_sema >= 0) {
@@ -313,7 +311,6 @@ void YabauseDeInit(void) {
 #endif
 
       CheatDeInit();
-   }
    SH2DeInit();
 
    if (BiosRom)
