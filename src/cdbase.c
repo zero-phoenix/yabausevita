@@ -1906,7 +1906,8 @@ typedef struct ChdInfo_ { void* chd; } ChdInfo;
 
 ChdInfo * pChdInfo = NULL;
 
-static int LoadCHD(const char *chd_filename, void *iso_file) { return -1; }
+static int LoadCHD(const char *chd_filename, FILE *iso_file) { return -1; }
 
 
 static int ISOCDReadSectorFADFromCHD(u32 FAD, void *buffer) { return 0; }
+
