@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "cs0.h"
 #include "error.h"
-#include "japmodem.h"
+//#include "japmodem.h"
 #include "netlink.h"
 #include "decrypt.h"
 #include "yui.h"
@@ -1564,18 +1564,7 @@ int CartInit(const char * filename, int type)
          CartridgeArea->Cs1WriteLong = &ROMSTVCs1WriteLong;
          break;
       }
-      case CART_JAPMODEM: // Sega Saturn Modem(Japanese)
-      {
-         CartridgeArea->cartid = 0xFF;
-
-         CartridgeArea->Cs0ReadByte = &JapModemCs0ReadByte;
-         CartridgeArea->Cs0ReadWord = &JapModemCs0ReadWord;
-         CartridgeArea->Cs0ReadLong = &JapModemCs0ReadLong;
-
-         CartridgeArea->Cs2ReadByte = &JapModemCs2ReadByte;
-         CartridgeArea->Cs2WriteByte = &JapModemCs2WriteByte;
-         break;
-      }
+      
       case CART_USBDEV: // USB Dev Cartridge
       {
          if ((CartridgeArea->rom = T2MemoryInit(0x40000)) == NULL)
@@ -1818,3 +1807,4 @@ int CartLoadState(const void * stream, UNUSED int version, int size)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
