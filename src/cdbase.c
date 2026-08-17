@@ -37,7 +37,7 @@
 #include "debug.h"
 #include "junzip.h"
 #include "zlib.h"
-#include "chd.h"
+//#include "chd.h"
 
 #ifndef HAVE_STRICMP
 #ifdef HAVE_STRCASECMP
@@ -1902,6 +1902,7 @@ static void ISOCDReadAheadFAD(UNUSED u32 FAD)
 #define CD_MAX_TRACKS           (99)    /* AFAIK the theoretical limit */
 #define CD_TRACK_PADDING 4
 
+#if 0
 typedef struct ChdInfo_ {
   chd_file *chd;
   core_file * image_file;
@@ -2123,22 +2124,8 @@ static int LoadCHD(const char *chd_filename, FILE *iso_file)
 }
 
 
-static int ISOCDReadSectorFADFromCHD(u32 FAD, void *buffer) {
-  int i, j;
-  size_t num_read = 0;
-  track_info_struct *track = NULL;
-  u32 chdlba;
-  u32 physlba;
-  u32 loglba = FAD;
-
-  chdlba = loglba;
-  for (i = 0; i < disc.session_num; i++)
-  {
-    for (j = 0; j < disc.session[i].track_num-1 ; j++)
-    {
-      //if (j == 1) {
-      //  int a = 0;
-      //}
+static int ISOCDReadSectorFADFromCHD(u32 FAD, void *buffer) { return 0; }
+#endif
       if (loglba < disc.session[i].track[j+1].logframeofs) {
         //if ((loglba > disc.session[i].track[j].pregap)) {
        //   loglba -= disc.session[i].track[j].pregap;
@@ -2187,3 +2174,4 @@ static int ISOCDReadSectorFADFromCHD(u32 FAD, void *buffer) {
 
   return 1;
 }
+
