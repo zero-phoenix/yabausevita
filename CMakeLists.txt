@@ -29,7 +29,7 @@ add_definitions(-DVERSION="0.9.10")
 #   macro (no con HAVE_GETTIMEOFDAY); sin ella gettimeofday queda sin
 #   declarar y GCC 15 lo trata como error.
 add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY -DHAVE_SYS_TIME_H)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -flto -ftree-vectorize -funroll-loops -fgcse-after-reload -fweb -frename-registers")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -flto -ftree-vectorize -funroll-loops -fgcse-after-reload -fweb -frename-registers -mfpu=neon -ffast-math -fno-math-errno -fno-strict-aliasing")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
