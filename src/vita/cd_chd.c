@@ -343,7 +343,7 @@ static int CHDCDInit(const char *path)
     return 0;
 }
 
-static int CHDCDDeInit(void)
+static void CHDCDDeInit(void)
 {
     if (s_chd)
     {
@@ -354,7 +354,6 @@ static int CHDCDDeInit(void)
     cache_cleanup();  // Free pre-allocated buffers
     cache_reset();
     s_numtracks = 0;
-    return 0;
 }
 
 static int CHDCDGetStatus(void)
