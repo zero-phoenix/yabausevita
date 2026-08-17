@@ -1,4 +1,3 @@
-#include "sh2core.h"
 /*  Copyright 2003-2005 Guillaume Duhamel
     Copyright 2004-2006 Theo Berkau
 
@@ -24,10 +23,6 @@
 
 #include "memory.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define REGION_AUTODETECT               0
 #define REGION_JAPAN                    1
 #define REGION_ASIANTSC                 2
@@ -38,33 +33,24 @@ extern "C" {
 #define REGION_EUROPE                   12
 #define REGION_CENTRALSOUTHAMERICAPAL   13
 
-enum
-{
-   LANGUAGE_ENGLISH = 0,
-   LANGUAGE_GERMAN = 1,
-   LANGUAGE_FRENCH = 2,
-   LANGUAGE_SPANISH = 3,
-   LANGUAGE_ITALIAN = 4,
-   LANGUAGE_JAPANESE = 5,
-};
-
 typedef struct {
-   u8 IREG[7];
-   u8 padding[8];
-   u8 COMREG;
-   u8 OREG[32];
-   u8 SR;
-   u8 SF;
-   u8 padding2[8];
-   u8 PDR[2];
-   u8 DDR[2];
-   u8 IOSEL;
-   u8 EXLE;
+        u8 IREG[7];
+        u8 padding[8];
+	u8 COMREG;
+        u8 OREG[32];
+	u8 SR;
+	u8 SF;
+        u8 padding2[8];
+        u8 PDR[2];
+        u8 DDR[2];
+        u8 IOSEL;
+        u8 EXLE;
 } Smpc;
 
 extern Smpc * SmpcRegs;
+extern u8 * SmpcRegsT;
 
-typedef struct
+typedef struct 
 {
    int offset;
    int size;
@@ -85,39 +71,29 @@ typedef struct {
    u8 firstPeri;
    u8 regionid;
    u8 regionsetting;
-   u8 languageid;
    u8 SMEM[4];
    s32 timing;
    PortData_struct port1;
    PortData_struct port2;
-   u32 basetime;  // Safe until early 2106.  After that you're on your own (:
 } SmpcInternal;
 
 extern SmpcInternal * SmpcInternalVars;
 
-int SmpcInit(u8 regionid, u32 basetime, const char *smpcpath, u8 languageid);
+int SmpcInit(u8 regionid);
 void SmpcDeInit(void);
 void SmpcRecheckRegion(void);
-int SmpcGetLanguage(void);
 void SmpcReset(void);
-void SmpcResetButton(void);
+void SmpcResetButton();
 void SmpcExec(s32 t);
-void SmpcINTBACKEnd(void);
-void SmpcCKCHG320(void);
-void SmpcCKCHG352(void);
+void SmpcINTBACKEnd();
 
-u8 FASTCALL	SmpcReadByte(SH2_struct *context, u8*, u32);
-u16 FASTCALL	SmpcReadWord(SH2_struct *context, u8*, u32);
-u32 FASTCALL	SmpcReadLong(SH2_struct *context, u8*, u32);
-void FASTCALL	SmpcWriteByte(SH2_struct *context, u8*, u32, u8);
-void FASTCALL	SmpcWriteWord(SH2_struct *context, u8*, u32, u16);
-void FASTCALL	SmpcWriteLong(SH2_struct *context, u8*, u32, u32);
+u8 FASTCALL	SmpcReadByte(u32);
+u16 FASTCALL	SmpcReadWord(u32);
+u32 FASTCALL	SmpcReadLong(u32);
+void FASTCALL	SmpcWriteByte(u32, u8);
+void FASTCALL	SmpcWriteWord(u32, u16);
+void FASTCALL	SmpcWriteLong(u32, u32);
 
-int SmpcSaveState(void ** stream);
-int SmpcLoadState(const void * stream, int version, int size);
-
-#ifdef __cplusplus
-}
-#endif
-
+int SmpcSaveState(FILE *fp);
+int SmpcLoadState(FILE *fp, int version, int size);
 #endif
