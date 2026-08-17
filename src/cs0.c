@@ -28,7 +28,7 @@
 #include "error.h"
 //#include "japmodem.h"
 #include "netlink.h"
-#include "decrypt.h"
+//#include "decrypt.h"
 #include "yui.h"
 
 cartridge_struct *CartridgeArea;
@@ -1279,28 +1279,11 @@ static u32 FASTCALL ROMSTVCs1ReadLong(SH2_struct *context, UNUSED u8* memory, u3
 
 //////////////////////////////////////////////////////////////////////////////
 
-static void FASTCALL ROMSTVCs1WriteByte(SH2_struct *context, UNUSED u8* memory, u32 addr, u8 val)
-{
-  LOGSTV("%s %x=%x\n", __FUNCTION__, addr,val);
-  u8 decryptCmd = addr & 0xF;
-  if (decryptCmd == 0x1)
-  {
-    decryptOn = val&0x1;
-    return;
-  }
-  T1WriteByte(&CartridgeArea->rom[0x2000000], addr & 0xFFFFFF, val);
-}
+static void FASTCALL ROMSTVCs1WriteByte(SH2_struct *context, u8* memory, u32 addr, u8 val) { T1WriteByte(&CartridgeArea->rom[0x2000000], addr & 0xFFFFFF, val); }
 
 //////////////////////////////////////////////////////////////////////////////
 
-static void FASTCALL ROMSTVCs1WriteWord(SH2_struct *context, UNUSED u8* memory, u32 addr, u16 val)
-{
-  LOGSTV("%s %x=%x\n", __FUNCTION__, addr, val);
-  u8 decryptCmd = addr & 0xF;
-  if (decryptCmd == 0x1)
-  {
-    decryptOn = val&0x1;
-  }
+static void FASTCALL ROMSTVCs1WriteWord(SH2_struct *context, u8* memory, u32 addr, u16 val) { }
   else if(decryptCmd == 0x8)
   {
     cyptoSetLowAddr(val);
