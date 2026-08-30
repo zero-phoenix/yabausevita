@@ -124,6 +124,11 @@ typedef struct {
     int  borderless;
     int  auto_frameskip;
 
+    /* autostart=1 en config.cfg: si rom_path existe, saltar el menú y
+       cargar el juego directamente. Infraestructura del ciclo de medición:
+       sin él, cada ronda exige una pulsación humana de Circle. */
+    int  autostart;
+
     int  rom_region;        /* region auto-detectada de la ROM seleccionada */
     int  bios_region;       /* región del BIOS emparejado */
 

@@ -89,6 +89,9 @@
 #include "scu.h"
 #include "yabause.h"
 #include "scsp.h"
+/* Ronda 1 (bitácora): coste del motor de sonido desde el hilo de audio.
+   Fuera de Vita se neutraliza solo. */
+#include "vita/emuprof.h"
 
 ////////////////////////////////////////////////////////////////
 
@@ -3246,7 +3249,9 @@ void ScspSetThreaded(int on) {
    Genera `len` muestras estéreo s16 intercaladas en `out` (len <= 735):
    avanza los timers del SCSP y el 68K en rebanadas de 64 muestras (buena
    granularidad de IRQ para el driver) y mezcla los 32 slots + CDDA.
-   A 44100 Hz el 68K de 11.2896 MHz ejecuta exactamente 256 ciclos/muestra. */
+   A 44100 Hz el 68K de 11.2896 MHz ejecuta exactamente 256 ciclos/muestra.
+   EMUPROF_SCSP_TH acumula su coste desde ESTE hilo: µs paralelos al de
+   emulación, no aditivos con ellos (bitácora, Ronda 1). */
 void ScspThreadedStep(s16 *out, u32 len) {
    u32 done = 0;
 
@@ -3258,6 +3263,8 @@ void ScspThreadedStep(s16 *out, u32 len) {
       scsp_thread_busy = 0;
       return;
    }
+
+   EMUPROF_START(EMUPROF_SCSP_TH);
 
    if (scsp_pending_m68kreset) {
       scsp_pending_m68kreset = 0;
@@ -3289,6 +3296,7 @@ void ScspThreadedStep(s16 *out, u32 len) {
    scsp_update((s32 *)scspchannel[0].data32, (s32 *)scspchannel[1].data32, len);
    ScspConvert32uto16s((s32 *)scspchannel[0].data32, (s32 *)scspchannel[1].data32, out, len);
 
+   EMUPROF_STOP(EMUPROF_SCSP_TH);
    scsp_thread_busy = 0;
 }
 

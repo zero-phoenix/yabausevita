@@ -1036,6 +1036,7 @@ void load_config_file(VitaMenuConfig *cfg) {
     cfg->sh2_sync = 1;
     cfg->show_fps = 0;
     cfg->borderless = 0;
+    cfg->autostart = 0;
     cfg->recent_count = 0;
     set_default_mapping(cfg);
 
@@ -1077,6 +1078,8 @@ void load_config_file(VitaMenuConfig *cfg) {
             cfg->show_fps = atoi(val);
         else if (strcmp(key, "borderless") == 0)
             cfg->borderless = atoi(val);
+        else if (strcmp(key, "autostart") == 0)
+            cfg->autostart = atoi(val);
         else if (strcmp(key, "map_version") == 0)
             map_version = atoi(val);
         else if (strncmp(key, "map_", 4) == 0) {
@@ -1156,6 +1159,8 @@ static void save_config_file(const VitaMenuConfig *cfg) {
     snprintf(buf, sizeof(buf), "show_fps=%d\n", cfg->show_fps);
     sceIoWrite(fd, buf, strlen(buf));
     snprintf(buf, sizeof(buf), "borderless=%d\n", cfg->borderless);
+    sceIoWrite(fd, buf, strlen(buf));
+    snprintf(buf, sizeof(buf), "autostart=%d\n", cfg->autostart);
     sceIoWrite(fd, buf, strlen(buf));
 
     /* map_version=2: marca que este config ya usa el mapeo nuevo;
@@ -2267,6 +2272,44 @@ int vita_menu_run(VitaMenuConfig *config, VitaMenuLoadCallback load_cb) {
 
     scan_bios_directory();
     if (vdbg) fprintf(vdbg, "menu_run: bios scanned\n");
+
+    /* ── Autostart: saltar el menú si config.cfg lo pide ──────────
+       Infraestructura del ciclo de medición: permite lanzar rondas
+       automatizadas sin pulsación humana de Circle. Replica la misma
+       validación (ROM existe y no vacía, BIOS por región) que hace la
+       selección manual; si algo falla, cae al menú normal. */
+    if (config->autostart && config->rom_path[0]) {
+        SceIoStat rom_st;
+        memset(&rom_st, 0, sizeof(rom_st));
+        int rom_ok = sceIoGetstat(config->rom_path, &rom_st) >= 0 &&
+                     rom_st.st_size > 0;
+
+        int bios_ok = 1;
+        if (config->auto_bios) {
+            int rr = detect_rom_region(config->rom_path,
+                                       detect_format(config->rom_path));
+            config->rom_region = rr;
+            int bidx = find_bios_for_region(rr);
+            if (bidx >= 0) {
+                safe_strcpy(config->bios_path, g_bios[bidx].path,
+                            VMENU_MAX_PATH);
+                config->bios_region = g_bios[bidx].region;
+            }
+            /* sin BIOS por región: main.c aplicará autodetect_bios/HLE */
+        } else {
+            SceIoStat bios_st;
+            memset(&bios_st, 0, sizeof(bios_st));
+            bios_ok = config->bios_path[0] != '\0' &&
+                      sceIoGetstat(config->bios_path, &bios_st) >= 0;
+        }
+
+        if (rom_ok && bios_ok) {
+            if (vdbg) fprintf(vdbg, "menu_run: AUTOSTART %s\n",
+                              config->rom_path);
+            return 0;
+        }
+        if (vdbg) fprintf(vdbg, "menu_run: autostart fallo (rom_ok=%d bios_ok=%d), seguimos al menu\n", rom_ok, bios_ok);
+    }
 
     safe_strcpy(g_current_dir, VMENU_ROM_DIR, sizeof(g_current_dir));
     scan_directory(g_current_dir);

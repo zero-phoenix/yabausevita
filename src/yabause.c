@@ -68,6 +68,12 @@ extern long long gettime();
 #define DONT_PROFILE
 #include "profile.h"
 
+/* Ronda 1 (bitácora R8): contadores por subsistema del lazo de emulación.
+   Los PROFILE_* de abajo siguen compilándose a nada (DONT_PROFILE); los
+   EMUPROF_* son los que miden de verdad. Fuera de Vita se neutralizan solos.
+   Ver src/vita/emuprof.h. */
+#include "vita/emuprof.h"
+
 #ifdef __vita__
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/kernel/processmgr.h>
@@ -94,7 +100,9 @@ int ssh2_thread_func(SceSize args, void *argp) {
         if (ssh2_thread_exit) break;
         if (yabsys.IsSSH2Running) {
             PROFILE_START("SSH2");
+            EMUPROF_START(EMUPROF_SSH2);
             SH2Exec(SSH2, ssh2_cycles_to_run);
+            EMUPROF_STOP(EMUPROF_SSH2);
             PROFILE_STOP("SSH2");
         }
         sceKernelSignalSema(ssh2_done_sema, 1);
@@ -447,23 +455,33 @@ int YabauseEmulate(void) {
 #ifdef NO_DECILINE
 
       PROFILE_START("MSH2");
+      EMUPROF_START(EMUPROF_MSH2);
       SH2Exec(MSH2, sh2cycles - yabsys.DecilineStop);
+      EMUPROF_STOP(EMUPROF_MSH2);
       PROFILE_STOP("MSH2");
       PROFILE_START("SSH2");
+      EMUPROF_START(EMUPROF_SSH2);
       if (yabsys.IsSSH2Running)
          SH2Exec(SSH2, sh2cycles - yabsys.DecilineStop);
+      EMUPROF_STOP(EMUPROF_SSH2);
       PROFILE_STOP("SSH2");
 
       PROFILE_START("hblankin");
+      EMUPROF_START(EMUPROF_HBLANK);
       Vdp2HBlankIN();
+      EMUPROF_STOP(EMUPROF_HBLANK);
       PROFILE_STOP("hblankin");
 
       PROFILE_START("MSH2");
+      EMUPROF_START(EMUPROF_MSH2);
       SH2Exec(MSH2, yabsys.DecilineStop);
+      EMUPROF_STOP(EMUPROF_MSH2);
       PROFILE_STOP("MSH2");
       PROFILE_START("SSH2");
+      EMUPROF_START(EMUPROF_SSH2);
       if (yabsys.IsSSH2Running)
          SH2Exec(SSH2, yabsys.DecilineStop);
+      EMUPROF_STOP(EMUPROF_SSH2);
       PROFILE_STOP("SSH2");
 
 #else // !NO_DECILINE
@@ -475,7 +493,9 @@ int YabauseEmulate(void) {
       }
 
       PROFILE_START("MSH2");
+      EMUPROF_START(EMUPROF_MSH2);
       SH2Exec(MSH2, sh2cycles);
+      EMUPROF_STOP(EMUPROF_MSH2);
       PROFILE_STOP("MSH2");
 
       if (ssh2_done_sema >= 0) {
@@ -495,7 +515,9 @@ int YabauseEmulate(void) {
 #endif
 
       PROFILE_START("SCU");
+      EMUPROF_START(EMUPROF_SCU);
       ScuExec(sh2cycles / 2);
+      EMUPROF_STOP(EMUPROF_SCU);
       PROFILE_STOP("SCU");
 
 #ifndef NO_DECILINE
@@ -512,10 +534,14 @@ int YabauseEmulate(void) {
       {
          // HBlankOUT
          PROFILE_START("hblankout");
+         EMUPROF_START(EMUPROF_HBLANK);
          Vdp2HBlankOUT();
+         EMUPROF_STOP(EMUPROF_HBLANK);
          PROFILE_STOP("hblankout");
          PROFILE_START("SCSP");
+         EMUPROF_START(EMUPROF_SCSP);
          ScspExec();
+         EMUPROF_STOP(EMUPROF_SCSP);
          PROFILE_STOP("SCSP");
          yabsys.DecilineCount = 0;
          yabsys.LineCount++;
@@ -532,7 +558,9 @@ int YabauseEmulate(void) {
          {
             // VBlankOUT
             PROFILE_START("VDP1/VDP2");
+            EMUPROF_START(EMUPROF_VDP);
             Vdp2VBlankOUT();
+            EMUPROF_STOP(EMUPROF_VDP);
             yabsys.LineCount = 0;
             oneframeexec = 1;
             PROFILE_STOP("VDP1/VDP2");
@@ -555,10 +583,14 @@ int YabauseEmulate(void) {
          if (usec > 0)
          {
             PROFILE_START("SMPC");
+            EMUPROF_START(EMUPROF_SMPC);
             SmpcExec(usec);
+            EMUPROF_STOP(EMUPROF_SMPC);
             PROFILE_STOP("SMPC");
             PROFILE_START("CDB");
+            EMUPROF_START(EMUPROF_CDB);
             Cs2Exec(usec);
+            EMUPROF_STOP(EMUPROF_CDB);
             PROFILE_STOP("CDB");
          }
       }
@@ -599,7 +631,9 @@ int YabauseEmulate(void) {
          M68k_centicycles -= 100;
       }
 #endif
+      EMUPROF_START(EMUPROF_M68K);
       M68KExec(M68k_cycles);
+      EMUPROF_STOP(EMUPROF_M68K);
       PROFILE_STOP("68K");
 
       PROFILE_STOP("Total Emulation");

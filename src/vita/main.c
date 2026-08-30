@@ -26,6 +26,7 @@
 #include "vita_menu.h"
 #include "cd_chd.h"
 #include "snd_vita.h"
+#include "emuprof.h"
 
 extern SH2Interface_struct SH2Fast;
 extern SH2Interface_struct SH2LRU;
@@ -378,6 +379,8 @@ int main(int argc, char *argv[])
             float f = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
             vita_log("FPS: %.1f\n", f);
             VIDGPUVdp2LogTiming();
+            EMUPROFLog();
+            EMUPROFReset();
             frame_count = 0;
             fps_timer = now;
         }
