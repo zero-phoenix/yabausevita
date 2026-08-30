@@ -273,6 +273,7 @@ def monitor(seconds=40, interval=2.5, out_dir=None, tag=""):
         "has_motion": (sum(1 for d in diffs if d > 0.5) / len(diffs)) >= 0.3 if diffs else False,
         "black_pct_mediana": sorted(blacks)[len(blacks)//2] if blacks else None,
         "diff_pct_mediana": sorted(diffs)[len(diffs)//2] if diffs else None,
+        "diffs_por_captura": diffs,
         "dir": str(out_dir),
     }
     return verdict

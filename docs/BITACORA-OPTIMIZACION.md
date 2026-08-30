@@ -236,6 +236,85 @@ roto que no ejecuta instrucciones también «hace 60 FPS». De ahí la regla R9.
 - R11 · El `show_fps` en pantalla es del ROM; el del título de Vita3K es de
   la app. No citarlos indistintamente.
 
+### Ronda 2 — NiGHTS, input, dynarec y el perfil SH2 · **EJECUTADA 30-ago-2026 (noche)**
+
+**Fecha:** 30-ago-2026 · **Línea base:** release `v0.9.11-r1` (commit `3d499fe`) · **Métrica:** veredictos R9 de los cuatro experimentos pendientes
+
+Ejecutada con `scripts/ronda_emulador.py` de MAGI — la metodología de la
+ronda 1 convertida en procedimiento, supervisada con doble verificación.
+
+#### 1. NiGHTS con espera larga (185 s) — NO LLEGA AL TÍTULO
+
+Imagen estable (86,8 % negro), movimiento 0,16 %, FPS 40,6, drawn=23/ventana,
+sin errores. Análisis de píxeles de la captura: el contenido no negro es
+texto blanco (353 muestras cuantizadas) + rojo (221) en dos bandas — la
+**pantalla de licencia SEGA** (texto blanco, logo rojo). La BIOS enciende el
+vídeo (tvmd=8101, ronda 1) y queda esperando al disco: cdb=49-60 ms/ventana
+de actividad continua. Sonic R y Panzer (ambos EU) arrancan con el mismo
+mecanismo; NiGHTS (USA, edición «(RE)», 21 pistas, leadout 233783) no.
+**Sospechoso: el camino de lectura de ESTE disco** — pista 1 MODE1_RAW con
+start_fad=150 — no la región (la BIOS ya es USA). Es el blanco de la ronda 3.
+
+#### 2. Input — NO CRUZA (con matiz de diseño)
+
+El experimento v5.11.0 midió diff antes/después en el attract de Sonic R,
+que YA se mueve: delta −0,27 % y un veredicto falso de «no cruza» sin
+aislar la pulsación. Se rediseñó (v5.12.0): capturas a 1 s, PICO de
+transición, y CONTROL de 6 s sin pulsar. Resultado correcto: pico control
+5,16 %, pico tras ENTER 5,31 % — la pulsación no produce transición
+visible. **Matiz:** el attract puede ignorar START; queda probar en una
+pantalla que responda (título con PRESS START). No se declara «el teclado
+no llega al pad» — se declara lo medido.
+
+#### 3. Dynarec — hang confirmado por tercera build
+
+cpu_mode=2, 90 s: cero ventanas de log. Tercera build independiente que
+reproduce el hang al primer frame (con `-Ofast`, con `-O3`, y con el VPK
+oficial del CI). Cache JIT OK (8 MB RWX). La ejecución del código generado
+nunca completa un frame. Pendiente hardware real (R4).
+
+#### 4. Perfil SH2 — SH2-BOUND confirmado
+
+| Juego | FPS | % del hilo principal en msh2+ssh2 | vision_ok |
+|---|---|---|---|
+| Sonic R | 44,5 | **69,9 %** | ✅ |
+| Panzer Dragoon | 59,8 | **64,7 %** | ✅ |
+| NiGHTS | 41,4 | **90,7 %** | (licencia) |
+
+El hilo de audio (scsp_th) consume 1,16-1,67 s por ventana de 5 s en
+paralelo. **El blanco de la ronda 3 es el par SH2** — y Panzer demuestra
+que 64,7 % SH2 aún da para 59,8 FPS: hay margen de ejecución, el problema
+es cuánto trabajo generan los intérpretes.
+
+#### Qué queda sin comprobar
+
+- Por qué la BIOS no valida el disco de NiGHTS (¿FAD/track de la pista 1?).
+- Input en pantalla que responda a START.
+- Dynarec en Vita real.
+- Los µs de SH2 no son aditivos con scsp_th (hilos paralelos) — el perfil
+  del hilo principal no cubre el segundo núcleo.
+
+#### Hallazgos reutilizables
+
+- A19 · NiGHTS se queda en la pantalla de licencia (texto blanco + logo
+  rojo sobre negro) con cdb activo: la BIOS espera al disco indefinidamente.
+  No es región (BIOS ya correcta) — es el disco o su lectura.
+- A20 · Medir input con diff antes/después en una escena que ya se mueve no
+  aisla la pulsación. Protocolo correcto: pico de transición + control sin
+  pulsar.
+- A21 · El attract puede ignorar START: un «no cruza» en attract no prueba
+  que el teclado no llegue al pad. Declarar el estado de la pantalla en el
+  veredicto.
+- A22 · Panzer a 59,8 FPS con 64,7 % SH2: el cuello no es solo el
+  porcentaje SH2, es el coste por instrucción de los intérpretes.
+
+#### Reglas nuevas
+
+- R12 · Un experimento de input se diseña con control sin pulsar y pico de
+  transición, nunca con delta de medianas en escena en movimiento (A20).
+- R13 · Todo veredicto declara en qué pantalla se midió; «no cruza» en
+  attract es «no respondió ESTA pantalla» (A21).
+
 <!-- Plantilla para cada ronda siguiente. Copiar y rellenar.
 
 ### Ronda N — <título corto de lo que se atacó>
@@ -298,6 +377,10 @@ marca como superado si una medición posterior lo contradice.
 | A16 | config.cfg con BOM: el sscanf lee `\ufeffrom_path` y rom_path se ignora en silencio. Escribir UTF-8 sin BOM. | Ronda 1 |
 | A17 | Vita3K abre dos ventanas (GUI y juego 960×544). Capturar y pulsar teclas por PID y tamaño de cliente, no por título. | Ronda 1 |
 | A18 | Con BIOS correcta, Panzer Dragoon ya corre a velocidad completa (59,8 FPS) en Vita3K. El margen real está en Sonic R y NiGHTS (SH2-bound). | Ronda 1 |
+| A19 | NiGHTS se queda en la pantalla de licencia (texto blanco + logo rojo) con cdb activo: la BIOS espera al disco indefinidamente. No es región — es el disco o su lectura. | Ronda 2 |
+| A20 | Medir input con diff antes/después en escena en movimiento no aísla la pulsación. Protocolo correcto: pico de transición + control sin pulsar. | Ronda 2 |
+| A21 | El attract puede ignorar START: «no cruza» en attract es «esta pantalla no respondió», no «el teclado no llega». | Ronda 2 |
+| A22 | Panzer a 59,8 FPS con 64,7 % SH2: el cuello no es solo el porcentaje, es el coste por instrucción de los intérpretes. | Ronda 2 |
 | A6 | `PORTING_NOTES.md` describe el hito 0 y **está desactualizado**: dice que SH-2 va en intérprete puro y que vídeo, sonido, mando y CD están en DUMMY. El código real tiene dynarec ARM, CHD, audio Vita y renderizador GPU. No usarlo como fuente. | Contraste con `src/vita/main.c`, 30-ago-2026 |
 
 ### 5.2 Reglas derivadas (lo que no hay que volver a intentar)
@@ -315,6 +398,8 @@ marca como superado si una medición posterior lo contradice.
 | R9 | Ninguna corrida se acepta sin **verificación de imagen y movimiento** (capturas continuas + diff %). El FPS por sí solo no es evidencia. | A12, Ronda 1 |
 | R10 | Todo cambio de core (SH2, VDP) se valida con corrida + capturas antes de llamarlo «funciona». El log no puede ver lo que ve el jugador. | A13, A14 |
 | R11 | El `show_fps` en pantalla mide el ROM; el del título de Vita3K mide la app. No citarlos indistintamente. | Ronda 1 |
+| R12 | Un experimento de input se diseña con control sin pulsar y pico de transición, nunca con delta de medianas en escena en movimiento. | A20 |
+| R13 | Todo veredicto declara en qué pantalla se midió; «no cruza» en attract es «no respondió ESTA pantalla». | A21 |
 
 ---
 
