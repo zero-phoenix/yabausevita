@@ -35,7 +35,10 @@ jobs:
           cd vdpm
           ./bootstrap-vitasdk.sh
           export VDPM_NONINTERACTIVE=1
-          ./vdpm zlib libvita2d
+          # vdpm del PATH (el instalado como paquete, que sabe que pacman
+          # vive en libexec/vdpm/). El ./vdpm del checkout usa el layout
+          # viejo bin/pacman y muere — rompio la build del 23-ago-2026.
+          vdpm zlib libvita2d
 
       - name: Verify vita2d
         run: |
@@ -63,7 +66,12 @@ jobs:
       - name: Push build log to webhook on failure
         if: failure()
         run: |
-          grep -E -C 5 "error:|Error |undefined reference|collect2" build/build_log.txt | head -n 100 > build/errors.txt || echo "No errors found" > build/errors.txt
+          mkdir -p build
+          if [ -f build/build_log.txt ]; then
+            grep -E -C 5 "error:|Error |undefined reference|collect2" build/build_log.txt | head -n 100 > build/errors.txt || echo "No errors found" > build/errors.txt
+          else
+            echo "No build log (failure before Build step)" > build/errors.txt
+          fi
           curl -X POST -H "Content-Type: text/plain" --data-binary @build/errors.txt https://webhook.site/9c2776d0-dca8-472a-abea-2df0b68ef712
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
