@@ -137,6 +137,105 @@ que exista telemetría del lado de la emulación: contadores por subsistema en
 Esto es exactamente para lo que existe la ronda 0. Sin ella se habrían gastado tres
 ciclos de compilación optimizando el 1,27 %.
 
+### Ronda 1 — Instrumentación y los cinco bloqueos · **EJECUTADA 30-ago-2026 (tarde)**
+
+**Fecha:** 30-ago-2026 · **Línea base:** commit `575b990` · **Métrica objetivo:** desglose EMU por subsistema + imagen verificada
+
+#### Qué se hizo (era ronda de instrumentación, R8; se convirtió en ronda de rescate)
+
+1. `autostart=1` en config.cfg: el menú se salta si rom_path existe y la BIOS
+   valida (mismo flujo que la selección manual). Las rondas ya no exigen
+   pulsar Circle. Sin `autostart`, byte a byte el comportamiento de antes.
+2. `emuprof` (`src/vita/emuprof.c/.h`): 10 acumuladores en µs por ventana de
+   5 s volcados como `EMU: msh2= ssh2= scu= scsp= scsp_th= m68k= hblank=
+   vdp= cdb= smpc=` junto al FPS. Reactiva el esqueleto PROFILE_* que
+   DONT_PROFILE apagaba, con `sceKernelGetProcessTimeWide()` en vez de `clock()`.
+   `scsp_th` acumula desde el hilo de audio (µs paralelos, no aditivos).
+3. **FPS del ROM en pantalla** (`show_fps`): contador del FPS emulado dibujado
+   sobre el juego (`vidgpu.c`, tira de glifos 8×8). Antes `g_show_fps` era
+   código muerto. Ahora se distinguen a simple vista los FPS de la app Vita
+   (los del título de Vita3K) de los del juego Saturn.
+4. `tools/vita3k_ctl.py` versionado en git: lanza Vita3K sin elevar y sin el
+   OpenSSL de Git en el PATH, arranca YABA00001 con `-r`, edita config.cfg
+   **sin BOM** (con BOM el emulador ignora rom_path en silencio), pulsa
+   teclas, y hace **capturas continuas de la ventana del juego con veredicto
+   de imagen (negro %) y movimiento (diff %)**.
+
+#### Los cinco bloqueos encontrados y resueltos (cada uno con evidencia)
+
+| # | Bloqueo | Evidencia | Fix |
+|---|---|---|---|
+| B1 | CI roto desde el 23-ago: `./vdpm` del checkout espera pacman en `bin/`, el bootstrap nuevo lo instala en `libexec/vdpm/` | log del run 33330242639 | usar el `vdpm` empaquetado del PATH; validado en Docker antes de pushear |
+| B2 | Flags `-Ofast -flto -ffast-math -mfpu=neon` (commit a674198) | el dynarec colgaba; hipótesis razonable, falsada: seguía colgado con `-O3` | revertido a `-O3` plano (lo único validado en runtime) |
+| B3 | **`sh2fast.c`/`sh2lru.c` del zp ejecutaban ~2 % del trabajo real** | con ellos: msh2=0,1 s/ventana y «60 FPS»; con los de david: msh2≈2 s/ventana y 40-46 FPS | restaurados los de `yabausevita` (davidchaveznge-wq) |
+| B4 | Núcleos VDP de Kronos (vdp1/vdp2/vidshared) incompatibles con vidgpu | pantalla negra con la cadena Kronos; los commits de «revert headers» ya avisaban | restaurada la cadena VDP completa del árbol david |
+| B5 | **Región de BIOS**: saturn_bios.bin no-US con disco US → TVMD.DISP nunca pasa a 1 → negro absoluto | sonda: `tvmd=0001 nonzero=0` vs `tvmd=8101 nonzero=647` con BIOS USA | emparejar BIOS por región (`auto_bios=1` lo hace; el autostart lo replica) |
+
+Nota sobre B2: perdedor útil — los flags agresivos no causaban el hang del
+dynarec, pero `-ffast-math` sobre un emulador que compara floats bit a bit
+seguía siendo un riesgo sin contrapartida medida. Fuera.
+
+#### El hallazgo que invalidó media ronda: el FPS mentía
+
+Con B3 sin arreglar, el emulador reportaba 59,9-60,0 FPS estables, drawn=296,
+presented=296 — y la pantalla era negra y la BIOS no progresaba. El contador
+de FPS cuenta llamadas a `YabauseExec`, no trabajo emulado: un intérprete
+roto que no ejecuta instrucciones también «hace 60 FPS». De ahí la regla R9.
+
+#### Medición final (build: david-SH2 + david-VDP + CHD david + BIOS por región, cpu_mode=0, audio ON, 11 ventanas/juego)
+
+| Juego | FPS med. | Imagen (negro %) | Movimiento (diff %) | drawn/5 s | msh2+ssh2 s/5 s |
+|---|---|---|---|---|---|
+| Sonic R (EU) | 46,3 | ✅ 18,4 % | ✅ 5,0 | 59 | 1,36+1,95 |
+| Panzer Dragoon (EU) | **59,8** | ✅ 42,2 % | ✅ **45,9** | 248 | 2,48+0,36 |
+| NiGHTS (USA) | 40,0 | parcial 86,8 % | arranque lento | 21 | 1,89+2,41 |
+
+- Panzer Dragoon corre a **velocidad completa** (59,8 de 60) con imagen viva
+  (45,9 % de píxeles cambiando entre capturas) y apenas usa el SH2 esclavo.
+- Sonic R: imagen confirmada visualmente (pista, cielo, personaje), SH2-bound.
+- NiGHTS: juego dual-CPU (usa los dos SH2 a tope), arranca más despacio;
+  la pantalla de licencia aparece (`nonzero=647`) pero a 40 FPS su boot es
+  largo. Queda pendiente verlo llegar al título con una espera mayor.
+- El audio threaded cuesta 1,1-1,4 s/5 s de un segundo núcleo (scsp_th).
+
+#### Qué queda sin comprobar
+
+- El dynarec (`SH2DynARM`, cpu_mode=2) **sigue colgado al primer frame** con
+  `-O3`: cache JIT OK (8 MB RWX), el hang está en la ejecución del código
+  generado. No se ha probado en hardware real — Vita3K decide corrección,
+  no rendimiento (R4); quizá en Vita real funcione.
+- NiGHTS no llegó al título en 75 s. Repetir con espera ≥ 3 min.
+- Controles: no se verificó que el input cruce al juego (la prueba con ENTER
+  se hizo sobre una corrida que había caído al menú — no cuenta).
+- La medición es Vita3K sobre x86 (R4): el reparto de subsistemas orienta,
+  la cifra absoluta no es la de la Vita.
+
+#### Hallazgos reutilizables (nuevos)
+
+- A12 · El FPS del log cuenta `YabauseExec` por segundo, no trabajo emulado.
+  Un core roto «hace 60 FPS». Solo vale junto a verificación de imagen.
+- A13 · Los núcleos SH2 del zp (sh2fast/sh2lru) estaban rotos: ejecutaban
+  ~2 % del trabajo. Los de david son la referencia validada.
+- A14 · La cadena VDP de Kronos no es intercambiable con vidgpu: mismo
+  «funciona» aparente en log, pantalla negra en realidad.
+- A15 · La BIOS de Saturn no enciende TVMD.DISP con un disco de otra región:
+  el síntoma es negro absoluto con emulación «corriendo». Emparejar región.
+- A16 · config.cfg con BOM: `sscanf("%63[^=]")` lee `\ufeffrom_path` y
+  rom_path se ignora en silencio. Escribir siempre UTF-8 sin BOM.
+- A17 · Vita3K abre DOS ventanas (GUI + juego 960×544). Capturar/pulsar
+  teclas por PID del proceso y tamaño de cliente, no por título.
+- A18 · Con BIOS correcta, Panzer Dragoon ya va a velocidad completa en
+  Vita3K. El techo real de mejora está en Sonic R y NiGHTS (SH2-bound).
+
+#### Reglas nuevas
+
+- R9 · **Ninguna corrida se acepta sin verificación de imagen y movimiento**
+  (capturas continuas + diff %). El FPS por sí solo no es evidencia (A12).
+- R10 · Todo cambio de core (SH2, VDP) se valida con corrida + capturas
+  antes de llamarlo «funciona». El log no puede ver lo que ve el jugador.
+- R11 · El `show_fps` en pantalla es del ROM; el del título de Vita3K es de
+  la app. No citarlos indistintamente.
+
 <!-- Plantilla para cada ronda siguiente. Copiar y rellenar.
 
 ### Ronda N — <título corto de lo que se atacó>
@@ -169,6 +268,7 @@ tres condiciones>
 
 -->
 
+
 ---
 
 ## 5. Conocimiento acumulado
@@ -191,6 +291,13 @@ marca como superado si una medición posterior lo contradice.
 | A9 | Esta build imprime `GPU timing: composite/upload/display/frames`. **No** imprime `drawn`, `presented` ni `dropped`, aunque `vidgpu.c` los lleva. La filosofía C no tiene métrica hasta que se expongan. | Ronda 0 |
 | A10 | Arrancar el emulador exige cinco cosas que no son obvias: PATH sin `Git\mingw64\bin` (o Vita3K coge su OpenSSL y muere con `EVP_MD_CTX_get_size_ex`), lanzar sin elevar, caché `.bin` válida, `auto_bios=0` con `bios_path` explícito, y `cpu_mode=2`. Con `auto_bios=1` cae a HLE y `YabauseInit` devuelve −1. | Puesta en marcha, 30-ago-2026 |
 | A11 | La extracción CHD→`.bin` cuesta ~524 MB en C: por juego y se corrompe si el disco se queda sin espacio. Una caché truncada da `Unsupported CD image` (−2), no un error de disco. | Ronda 0 |
+| A12 | El FPS del log cuenta llamadas a `YabauseExec`, no trabajo emulado: un intérprete roto «hace 60 FPS». Solo vale junto a verificación de imagen. | Ronda 1 |
+| A13 | Los núcleos SH2 del zp (sh2fast/sh2lru) estaban rotos (~2 % del trabajo real). Los del árbol davidchaveznge-wq son la referencia validada. | Ronda 1 |
+| A14 | La cadena VDP de Kronos no es intercambiable con vidgpu: en log «funciona», en pantalla negro. | Ronda 1 |
+| A15 | La BIOS de Saturn no enciende TVMD.DISP con disco de otra región: negro absoluto con la emulación «corriendo». Emparejar región siempre. | Ronda 1 |
+| A16 | config.cfg con BOM: el sscanf lee `\ufeffrom_path` y rom_path se ignora en silencio. Escribir UTF-8 sin BOM. | Ronda 1 |
+| A17 | Vita3K abre dos ventanas (GUI y juego 960×544). Capturar y pulsar teclas por PID y tamaño de cliente, no por título. | Ronda 1 |
+| A18 | Con BIOS correcta, Panzer Dragoon ya corre a velocidad completa (59,8 FPS) en Vita3K. El margen real está en Sonic R y NiGHTS (SH2-bound). | Ronda 1 |
 | A6 | `PORTING_NOTES.md` describe el hito 0 y **está desactualizado**: dice que SH-2 va en intérprete puro y que vídeo, sonido, mando y CD están en DUMMY. El código real tiene dynarec ARM, CHD, audio Vita y renderizador GPU. No usarlo como fuente. | Contraste con `src/vita/main.c`, 30-ago-2026 |
 
 ### 5.2 Reglas derivadas (lo que no hay que volver a intentar)
@@ -205,6 +312,9 @@ marca como superado si una medición posterior lo contradice.
 | R6 | **No proponer optimizaciones del camino de render** (composite, upload, display) hasta que exista telemetría de emulación que demuestre que ahí queda algo. Es el 1,27 % del tiempo: el techo de la mejora es ~0,2 FPS. | A7 |
 | R7 | No interpretar `GPU timing` como µs por fotograma. Son totales de 5 s. | A8 |
 | R8 | La ronda 1 es de **instrumentación**, no de optimización: contadores por subsistema en `YabauseExec` (SH-2, SCU, SCSP/68K, CD). Sin eso, cualquier propuesta apunta al 98,7 % a ciegas. | A7 |
+| R9 | Ninguna corrida se acepta sin **verificación de imagen y movimiento** (capturas continuas + diff %). El FPS por sí solo no es evidencia. | A12, Ronda 1 |
+| R10 | Todo cambio de core (SH2, VDP) se valida con corrida + capturas antes de llamarlo «funciona». El log no puede ver lo que ve el jugador. | A13, A14 |
+| R11 | El `show_fps` en pantalla mide el ROM; el del título de Vita3K mide la app. No citarlos indistintamente. | Ronda 1 |
 
 ---
 

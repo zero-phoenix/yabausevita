@@ -40,7 +40,8 @@ extern void VIDGPUVdp2LogTiming(void);
 
 static int g_auto_frameskip = 1;
 static int g_frame_skip = 0;
-static int g_show_fps = 0;
+int g_show_fps = 0;              /* show_fps del config: FPS del ROM en pantalla (vidgpu) */
+extern float g_game_fps;         /* contador visible del FPS emulado (vidgpu) */
 static int g_vsync = 1;
 
 int vita_log(const char *fmt, ...);
@@ -360,6 +361,7 @@ int main(int argc, char *argv[])
     g_frame_skip = cfg.frame_skip;
 
     int frame_count = 0;
+    int sec_count = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
     SceUInt64 exit_combo_t0 = 0;
     unsigned int last_buttons = 0;
@@ -374,13 +376,19 @@ int main(int argc, char *argv[])
 
         SceUInt64 now = sceKernelGetProcessTimeWide();
 
-        if (now - fps_timer >= 5000000ULL)
+        /* FPS del ROM: refresco de 1 s para el contador en pantalla,
+           volcado al log cada 5 s junto a GPU/EMU (mismo contrato). */
+        if (now - fps_timer >= 1000000ULL)
         {
-            float f = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
-            vita_log("FPS: %.1f\n", f);
-            VIDGPUVdp2LogTiming();
-            EMUPROFLog();
-            EMUPROFReset();
+            g_game_fps = (float)frame_count * 1000000.0f / (float)(now - fps_timer);
+            if (++sec_count >= 5)
+            {
+                vita_log("FPS: %.1f\n", g_game_fps);
+                VIDGPUVdp2LogTiming();
+                EMUPROFLog();
+                EMUPROFReset();
+                sec_count = 0;
+            }
             frame_count = 0;
             fps_timer = now;
         }

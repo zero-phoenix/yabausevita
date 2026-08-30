@@ -31,34 +31,12 @@ static int sh2fast_reset(void) { return 0; }
 static void FASTCALL sh2fast_exec(SH2_struct *restrict context, u32 cycles)
 {
     if (!context) return;
-
-    // OPTIMIZATION: Fast path for idle loops (v01.06)
-    // If CPU was idle last frame, it likely stays idle
-    if (__builtin_expect(context->idle_confirmed, 0))
-    {
-        // Check if still in same idle loop
-        if (context->regs.PC == context->idle_detect_pc)
-        {
-            // Still in idle loop: skip to end
-            context->cycles = cycles;
-            return;
-        }
-        else
-        {
-            // Exited idle loop: re-confirm state
-            context->idle_confirmed = 0;
-        }
-    }
-
     if (__builtin_expect(context->isIdle, 0))
     {
         SH2idleParse(context, cycles);
-        context->idle_confirmed = 1;
-        context->idle_detect_pc = context->regs.PC;
         return;
     }
     SH2idleCheck(context, cycles);
-    context->idle_confirmed = 0;
 
     u32 last_page = 0xFFFFFFFF;
     fetchfunc cached_fetch = NULL;

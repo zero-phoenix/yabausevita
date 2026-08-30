@@ -398,10 +398,6 @@ typedef struct
          u32 quo, rem, SR;  // Result values for registers
       } div_data;
    } psp;
-
-   /* Idle detection fast path (v01.06 optimization) */
-   u32 idle_detect_pc;        // PC where idle was detected
-   int idle_confirmed;        // Flag: "confirmed idle, no recheck needed"
 } SH2_struct;
 
 typedef struct

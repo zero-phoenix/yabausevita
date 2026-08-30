@@ -412,7 +412,7 @@ void Vdp2VBlankOUT(void) {
       }
 
       if ((onesecondticks+diffticks) > ((yabsys.OneFrameTime * (u64)framecount) + (yabsys.OneFrameTime / 2)) &&
-          framesskipped < 30)
+          framesskipped < 9)
       {
          // Skip the next frame
          skipnextframe = 1;

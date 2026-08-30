@@ -62,6 +62,7 @@ SCAN = {
 # ── Win32 ─────────────────────────────────────────────────────────────
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+gdi32 = ctypes.WinDLL("gdi32", use_last_error=True)
 
 INPUT_KEYBOARD = 1
 KEYEVENTF_KEYUP = 0x0002
@@ -81,6 +82,43 @@ class INPUT(ctypes.Structure):
 
 
 WNDENUMPROC = ctypes.WINFUNCTYPE(wt.BOOL, wt.HWND, wt.LPARAM)
+
+
+def windows_of_pid(pid):
+    """Todas las ventanas visibles de un proceso: [(hwnd, titulo, ancho, alto)]."""
+    found = []
+
+    @WNDENUMPROC
+    def cb(hwnd, _lparam):
+        wpid = wt.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(wpid))
+        if wpid.value == pid and user32.IsWindowVisible(hwnd):
+            length = user32.GetWindowTextLengthW(hwnd)
+            buf = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buf, length + 1)
+            rect = wt.RECT()
+            user32.GetClientRect(hwnd, ctypes.byref(rect))
+            found.append((hwnd, buf.value, rect.right, rect.bottom))
+        return True
+
+    user32.EnumWindows(cb, 0)
+    return found
+
+
+def find_game_window(pid=None):
+    """La ventana DONDE corre el juego, no el GUI. Vita3K abre una ventana
+    de render aparte con el cliente al tamano nativo Vita (960x544)."""
+    candidates = windows_of_pid(pid) if pid else []
+    if not candidates:  # sin pid: fallback por titulo (sin juego en marcha)
+        hwnd = find_vita3k_window()
+        return hwnd
+    for hwnd, _title, w, h in candidates:
+        if abs(w - 960) <= 4 and abs(h - 544) <= 4:
+            return hwnd
+    # sin ventana 960x544: la que NO sea el GUI principal (con menu File)
+    gui = {hwnd for hwnd, t, w, h in candidates if w > 1000 and h > 600}
+    non_gui = [hwnd for hwnd, t, w, h in candidates if hwnd not in gui]
+    return (non_gui or [c[0] for c in candidates])[0]
 
 
 def find_vita3k_window():
@@ -112,10 +150,10 @@ def send_scancode(hwnd, code, hold=0.05):
 
 
 def press_key(name, hold=0.05):
-    """Enfoca la ventana de Vita3K (AttachThreadInput) y pulsa una tecla."""
+    """Enfoca la ventana DEL JUEGO (AttachThreadInput) y pulsa una tecla."""
     if name.upper() not in SCAN:
         raise SystemExit(f"tecla no mapeada: {name}")
-    hwnd = find_vita3k_window()
+    hwnd = find_game_window(CURRENT_PID) or find_vita3k_window()
     if not hwnd:
         raise SystemExit("no hay ventana Vita3K* abierta")
     cur_thread = kernel32.GetCurrentThreadId()
@@ -131,6 +169,115 @@ def press_key(name, hold=0.05):
         user32.AttachThreadInput(cur_thread, target_thread, False)
 
 
+# ── Ojos: captura de la ventana y detección de movimiento ────────────
+# El FPS no es prueba de que haya imagen: la Ronda 1 lo pago — 60 FPS
+# emulados con la pantalla en negro. Una corrida valida exige capturas
+# continuas y movimiento real entre ellas.
+from PIL import Image, ImageChops
+
+PW_RENDERFULLCONTENT = 0x00000002  # captura contenido GPU (OpenGL/D3D)
+
+
+def capture_window(hwnd=None):
+    """PIL Image del área cliente de la ventana Vita3K (PrintWindow)."""
+    hwnd = hwnd or find_vita3k_window()
+    if not hwnd:
+        raise SystemExit("no hay ventana Vita3K* abierta")
+    rect = wt.RECT()
+    user32.GetClientRect(hwnd, ctypes.byref(rect))
+    pt = wt.POINT(0, 0)
+    user32.ClientToScreen(hwnd, ctypes.byref(pt))
+    w, h = rect.right, rect.bottom
+    hdc_window = user32.GetDC(hwnd)
+    hdc_mem = gdi32.CreateCompatibleDC(hdc_window)
+    hbmp = gdi32.CreateCompatibleBitmap(hdc_window, w, h)
+    gdi32.SelectObject(hdc_mem, hbmp)
+    result = user32.PrintWindow(hwnd, hdc_mem, PW_RENDERFULLCONTENT)
+
+    class BITMAP(ctypes.Structure):
+        _fields_ = [("bmType", wt.LONG), ("bmWidth", wt.LONG),
+                    ("bmHeight", wt.LONG), ("bmWidthBytes", wt.LONG),
+                    ("bmPlanes", wt.WORD), ("bmBitsPixel", wt.WORD),
+                    ("bmBits", wt.LPVOID)]
+    bmp = BITMAP()
+    gdi32.GetObjectW(hbmp, ctypes.sizeof(bmp), ctypes.byref(bmp))
+    class BMIH(ctypes.Structure):
+        _fields_ = [("biSize", wt.DWORD), ("biWidth", wt.LONG),
+                    ("biHeight", wt.LONG), ("biPlanes", wt.WORD),
+                    ("biBitCount", wt.WORD), ("biCompression", wt.DWORD),
+                    ("biSizeImage", wt.DWORD), ("biXPelsPerMeter", wt.LONG),
+                    ("biYPelsPerMeter", wt.LONG), ("biClrUsed", wt.DWORD),
+                    ("biClrImportant", wt.DWORD)]
+    class BMI(ctypes.Structure):
+        _fields_ = [("bmiHeader", BMIH), ("bmiColors", wt.DWORD * 3)]
+    bmi = BMI()
+    bmi.bmiHeader.biSize = ctypes.sizeof(BMIH)
+    bmi.bmiHeader.biWidth = bmp.bmWidth
+    bmi.bmiHeader.biHeight = -bmp.bmHeight  # top-down
+    bmi.bmiHeader.biPlanes = 1
+    bmi.bmiHeader.biBitCount = 32
+    bmi.bmiHeader.biCompression = 0  # BI_RGB
+    buf = ctypes.create_string_buffer(bmp.bmWidth * bmp.bmHeight * 4)
+    gdi32.GetDIBits(hdc_mem, hbmp, 0, bmp.bmHeight, buf, ctypes.byref(bmi), 0)
+    img = Image.frombytes("RGBA", (bmp.bmWidth, bmp.bmHeight), buf.raw)
+    gdi32.DeleteObject(hbmp)
+    gdi32.DeleteDC(hdc_mem)
+    user32.ReleaseDC(hwnd, hdc_window)
+    return img.convert("RGB"), bool(result)
+
+
+def frame_stats(img, prev):
+    """% de píxeles casi negros y % que cambió respecto a la captura previa."""
+    gray = img.convert("L")
+    hist = gray.histogram()
+    black = sum(hist[:16]) / (img.width * img.height) * 100.0
+    diff = None
+    if prev is not None:
+        d = ImageChops.difference(gray, prev.convert("L"))
+        changed = sum(d.histogram()[13:]) / (img.width * img.height) * 100.0
+        diff = changed
+    return black, diff
+
+
+def monitor(seconds=40, interval=2.5, out_dir=None, tag=""):
+    """Capturas continuas de la ventana DEL JUEGO → veredicto de imagen y
+    movimiento. Los PNG quedan en out_dir para verificación humana."""
+    from datetime import datetime
+    stamp = datetime.now().strftime("%H%M%S")
+    out_dir = Path(out_dir) if out_dir else REPO / "build-docker" / f"shots-{tag or stamp}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    hwnd = find_game_window(CURRENT_PID)
+    if not hwnd:
+        raise SystemExit("no se encontro ventana de juego (pid=%s)" % CURRENT_PID)
+    shots = []
+    prev = None
+    t_end = time.time() + seconds
+    i = 0
+    while time.time() < t_end:
+        img, pw_ok = capture_window(hwnd)
+        black, diff = frame_stats(img, prev)
+        name = f"{out_dir / f'{i:03d}_b{black:05.1f}_d{diff if diff is not None else -1:05.1f}.png'}"
+        img.save(name)
+        shots.append({"t": round(i * interval, 1), "black_pct": round(black, 2),
+                      "diff_pct": round(diff, 2) if diff is not None else None,
+                      "printwindow_ok": pw_ok, "file": str(name)})
+        print(f"[{i*interval:5.1f}s] negro={black:6.2f}%  cambio={diff if diff is not None else '  ---'}%")
+        prev = img
+        i += 1
+        time.sleep(interval)
+    blacks = [s["black_pct"] for s in shots]
+    diffs = [s["diff_pct"] for s in shots if s["diff_pct"] is not None]
+    verdict = {
+        "shots": len(shots),
+        "has_image": (sum(1 for b in blacks if b < 90.0) / len(blacks)) >= 0.5 if blacks else False,
+        "has_motion": (sum(1 for d in diffs if d > 0.5) / len(diffs)) >= 0.3 if diffs else False,
+        "black_pct_mediana": sorted(blacks)[len(blacks)//2] if blacks else None,
+        "diff_pct_mediana": sorted(diffs)[len(diffs)//2] if diffs else None,
+        "dir": str(out_dir),
+    }
+    return verdict
+
+
 # ── Lanzamiento ───────────────────────────────────────────────────────
 def clean_env():
     """PATH sin Git/mingw64: Vita3K resolvería su OpenSSL contra el de Git
@@ -143,14 +290,19 @@ def clean_env():
     return env
 
 
+CURRENT_PID = None
+
+
 def launch(app_dir=None):
+    global CURRENT_PID
     kill()
-    args = [str(VITA3K_EXE)]
-    if app_dir:
-        args.append(str(app_dir))
-    subprocess.Popen(args, env=clean_env(),
-                     cwd=str(VITA3K_EXE.parent),
-                     creationflags=subprocess.DETACHED_PROCESS)
+    # -r YABA00001: flag dedicado de Vita3K para arrancar una app instalada
+    # (mas limpio que el content-path posicional, que reinstalaria).
+    args = [str(VITA3K_EXE), "-r", APP_DIR.name]
+    proc = subprocess.Popen(args, env=clean_env(),
+                            cwd=str(VITA3K_EXE.parent),
+                            creationflags=subprocess.DETACHED_PROCESS)
+    CURRENT_PID = proc.pid
     return wait_log(BOOT_MARKER, timeout=90)
 
 
@@ -359,6 +511,16 @@ def main():
     p.add_argument("name")
     p.add_argument("--hold", type=float, default=0.05)
     p.set_defaults(fn=lambda a: press_key(a.name, a.hold))
+
+    p = sub.add_parser("shot", help="una captura de la ventana Vita3K")
+    p.set_defaults(fn=lambda a: capture_window()[0].save("vita3k_shot.png") or print("vita3k_shot.png"))
+
+    p = sub.add_parser("monitor", help="capturas continuas + veredicto de movimiento")
+    p.add_argument("--seconds", type=float, default=40)
+    p.add_argument("--interval", type=float, default=2.5)
+    p.add_argument("--tag", default="")
+    p.set_defaults(fn=lambda a: print(json.dumps(
+        monitor(a.seconds, a.interval, tag=a.tag), ensure_ascii=False, indent=1)))
 
     args = ap.parse_args()
     args.fn(args)

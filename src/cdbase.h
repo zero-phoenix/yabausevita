@@ -1,4 +1,3 @@
-#include "sh2core.h"
 /*  Copyright 2004-2005 Theo Berkau
     Copyright 2005 Joost Peters
     Copyright 2006 Guillaume Duhamel
@@ -20,58 +19,32 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 */
 
-/*! \file cdbase.c
-    \brief Header for Dummy and ISO, BIN/CUE, MDS CD Interfaces
-*/
-
 #ifndef CDBASE_H
 #define CDBASE_H
 
 #include <stdio.h>
 #include "core.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define CDCORE_DEFAULT -1
 #define CDCORE_DUMMY    0
 #define CDCORE_ISO      1
 #define CDCORE_ARCH     2
-#define CDCORE_CHD      3
-
-#define CDCORE_NORMAL 0
-#define CDCORE_NODISC 2
-#define CDCORE_OPEN   3
 
 typedef struct
 {
         int id;
         const char *Name;
         int (*Init)(const char *);
-        void (*DeInit)(void);
-        int (*GetStatus)(void);
+        int (*DeInit)();
+        int (*GetStatus)();
         s32 (*ReadTOC)(u32 *TOC);
         int (*ReadSectorFAD)(u32 FAD, void *buffer);
-        void (*ReadAheadFAD)(u32 FAD);
-		void(*SetStatus)(int status);
 } CDInterface;
-
-typedef struct
-{
-  char* filename;
-  u8* zipBuffer;
-  u32 size;
-} ZipEntry;
 
 extern CDInterface DummyCD;
 
 extern CDInterface ISOCD;
 
 extern CDInterface ArchCD;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
