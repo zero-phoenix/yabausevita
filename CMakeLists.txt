@@ -29,8 +29,14 @@ add_definitions(-DVERSION="0.9.10")
 #   macro (no con HAVE_GETTIMEOFDAY); sin ella gettimeofday queda sin
 #   declarar y GCC 15 lo trata como error.
 add_definitions(-DDONT_PROFILE -DNO_DECILINE -DPSP_TIMING_TWEAKS -DHAVE_GETTIMEOFDAY -DHAVE_SYS_TIME_H)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -flto -ftree-vectorize -funroll-loops -fgcse-after-reload -fweb -frename-registers -mfpu=neon -ffast-math -fno-math-errno -fno-strict-aliasing")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+# Ronda 1: -Ofast -flto -ffast-math -mfpu=neon (commit a674198, 16-ago)
+# colgaba el dynarec en el primer frame — codegen en runtime + LTO es un
+# vector de rotura clasico. Verificado empiricamente: cpu_mode=0 arrancaba,
+# cpu_mode=2 hang. Se vuelve a -O3 plano, lo unico validado en runtime
+# (binario del 15-jul, Ronda 0). El coste teorico de NEON/vectorizacion
+# en el rasterizador queda para una ronda que lo mida de verdad.
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -funroll-loops -fgcse-after-reload -fweb -frename-registers")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
