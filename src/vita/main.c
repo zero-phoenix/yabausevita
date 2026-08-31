@@ -362,6 +362,9 @@ int main(int argc, char *argv[])
 
     int frame_count = 0;
     int sec_count = 0;
+    extern unsigned long long sh2fast_instr_total[2];
+    unsigned long long last_instr[2] = {0, 0};
+    int instr_reported = 0;
     SceUInt64 fps_timer = sceKernelGetProcessTimeWide();
     SceUInt64 exit_combo_t0 = 0;
     unsigned int last_buttons = 0;
@@ -385,6 +388,23 @@ int main(int argc, char *argv[])
             {
                 vita_log("FPS: %.1f\n", g_game_fps);
                 VIDGPUVdp2LogTiming();
+                /* Ronda 3: instrucciones SH2 por ventana (contador del core)
+                   → coste por instrucción en ns. */
+                if (instr_reported)
+                {
+                    unsigned long long di = sh2fast_instr_total[0] - last_instr[0];
+                    unsigned long long ds = sh2fast_instr_total[1] - last_instr[1];
+                    unsigned long long mu_ns = emuprof_acc[EMUPROF_MSH2] * 1000ULL;
+                    unsigned long long su_ns = emuprof_acc[EMUPROF_SSH2] * 1000ULL;
+                    vita_log("  SH2: msh2_instr=%llu ssh2_instr=%llu "
+                             "msh2_ns/instr=%llu ssh2_ns/instr=%llu\n",
+                             di, ds,
+                             di ? mu_ns / di : 0,
+                             ds ? su_ns / ds : 0);
+                }
+                last_instr[0] = sh2fast_instr_total[0];
+                last_instr[1] = sh2fast_instr_total[1];
+                instr_reported = 1;
                 EMUPROFLog();
                 EMUPROFReset();
                 sec_count = 0;

@@ -4,3 +4,5 @@ build/
 *.vpk
 *.self
 *.velf
+build-docker/
+tools/__pycache__/

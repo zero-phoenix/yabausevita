@@ -28,12 +28,22 @@ static int sh2fast_init(void)
 static void sh2fast_deinit(void) {}
 static int sh2fast_reset(void) { return 0; }
 
+/* Ronda 3: instrucciones ejecutadas por core. El campo context->cycles NO
+   es un contador absoluto (se renueva por llamada), así que se acumula el
+   delta DENTRO de cada exec: una comparación y una suma por llamada, no
+   por instrucción — medir el coste por instrucción no puede encarecer la
+   instrucción. [0]=MSH2, [1]=SSH2. */
+unsigned long long sh2fast_instr_total[2] = {0, 0};
+
 static void FASTCALL sh2fast_exec(SH2_struct *restrict context, u32 cycles)
 {
     if (!context) return;
+    u32 cycles_entrada = context->cycles;
+    int idx = (context == MSH2) ? 0 : 1;   /* indice, no booleano */
     if (__builtin_expect(context->isIdle, 0))
     {
         SH2idleParse(context, cycles);
+        sh2fast_instr_total[idx] += context->cycles - cycles_entrada;
         return;
     }
     SH2idleCheck(context, cycles);
@@ -66,6 +76,7 @@ static void FASTCALL sh2fast_exec(SH2_struct *restrict context, u32 cycles)
 
         context->cycles++;
     }
+    sh2fast_instr_total[idx] += context->cycles - cycles_entrada;
 }
 
 static void sh2fast_write_notify(u32 start, u32 length)

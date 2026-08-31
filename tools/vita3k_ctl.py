@@ -239,9 +239,10 @@ def frame_stats(img, prev):
     return black, diff
 
 
-def monitor(seconds=40, interval=2.5, out_dir=None, tag=""):
-    """Capturas continuas de la ventana DEL JUEGO → veredicto de imagen y
-    movimiento. Los PNG quedan en out_dir para verificación humana."""
+def monitor(seconds=40, interval=2.5, out_dir=None, tag="", con_oidos=True):
+    """Capturas continuas de la ventana DEL JUEGO → veredicto de imagen,
+    movimiento y (si hay sounddevice) sonido. Los PNG quedan en out_dir
+    para verificación humana."""
     from datetime import datetime
     stamp = datetime.now().strftime("%H%M%S")
     out_dir = Path(out_dir) if out_dir else REPO / "build-docker" / f"shots-{tag or stamp}"
@@ -249,6 +250,14 @@ def monitor(seconds=40, interval=2.5, out_dir=None, tag=""):
     hwnd = find_game_window(CURRENT_PID)
     if not hwnd:
         raise SystemExit("no se encontro ventana de juego (pid=%s)" % CURRENT_PID)
+    orejas = None
+    if con_oidos and _OIDOS_DISPONIBLES:
+        try:
+            orejas = Oidos()
+            orejas.empezar()
+            orejas._stream.start_stream()
+        except Exception:
+            orejas = None
     shots = []
     prev = None
     t_end = time.time() + seconds
@@ -276,7 +285,105 @@ def monitor(seconds=40, interval=2.5, out_dir=None, tag=""):
         "diffs_por_captura": diffs,
         "dir": str(out_dir),
     }
+    if orejas is not None:
+        verdict["oidos"] = orejas.parar()
     return verdict
+
+
+# ── Oídos: loopback WASAPI + veredicto de sonido ─────────────────────
+# R9 era «sin imagen no hay corrida»; el sonido es la otra mitad. Un juego
+# con el audio caído o entrecortado también está roto, y el log no lo
+# muestra: scsp_th puede quemar CPU produciendo audio que nunca llega.
+try:
+    import pyaudiowpatch as _pyaudio
+    import numpy as _np
+    _OIDOS_DISPONIBLES = True
+    _OIDOS_FALTA = ""
+except Exception as _e:  # opcional, como pygame/capstone en MAGI
+    _OIDOS_DISPONIBLES = False
+    _OIDOS_FALTA = str(_e)
+
+
+class Oidos:
+    """Escucha el loopback WASAPI de la salida por defecto mientras el
+    juego corre. pyaudiowpatch (no sounddevice): es el que expone el
+    loopback de verdad en Windows.
+
+    uso:
+        o = Oidos(); o.empezar(); ...correr...; v = o.parar()
+    veredicto: has_sound (energia sostenida), choppy (tramos con sonido
+    seguidos de silencio, varias veces), rms y sonando_pct.
+    """
+
+    def __init__(self, tramo_ms=100):
+        self.tramo_ms = tramo_ms
+        self._chunks = []
+        self._pa = None
+        self._stream = None
+
+    def empezar(self):
+        if not _OIDOS_DISPONIBLES:
+            raise SystemExit(f"oidos sin pyaudiowpatch/numpy: {_OIDOS_FALTA}")
+        self._pa = _pyaudio.PyAudio()
+        salida = self._pa.get_default_output_device_info()
+        prefijo = salida["name"][:20]
+        lb = None
+        for d in self._pa.get_loopback_device_info_generator():
+            if d["name"].startswith(prefijo) or prefijo in d["name"]:
+                lb = d
+                break
+        if lb is None:  # cualquier loopback disponible
+            lb = next(self._pa.get_loopback_device_info_generator())
+        self.sr = int(lb["defaultSampleRate"])
+        self.canal = lb["maxInputChannels"]
+        tramo = self.sr * self.tramo_ms // 1000
+        self._stream = self._pa.open(
+            format=_pyaudio.paFloat32, channels=self.canal, rate=self.sr,
+            input=True, input_device_index=lb["index"],
+            frames_per_buffer=tramo, stream_callback=self._cb)
+
+    def _cb(self, in_data, frame_count, time_info, status):
+        x = _np.frombuffer(in_data, dtype=_np.float32)
+        if self.canal >= 2:
+            x = x.reshape(-1, self.canal).mean(axis=1)
+        self._chunks.append(x.copy())
+        return (in_data, _pyaudio.paContinue)
+
+    def parar(self):
+        if self._stream:
+            self._stream.stop_stream()
+            self._stream.close()
+            self._stream = None
+        if self._pa:
+            self._pa.terminate()
+            self._pa = None
+        if not self._chunks:
+            return {"has_sound": False, "choppy": None, "error": "sin captura"}
+        x = _np.concatenate(self._chunks)
+        tramo = self.sr * self.tramo_ms // 1000
+        n = len(x) // tramo
+        rms = [float(_np.sqrt(_np.mean(x[i*tramo:(i+1)*tramo]**2)))
+               for i in range(n)]
+        sonando = [r > 0.004 for r in rms]  # ~-48 dBFS por tramo de 100 ms
+        frac = sum(sonando) / len(sonando) if sonando else 0
+        cortes = sum(1 for a, b in zip(sonando, sonando[1:]) if a and not b)
+        return {
+            "tramos": len(rms),
+            "has_sound": frac >= 0.3,
+            "choppy": bool(frac >= 0.3 and cortes >= 8),
+            "rms_mediana": round(sorted(rms)[len(rms)//2], 5),
+            "sonando_pct": round(frac * 100, 1),
+            "cortes": cortes,
+        }
+
+
+def oidos(segundos=15):
+    """Oír N segundos AHORA (la ventana debe estar sonando)."""
+    o = Oidos()
+    o.empezar()
+    o._stream.start_stream()
+    time.sleep(segundos)
+    return o.parar()
 
 
 # ── Lanzamiento ───────────────────────────────────────────────────────
@@ -515,6 +622,11 @@ def main():
 
     p = sub.add_parser("shot", help="una captura de la ventana Vita3K")
     p.set_defaults(fn=lambda a: capture_window()[0].save("vita3k_shot.png") or print("vita3k_shot.png"))
+
+    p = sub.add_parser("oidos", help="escuchar N segundos y veredicto de sonido")
+    p.add_argument("--segundos", type=float, default=10)
+    p.set_defaults(fn=lambda a: print(json.dumps(oidos(a.segundos),
+                                                  ensure_ascii=False, indent=1)))
 
     p = sub.add_parser("monitor", help="capturas continuas + veredicto de movimiento")
     p.add_argument("--seconds", type=float, default=40)

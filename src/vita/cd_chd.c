@@ -360,6 +360,30 @@ static int CHDCDReadSectorFAD(u32 FAD, void *buffer)
         }
     }
 
+    /* Ronda 3: sonda de lecturas. Primeras 60 en detalle, resumen cada 200,
+       y TODO gap/error siempre — son raros y son el oro del diagnóstico. */
+    {
+        static u32 s_reads = 0, s_gap = 0, s_err = 0, s_min = 0xFFFFFFFF, s_max = 0;
+        if (FAD < s_min) s_min = FAD;
+        if (FAD > s_max) s_max = FAD;
+        if (!t && FAD >= s_leadout_fad + 150)
+            s_err++;
+        else if (!t)
+            s_gap++;
+        if (s_reads < 60)
+            CHDLOG("CDREAD[%u]: FAD=%u trk=%s%s\n", s_reads, FAD,
+                   t ? "datos" : (FAD >= s_leadout_fad + 150 ? "FUERA" : "gap"),
+                   (t && t->datasize == 2048) ? "(cocinada)" :
+                   (t && t->datasize == 2352) ? "(raw)" : "");
+        else if (!t)
+            CHDLOG("CDREAD[%u]: FAD=%u %s (total gap=%u err=%u)\n", s_reads, FAD,
+                   FAD >= s_leadout_fad + 150 ? "FUERA" : "gap", s_gap, s_err);
+        else if ((s_reads % 200) == 0)
+            CHDLOG("CDREAD: total=%u gap=%u err=%u rangoFAD=[%u,%u]\n",
+                   s_reads, s_gap, s_err, s_min, s_max);
+        s_reads++;
+    }
+
     if (!t)
     {
         /* pregap virtual, gap entre pistas o leadout: silencio.
@@ -415,6 +439,23 @@ static int CHDCDReadSectorFAD(u32 FAD, void *buffer)
         else
         {
             memcpy(out + 16, hunk + offs, t->datasize);
+        }
+    }
+
+    /* Ronda 3b: lo que la BIOS VE en el sector 0 del disco — si la firma
+       "SEGA SEGASATURN" (con su sync de 12 bytes delante) no está byte a
+       byte, aquí se ve al instante. 120 bytes cubren firma + fecha +
+       región (0x40) + periféricos (0x80). */
+    if (FAD == 150)
+    {
+        static int s_dump150 = 0;
+        if (s_dump150 < 2)
+        {
+            s_dump150++;
+            CHDLOG("SEC150[%d]:", s_dump150);
+            for (i = 0; i < 120; i++)
+                CHDLOG(" %02X", out[i]);
+            CHDLOG("\n");
         }
     }
 
