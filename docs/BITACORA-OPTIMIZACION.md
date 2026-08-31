@@ -383,6 +383,16 @@ marca como superado si una medición posterior lo contradice.
 | A22 | Panzer a 59,8 FPS con 64,7 % SH2: el cuello no es solo el porcentaje, es el coste por instrucción de los intérpretes. | Ronda 2 |
 | A6 | `PORTING_NOTES.md` describe el hito 0 y **está desactualizado**: dice que SH-2 va en intérprete puro y que vídeo, sonido, mando y CD están en DUMMY. El código real tiene dynarec ARM, CHD, audio Vita y renderizador GPU. No usarlo como fuente. | Contraste con `src/vita/main.c`, 30-ago-2026 |
 
+### 5.1b Ronda 3 — el disco de NiGHTS y el coste por instrucción
+
+| # | Hallazgo | Origen |
+|---|---|---|
+| A23 | **El disco de NiGHTS llega byte-perfecto.** Volcado hex del sector 150: sync correcto, MSF 00:02:00, mode 1, `SEGA SEGASATURN SEGA ENTERPRISES`, y región `JTU` en el offset 0x40 (incluye U, válida con BIOS USA). Ni disco corrupto, ni lector roto, ni región equivocada: tres hipótesis descartadas con una sola medición. | Sonda `CDREAD` en `cd_chd.c`, 30-ago-2026 |
+| A24 | **NiGHTS lee 3 sectores del IP.BIN y abandona**; Panzer lee los 16 completos y luego streamea secuencial. Tras abandonar, NiGHTS se pasa el tiempo buscando por zonas de audio (FAD 4963→20051), que es el patrón de una BIOS tratando el disco como CD de música. | Traza CD comparada, R3 |
+| A25 | **Coste por instrucción medido**: 51 ns/instr en NiGHTS, 57-81 ns en Panzer. Es la métrica que la ronda 1 pedía y no existía. Solo la lleva `SH2Fast`; `SH2LRU` y el dynarec siguen sin instrumentar. | `sh2fast_instr_total`, R3 |
+| A26 | `SH2LRU` da ~44 FPS en Sonic R, prácticamente lo mismo que `SH2Fast`. Cambiar de intérprete no es la palanca. | R3 |
+| A27 | El TOC construido por `cd_chd.c` marca la pista 1 con `ctrl 0x41` (datos), que es correcto. El TOC no explica A24. | Lectura de `cd_chd.c`, R3 |
+
 ### 5.2 Reglas derivadas (lo que no hay que volver a intentar)
 
 | # | Regla | Por qué |
@@ -394,6 +404,8 @@ marca como superado si una medición posterior lo contradice.
 | R5 | No leer `PORTING_NOTES.md` para saber el estado del emulador. Leer `src/vita/main.c`. | A6 |
 | R6 | **No proponer optimizaciones del camino de render** (composite, upload, display) hasta que exista telemetría de emulación que demuestre que ahí queda algo. Es el 1,27 % del tiempo: el techo de la mejora es ~0,2 FPS. | A7 |
 | R7 | No interpretar `GPU timing` como µs por fotograma. Son totales de 5 s. | A8 |
+| R14 | **No volver a sospechar del disco de NiGHTS.** Llega byte-perfecto y su región es válida. La siguiente hipótesis es del lado de la BIOS/CDB: por qué abandona tras 3 sectores del IP.BIN. | A23, A24, A27 |
+| R15 | La palanca no es cambiar de intérprete: `SH2Fast` y `SH2LRU` dan lo mismo. Es el coste por instrucción (51-81 ns). | A25, A26 |
 | R8 | La ronda 1 es de **instrumentación**, no de optimización: contadores por subsistema en `YabauseExec` (SH-2, SCU, SCSP/68K, CD). Sin eso, cualquier propuesta apunta al 98,7 % a ciegas. | A7 |
 | R9 | Ninguna corrida se acepta sin **verificación de imagen y movimiento** (capturas continuas + diff %). El FPS por sí solo no es evidencia. | A12, Ronda 1 |
 | R10 | Todo cambio de core (SH2, VDP) se valida con corrida + capturas antes de llamarlo «funciona». El log no puede ver lo que ve el jugador. | A13, A14 |
