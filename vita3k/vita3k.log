@@ -1,123 +1,1617 @@
-[22:27:12.958] |I| [main]: Vita3K v0.2.1 4058-6063154f
-[22:27:12.958] |I| [main]: OS: Microsoft Windows 10 Professional (build 19045)
-[22:27:12.958] |I| [main]: CPU: Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz | 8 Threads | 3.392 GHz
-[22:27:12.958] |I| [main]: Available ram memory: 24520 MiB
-[22:27:12.959] |I| [app::init]: Base path: "C:\Users\D\Documents\GitHub\yabausevita\vita3k\"
-[22:27:12.959] |I| [app::init]: VitaFS path: "C:\Users\D\AppData\Roaming\Vita3K\Vita3K\"
-[22:27:12.961] |E| [discordrpc::init]: Failed to initialize Discord Rich Presence, err_code: 4
-[22:27:12.961] |I| [export_library_init_taihen]: taiHEN: HLE module initialized
-[22:27:12.963] |E| [main]: File: [1] is not a supported content type.
-[22:27:13.384] |I| [ThemeManager::apply_theme_entry]: Loaded stylesheet 'dark' from :/themes/dark/dark.qss
-[22:27:13.809] |I| [renderer::vulkan::VKState::create]: Vulkan device: NVIDIA GeForce GTX 1050
-[22:27:13.809] |I| [renderer::vulkan::VKState::create]: Driver version: 582.66.0.0
-[22:27:14.234] |I| [renderer::vulkan::ScreenRenderer::setup]: Your device support high deep stencil quality
-[22:27:14.234] |I| [renderer::vulkan::ScreenRenderer::setup]: Present mode: Mailbox
-[22:27:14.333] |I| [renderer::State::init_overlay_font_dirs]: Overlay font firmware dir: C:\Users\D\AppData\Roaming\Vita3K\Vita3K\sa0\data\font\pvf/
-[22:27:14.333] |I| [renderer::State::init_overlay_font_dirs]: Overlay font system dirs: 1 entries
-[22:27:14.335] |I| [renderer::vulkan::VKState::late_init]: The Vulkan renderer is using texture viewport for better performance
-[22:27:14.335] |I| [renderer::vulkan::VKState::late_init]: Using the following memory mapping method: Double buffer
-[22:27:14.477] |I| [renderer::vulkan::PipelineCache::set_async_compilation]: Enabling asynchronous pipeline compilation with 3 threads
-[22:27:14.479] |E| [SDLAudioAdapter::init]: SDL audio error: Audio subsystem is not initialized
-[22:27:14.479] |W| [app::late_init]: Failed to initialize audio! Audio will not work.
-[22:27:14.480] |I| [load_app_impl]: CPU Optimisation state: true
-[22:27:14.480] |I| [load_app_impl]: ngs state: true
-[22:27:14.480] |I| [load_app_impl]: Resolution multiplier: 1
-[22:27:14.480] |I| [load_app_impl]: modules mode: Automatic
-[22:27:14.480] |I| [load_app_impl]: Title: YabauseVita
-[22:27:14.480] |I| [load_app_impl]: Serial: YABA00001
-[22:27:14.480] |I| [load_app_impl]: Version: 1.00
-[22:27:14.480] |I| [load_app_impl]: Category: gd
-[22:27:14.483] |I| [load_module]: Loading module "app0:eboot.bin"
-[22:27:14.502] |I| [load_self]: Loaded module segment 0 @ [0x81000000 - 0x8106507C / 0x81000000] (size: 0x0006507C) of module app0:eboot.bin
-[22:27:14.502] |I| [load_self]: Loaded module segment 1 @ [0x81070000 - 0x81161024 / 0x81070000] (size: 0x000F1024) of module app0:eboot.bin
-[22:27:14.502] |I| [load_self]: Linking SELF app0:eboot.bin...
-[22:27:14.502] |I| [load_self]: eboot.bin module NID: 0x1F29EA09
-[22:27:14.502] |I| [load_module::<lambda_2>::operator ()]: Module YabauseVita (at "app0:eboot.bin") loaded
-[22:27:14.502] |I| [load_app_impl]: Main executable YabauseVita (eboot.bin) loaded
-[22:27:14.502] |I| [get_patches]: Found 0 patches for titleid YABA00001
-[22:27:14.503] |I| [load_module]: Loading module "os0:kd/bootimage.skprx"
-[22:27:14.539] |I| [load_self]: Loaded module segment 0 @ [0x80005000 - 0x8030FE5C / 0x81000000] (size: 0x0030AE5C) of module os0:kd/bootimage.skprx
-[22:27:14.539] |I| [load_self]: Linking SELF os0:kd/bootimage.skprx...
-[22:27:14.539] |I| [load_module::<lambda_2>::operator ()]: Module SceKernelBootimage (at "os0:kd/bootimage.skprx") loaded
-[22:27:14.539] |I| [load_module]: Loading module "os0:kd/sysmodule.skprx"
-[22:27:14.539] |I| [load_self]: Loaded module segment 0 @ [0x80310000 - 0x80312D74 / 0x81000000] (size: 0x00002D74) of module os0:kd/sysmodule.skprx
-[22:27:14.539] |I| [load_self]: Loaded module segment 1 @ [0x80313000 - 0x80313004 / 0x81003000] (size: 0x00000004) of module os0:kd/sysmodule.skprx
-[22:27:14.539] |I| [load_self]: Linking ELF os0:kd/sysmodule.skprx...
-[22:27:14.539] |I| [load_module::<lambda_2>::operator ()]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") loaded
-[22:27:14.539] |I| [load_module]: Loading module "vs0:sys/external/libc.suprx"
-[22:27:14.543] |I| [load_self]: vs0:sys/external/libc.suprx: Skipping special segment 0x6FFFFF01...
-[22:27:14.543] |I| [load_self]: Loaded module segment 0 @ [0x80315000 - 0x803668A4 / 0x81000000] (size: 0x000518A4) of module vs0:sys/external/libc.suprx
-[22:27:14.543] |I| [load_self]: Loaded module segment 1 @ [0x80367000 - 0x803698A0 / 0x81052000] (size: 0x000028A0) of module vs0:sys/external/libc.suprx
-[22:27:14.543] |I| [load_self]: Linking SELF vs0:sys/external/libc.suprx...
-[22:27:14.543] |I| [load_module::<lambda_2>::operator ()]: Module SceLibc (at "vs0:sys/external/libc.suprx") loaded
-[22:27:14.543] |I| [load_module]: Loading module "vs0:sys/external/libfios2.suprx"
-[22:27:14.546] |I| [load_self]: vs0:sys/external/libfios2.suprx: Skipping special segment 0x6FFFFF01...
-[22:27:14.546] |I| [load_self]: Loaded module segment 0 @ [0x8036A000 - 0x80396CBF / 0x81000000] (size: 0x0002CCBF) of module vs0:sys/external/libfios2.suprx
-[22:27:14.546] |I| [load_self]: Loaded module segment 1 @ [0x80397000 - 0x8039C255 / 0x8102D000] (size: 0x00005255) of module vs0:sys/external/libfios2.suprx
-[22:27:14.546] |I| [load_self]: Linking SELF vs0:sys/external/libfios2.suprx...
-[22:27:14.546] |I| [load_module::<lambda_2>::operator ()]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") loaded
-[22:27:14.546] |I| [load_module]: Loading module "vs0:sys/external/libSceFt2.suprx"
-[22:27:14.549] |I| [load_self]: Loaded module segment 0 @ [0x8039D000 - 0x803EDF04 / 0x81000000] (size: 0x00050F04) of module vs0:sys/external/libSceFt2.suprx
-[22:27:14.549] |I| [load_self]: Loaded module segment 1 @ [0x803EE000 - 0x803EE2F4 / 0x81051000] (size: 0x000002F4) of module vs0:sys/external/libSceFt2.suprx
-[22:27:14.549] |I| [load_self]: Linking SELF vs0:sys/external/libSceFt2.suprx...
-[22:27:14.549] |I| [load_module::<lambda_2>::operator ()]: Module SceLibft2 (at "vs0:sys/external/libSceFt2.suprx") loaded
-[22:27:14.549] |I| [load_module]: Loading module "vs0:sys/external/libpvf.suprx"
-[22:27:14.550] |I| [load_self]: Loaded module segment 0 @ [0x803EF000 - 0x803FEF14 / 0x81000000] (size: 0x0000FF14) of module vs0:sys/external/libpvf.suprx
-[22:27:14.550] |I| [load_self]: Loaded module segment 1 @ [0x803FF000 - 0x803FF008 / 0x81010000] (size: 0x00000008) of module vs0:sys/external/libpvf.suprx
-[22:27:14.550] |I| [load_self]: Linking SELF vs0:sys/external/libpvf.suprx...
-[22:27:14.550] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPvf (at "vs0:sys/external/libpvf.suprx") loaded
-[22:27:14.552] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Found pipeline cache, reading...
-[22:27:14.552] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Pipeline cache read and loaded
-[22:27:14.734] |W| [export_ksceKernelRegisterProcEventHandler::<lambda_1>::operator ()]: Stubbed ksceKernelRegisterProcEventHandler import called. (Immediately run create and start callbacks on current thread)
-[22:27:14.734] |I| [start_module]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") module_start returned 0x0
-[22:27:14.788] |I| [start_module]: Module SceLibc (at "vs0:sys/external/libc.suprx") module_start returned 0x0
-[22:27:14.818] |W| [export_sceKernelGetProcessId::<lambda_1>::operator ()]: Stubbed sceKernelGetProcessId import called. (pid: 1)
-[22:27:14.819] |I| [start_module]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") module_start returned 0x0
-[22:27:14.819] |I| [MainWindow::boot_game_once]: Game started: YabauseVita (YABA00001)
-[22:27:14.820] |I| [renderer::vulkan::VKState::precompile_shader]: Program Compiled 1/1
-[22:27:14.979] |I| [export_sceIoOpen]: Opening file: tty0:
-[22:27:14.993] |I| [stat_file]: Skipped 2 duplicate messages..
-[22:27:14.993] |E| [stat_file]: Missing file at "C:/Users/D/AppData/Roaming/Vita3K/Vita3K/ux0/data/yabausevita_log.txt" (target path: ux0:/data/yabausevita_log.txt)
-[22:27:14.993] |W| [io_error_impl]: stat_file (_sceIoGetstat) returned 0x80010002
-[22:27:14.993] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:15.013] |I| [export_sceAppMgrGetBudgetInfo::<lambda_1>::operator ()]: Skipped 2 duplicate messages..
-[22:27:15.013] |W| [export_sceAppMgrGetBudgetInfo::<lambda_1>::operator ()]: Stubbed sceAppMgrGetBudgetInfo import called. (not system mode)
-[22:27:15.052] |W| [export_sceGxmMapFragmentUsseMemory::<lambda_1>::operator ()]: Stubbed sceGxmMapFragmentUsseMemory import called. (always return success)
-[22:27:15.070] |I| [GameCompatibility::on_ver_reply_finished]: DB is up to date (2026-07-12 02:10:31Z)
-[22:27:15.114] |W| [export_sceGxmMapVertexUsseMemory::<lambda_1>::operator ()]: Stubbed sceGxmMapVertexUsseMemory import called. (always return success)
-[22:27:15.123] |W| [export_SceThreadmgrForDriver_20C228E4::<lambda_1>::operator ()]: Unimplemented SceThreadmgrForDriver_20C228E4 import called.
-[22:27:15.126] |W| [export_SceQafMgrForDriver_B9770A13::<lambda_1>::operator ()]: Unimplemented SceQafMgrForDriver_B9770A13 import called.
-[22:27:15.126] |W| [export_ksceKernelSetPermission::<lambda_1>::operator ()]: Unimplemented ksceKernelSetPermission import called.
-[22:27:15.127] |I| [load_module]: Loading module "vs0:sys/external/libpgf.suprx"
-[22:27:15.128] |I| [load_self]: Loaded module segment 0 @ [0x80447000 - 0x8044CCB4 / 0x81000000] (size: 0x00005CB4) of module vs0:sys/external/libpgf.suprx
-[22:27:15.128] |I| [load_self]: Loaded module segment 1 @ [0x8044D000 - 0x8044DFE8 / 0x81006000] (size: 0x00000FE8) of module vs0:sys/external/libpgf.suprx
-[22:27:15.128] |I| [load_self]: Linking SELF vs0:sys/external/libpgf.suprx...
-[22:27:15.128] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPgf (at "vs0:sys/external/libpgf.suprx") loaded
-[22:27:15.138] |W| [io_error_impl]: create_dir (_sceIoMkdir) returned 0x80010011
-[22:27:15.139] |I| [export_sceIoOpen]: Skipped 4 duplicate messages..
-[22:27:15.139] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:15.142] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/vmenu_dbg.txt
-[22:27:15.145] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/config.cfg
-[22:27:15.161] |W| [io_error_impl]: create_dir (_sceIoMkdir) returned 0x80010011
-[22:27:15.167] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/bios/saturn_bios.bin
-[22:27:15.180] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/vmenu_dbg.txt
-[22:27:17.208] |I| [export_sceIoOpen]: Skipped 2 duplicate messages..
-[22:27:17.208] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/config.cfg
-[22:27:17.215] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:17.244] |I| [export_sceIoOpen]: Skipped 3 duplicate messages..
-[22:27:17.244] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/roms/Sonic R (Europe).bin
-[22:27:17.311] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/bios/saturn_bios.bin
-[22:27:17.332] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:22.398] |I| [export_sceIoOpen]: Skipped 5 duplicate messages..
-[22:27:22.398] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:27.410] |I| [export_sceIoOpen]: Skipped 1 duplicate messages..
-[22:27:27.410] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:32.020] |I| [renderer::vulkan::PipelineCache::save_pipeline_cache]: Skipped 54 duplicate messages..
-[22:27:32.020] |I| [renderer::vulkan::PipelineCache::save_pipeline_cache]: Saving pipeline cache...
-[22:27:32.020] |I| [renderer::vulkan::PipelineCache::save_pipeline_cache]: Pipeline cache saved
-[22:27:32.410] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:37.464] |I| [export_sceIoOpen]: Skipped 81 duplicate messages..
-[22:27:37.464] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[22:27:39.476] |I| [export_sceIoOpen]: Skipped 16 duplicate messages..
-[22:27:39.476] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
-[
+[05:58:19.043] |I| [config::init_config]: input-installed-path: YABA00001
+[05:58:19.043] |I| [config::init_config]: log-level: trace
+[05:58:19.997] |I| [main]: Vita3K v0.2.1 4058-6063154f
+[05:58:19.997] |I| [main]: OS: Microsoft Windows 10 Professional (build 19045)
+[05:58:19.997] |I| [main]: CPU: Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz | 8 Threads | 3.392 GHz
+[05:58:19.997] |I| [main]: Available ram memory: 24520 MiB
+[05:58:19.997] |I| [app::init]: Base path: "C:\Users\D\Documents\GitHub\yabausevita-zp\vita3k\"
+[05:58:19.997] |I| [app::init]: VitaFS path: "C:\Users\D\AppData\Roaming\Vita3K\Vita3K\"
+[05:58:20.002] |E| [discordrpc::init]: Failed to initialize Discord Rich Presence, err_code: 4
+[05:58:20.002] |I| [export_library_init_taihen]: taiHEN: HLE module initialized
+[05:58:20.026] |I| [app::load_cached_apps]: Apps cache source metadata differs from installed content; rebuilding.
+[05:58:20.962] |I| [ThemeManager::apply_theme_entry]: Loaded stylesheet 'dark' from :/themes/dark/dark.qss
+[05:58:21.428] |D| [app::AppSessionController::set_phase]: App session phase: Idle -> Launching
+[05:58:21.545] |I| [renderer::vulkan::VKState::create]: Vulkan device: NVIDIA GeForce GTX 1050
+[05:58:21.545] |I| [renderer::vulkan::VKState::create]: Driver version: 582.66.0.0
+[05:58:22.332] |I| [renderer::vulkan::ScreenRenderer::setup]: Your device support high deep stencil quality
+[05:58:22.332] |I| [renderer::vulkan::ScreenRenderer::setup]: Present mode: Mailbox
+[05:58:22.492] |I| [renderer::State::init_overlay_font_dirs]: Overlay font firmware dir: C:\Users\D\AppData\Roaming\Vita3K\Vita3K\sa0\data\font\pvf/
+[05:58:22.493] |I| [renderer::State::init_overlay_font_dirs]: Overlay font system dirs: 1 entries
+[05:58:22.493] |D| [renderer::State::init_overlay_font_dirs]:   system font dir: C:/Windows/Fonts/
+[05:58:22.527] |I| [renderer::vulkan::VKState::late_init]: The Vulkan renderer is using texture viewport for better performance
+[05:58:22.527] |I| [renderer::vulkan::VKState::late_init]: Using the following memory mapping method: Double buffer
+[05:58:22.661] |I| [renderer::vulkan::PipelineCache::set_async_compilation]: Enabling asynchronous pipeline compilation with 3 threads
+[05:58:22.789] |I| [load_app_impl]: CPU Optimisation state: true
+[05:58:22.789] |I| [load_app_impl]: ngs state: true
+[05:58:22.789] |I| [load_app_impl]: Resolution multiplier: 1
+[05:58:22.789] |I| [load_app_impl]: modules mode: Automatic
+[05:58:22.789] |I| [load_app_impl]: Title: YabauseVita
+[05:58:22.789] |I| [load_app_impl]: Serial: YABA00001
+[05:58:22.789] |I| [load_app_impl]: Version: 1.00
+[05:58:22.789] |I| [load_app_impl]: Category: gd
+[05:58:22.796] |I| [load_module]: Loading module "app0:eboot.bin"
+[05:58:22.817] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0xCDE6C, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:22.827] |I| [load_self]: Loaded module segment 0 @ [0x81000000 - 0x810CE8BC / 0x81000000] (size: 0x000CE8BC) of module app0:eboot.bin
+[05:58:22.827] |I| [load_self]: Loaded module segment 1 @ [0x810D0000 - 0x811EC558 / 0x810D0000] (size: 0x0011C558) of module app0:eboot.bin
+[05:58:22.827] |I| [load_self]: Linking SELF app0:eboot.bin...
+[05:58:22.827] |I| [load_self]: eboot.bin module NID: 0x217A6613
+[05:58:22.828] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x810CDE6C
+[05:58:22.828] |D| [load_var_exports]: 	NID 0x70FBA1E7 (SCE_PROC_PARAMS) at 0x810CDEC8
+[05:58:22.828] |I| [load_module::<lambda_2>::operator ()]: Module YabauseVita (at "app0:eboot.bin") loaded
+[05:58:22.828] |I| [load_app_impl]: Main executable YabauseVita (eboot.bin) loaded
+[05:58:22.828] |I| [get_patches]: Found 0 patches for titleid YABA00001
+[05:58:22.832] |I| [load_module]: Loading module "os0:kd/bootimage.skprx"
+[05:58:22.947] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x0, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:22.951] |I| [load_self]: Loaded module segment 0 @ [0x80005000 - 0x8030FE5C / 0x81000000] (size: 0x0030AE5C) of module os0:kd/bootimage.skprx
+[05:58:22.951] |I| [load_self]: Linking SELF os0:kd/bootimage.skprx...
+[05:58:22.951] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x800050D8
+[05:58:22.951] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x80005000
+[05:58:22.951] |I| [load_module::<lambda_2>::operator ()]: Module SceKernelBootimage (at "os0:kd/bootimage.skprx") loaded
+[05:58:22.951] |I| [load_module]: Loading module "os0:kd/sysmodule.skprx"
+[05:58:22.953] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x1010, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:22.953] |I| [load_self]: Loaded module segment 0 @ [0x80310000 - 0x80312D74 / 0x81000000] (size: 0x00002D74) of module os0:kd/sysmodule.skprx
+[05:58:22.953] |I| [load_self]: Loaded module segment 1 @ [0x80313000 - 0x80313004 / 0x81003000] (size: 0x00000004) of module os0:kd/sysmodule.skprx
+[05:58:22.953] |I| [load_self]: Linking ELF os0:kd/sysmodule.skprx...
+[05:58:22.953] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x80311468
+[05:58:22.953] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x80311010
+[05:58:22.953] |D| [load_var_imports]: 	NID NOT FOUND 0x99EEBD1F (UNRECOGNISED) at 0x80312CD0, setting to stub value 0xDEADBEEF
+[05:58:22.953] |I| [load_module::<lambda_2>::operator ()]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") loaded
+[05:58:22.953] |I| [load_module]: Loading module "vs0:sys/external/libc.suprx"
+[05:58:22.979] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x3C4DC, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x5, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:22.980] |I| [load_self]: vs0:sys/external/libc.suprx: Skipping special segment 0x6FFFFF01...
+[05:58:22.980] |I| [load_self]: Loaded module segment 0 @ [0x80315000 - 0x803668A4 / 0x81000000] (size: 0x000518A4) of module vs0:sys/external/libc.suprx
+[05:58:22.980] |I| [load_self]: Loaded module segment 1 @ [0x80367000 - 0x803698A0 / 0x81052000] (size: 0x000028A0) of module vs0:sys/external/libc.suprx
+[05:58:22.980] |I| [load_self]: Linking SELF vs0:sys/external/libc.suprx...
+[05:58:22.980] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x8035C314
+[05:58:22.980] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x803514DC
+[05:58:22.982] |I| [load_module::<lambda_2>::operator ()]: Module SceLibc (at "vs0:sys/external/libc.suprx") loaded
+[05:58:22.982] |I| [load_module]: Loading module "vs0:sys/external/libfios2.suprx"
+[05:58:23.003] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x23F08, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x5, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:23.004] |I| [load_self]: vs0:sys/external/libfios2.suprx: Skipping special segment 0x6FFFFF01...
+[05:58:23.004] |I| [load_self]: Loaded module segment 0 @ [0x8036A000 - 0x80396CBF / 0x81000000] (size: 0x0002CCBF) of module vs0:sys/external/libfios2.suprx
+[05:58:23.004] |I| [load_self]: Loaded module segment 1 @ [0x80397000 - 0x8039C255 / 0x8102D000] (size: 0x00005255) of module vs0:sys/external/libfios2.suprx
+[05:58:23.004] |I| [load_self]: Linking SELF vs0:sys/external/libfios2.suprx...
+[05:58:23.004] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x80396BC8
+[05:58:23.004] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x8038DF08
+[05:58:23.004] |I| [load_module::<lambda_2>::operator ()]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") loaded
+[05:58:23.004] |I| [load_module]: Loading module "vs0:sys/external/libSceFt2.suprx"
+[05:58:23.022] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x3BF10, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:23.023] |I| [load_self]: Loaded module segment 0 @ [0x8039D000 - 0x803EDF04 / 0x81000000] (size: 0x00050F04) of module vs0:sys/external/libSceFt2.suprx
+[05:58:23.023] |I| [load_self]: Loaded module segment 1 @ [0x803EE000 - 0x803EE2F4 / 0x81051000] (size: 0x000002F4) of module vs0:sys/external/libSceFt2.suprx
+[05:58:23.023] |I| [load_self]: Linking SELF vs0:sys/external/libSceFt2.suprx...
+[05:58:23.023] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x803D97DC
+[05:58:23.023] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x803D8F10
+[05:58:23.023] |I| [load_module::<lambda_2>::operator ()]: Module SceLibft2 (at "vs0:sys/external/libSceFt2.suprx") loaded
+[05:58:23.023] |I| [load_module]: Loading module "vs0:sys/external/libpvf.suprx"
+[05:58:23.038] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0xE300, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:23.038] |I| [load_self]: Loaded module segment 0 @ [0x803EF000 - 0x803FEF14 / 0x81000000] (size: 0x0000FF14) of module vs0:sys/external/libpvf.suprx
+[05:58:23.038] |I| [load_self]: Loaded module segment 1 @ [0x803FF000 - 0x803FF008 / 0x81010000] (size: 0x00000008) of module vs0:sys/external/libpvf.suprx
+[05:58:23.038] |I| [load_self]: Linking SELF vs0:sys/external/libpvf.suprx...
+[05:58:23.038] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x803FD710
+[05:58:23.038] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x803FD300
+[05:58:23.038] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPvf (at "vs0:sys/external/libpvf.suprx") loaded
+[05:58:23.038] |D| [load_taihen_config]: taiHEN: no config.txt found
+[05:58:23.081] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Found pipeline cache, reading...
+[05:58:23.082] |I| [renderer::vulkan::PipelineCache::read_pipeline_cache]: Pipeline cache read and loaded
+[05:58:23.126] |D| [start_module]: Running module_start of library: SceSysmodule at address 0x80310CC9
+[05:58:23.371] |W| [export_ksceKernelRegisterProcEventHandler::<lambda_1>::operator ()]: Stubbed ksceKernelRegisterProcEventHandler import called. (Immediately run create and start callbacks on current thread)
+[05:58:23.371] |I| [start_module]: Module SceSysmodule (at "os0:kd/sysmodule.skprx") module_start returned 0x0
+[05:58:23.371] |D| [start_module]: Running module_start of library: SceLibc at address 0x80315871
+[05:58:23.422] |T| [open_file]: sceKernelGetStdin: Opening terminal tty0:
+[05:58:23.422] |T| [open_file]: sceKernelGetStdout: Opening terminal tty0:
+[05:58:23.422] |T| [open_file]: sceKernelGetStderr: Opening terminal tty0:
+[05:58:23.447] |I| [start_module]: Module SceLibc (at "vs0:sys/external/libc.suprx") module_start returned 0x0
+[05:58:23.447] |D| [start_module]: Running module_start of library: SceLibFios2 at address 0x8036A001
+[05:58:23.501] |W| [export_sceKernelGetProcessId::<lambda_1>::operator ()]: Stubbed sceKernelGetProcessId import called. (pid: 1)
+[05:58:23.504] |I| [start_module]: Module SceLibFios2 (at "vs0:sys/external/libfios2.suprx") module_start returned 0x0
+[05:58:23.504] |D| [app::AppSessionController::set_phase]: App session phase: Launching -> Running
+[05:58:23.506] |I| [MainWindow::boot_game_once]: Game started: YabauseVita (YABA00001)
+[05:58:23.567] |I| [renderer::vulkan::VKState::precompile_shader]: Program Compiled 1/1
+[05:58:23.573] |D| [overlay::font::initialize_codepage::<lambda_1>::operator ()]: Overlay font: loaded 'C:/Windows/Fonts/Arial.ttf' (index 0) for character 0x50 (codepage 0)
+[05:58:23.583] |D| [overlay::font::initialize_codepage::<lambda_1>::operator ()]: Overlay font: loaded 'C:/Windows/Fonts/Arial.ttf' (index 0) for character 0x31 (codepage 0)
+[05:58:23.747] |I| [export_sceIoOpen]: Skipped 1 duplicate messages..
+[05:58:23.747] |I| [export_sceIoOpen]: Opening file: tty0:
+[05:58:23.747] |T| [open_file]: sceIoOpen: Opening terminal tty0:
+[05:58:23.747] |I| [export_sceIoOpen]: Opening file: tty0:
+[05:58:23.747] |T| [open_file]: sceIoOpen: Opening terminal tty0:
+[05:58:23.747] |I| [export_sceIoOpen]: Opening file: tty0:
+[05:58:23.747] |T| [open_file]: sceIoOpen: Opening terminal tty0:
+[05:58:23.767] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:23.767] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6
+[05:58:23.783] |T| [write_file]: sceIoWrite: Writing to fd: 0x6, size: 21
+[05:58:23.784] |T| [close_file]: sceIoClose: Closing file fd: 0x6
+[05:58:23.788] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:23.788] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7
+[05:58:23.792] |T| [write_file]: sceIoWrite: Writing to fd: 0x7, size: 45
+[05:58:23.792] |T| [close_file]: sceIoClose: Closing file fd: 0x7
+[05:58:23.792] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:23.793] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8
+[05:58:23.793] |T| [write_file]: sceIoWrite: Writing to fd: 0x8, size: 18
+[05:58:23.793] |T| [close_file]: sceIoClose: Closing file fd: 0x8
+[05:58:23.795] |W| [export_sceAppMgrGetBudgetInfo::<lambda_1>::operator ()]: Stubbed sceAppMgrGetBudgetInfo import called. (not system mode)
+[05:58:23.872] |W| [export_sceGxmMapFragmentUsseMemory::<lambda_1>::operator ()]: Stubbed sceGxmMapFragmentUsseMemory import called. (always return success)
+[05:58:23.969] |W| [export_sceGxmMapVertexUsseMemory::<lambda_1>::operator ()]: Stubbed sceGxmMapVertexUsseMemory import called. (always return success)
+[05:58:23.986] |W| [export_SceThreadmgrForDriver_20C228E4::<lambda_1>::operator ()]: Unimplemented SceThreadmgrForDriver_20C228E4 import called.
+[05:58:23.990] |W| [export_SceQafMgrForDriver_B9770A13::<lambda_1>::operator ()]: Unimplemented SceQafMgrForDriver_B9770A13 import called.
+[05:58:23.993] |W| [export_ksceKernelSetPermission::<lambda_1>::operator ()]: Unimplemented ksceKernelSetPermission import called.
+[05:58:23.994] |I| [load_module]: Loading module "vs0:sys/external/libpgf.suprx"
+[05:58:24.012] |T| [load_self]: ELF Header: e_type: 0xFE04, e_machine: 0x28, e_version: 0x1, e_entry: 0x5810, e_phoff: 0x34, e_shoff: 0x0, e_flags: 0x5000000, e_ehsize: 0x34, e_phentsize: 0x20, e_phnum: 0x3, e_shentsize: 0x0, e_shnum: 0x0, e_shstrndx: 0x0
+[05:58:24.012] |I| [load_self]: Loaded module segment 0 @ [0x80447000 - 0x8044CCB4 / 0x81000000] (size: 0x00005CB4) of module vs0:sys/external/libpgf.suprx
+[05:58:24.012] |I| [load_self]: Loaded module segment 1 @ [0x8044D000 - 0x8044DFE8 / 0x81006000] (size: 0x00000FE8) of module vs0:sys/external/libpgf.suprx
+[05:58:24.012] |I| [load_self]: Linking SELF vs0:sys/external/libpgf.suprx...
+[05:58:24.012] |D| [load_var_exports]: 	NID 0x936C8A78 (SYSLYB) at 0x8044CA64
+[05:58:24.012] |D| [load_var_exports]: 	NID 0x6C2224BA (NID_MODULE_INFO) at 0x8044C810
+[05:58:24.012] |I| [load_module::<lambda_2>::operator ()]: Module SceLibPgf (at "vs0:sys/external/libpgf.suprx") loaded
+[05:58:24.032] |W| [io_error_impl]: create_dir (_sceIoMkdir) returned 0x80010011
+[05:58:24.034] |I| [export_sceIoOpen]: Skipped 4 duplicate messages..
+[05:58:24.034] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.034] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9
+[05:58:24.035] |T| [write_file]: sceIoWrite: Writing to fd: 0x9, size: 14
+[05:58:24.035] |T| [close_file]: sceIoClose: Closing file fd: 0x9
+[05:58:24.036] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/vmenu_dbg.txt
+[05:58:24.054] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabause/vmenu_dbg.txt (ux0:/data/yabause/vmenu_dbg.txt), fd: 0xA
+[05:58:24.057] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/config.cfg
+[05:58:24.072] |T| [open_file]: sceIoOpen: Opening file ux0:data/yabause/config.cfg (ux0:/data/yabause/config.cfg), fd: 0xB
+[05:58:24.095] |T| [close_file]: sceIoClose: Closing file fd: 0xB
+[05:58:24.096] |W| [io_error_impl]: create_dir (_sceIoMkdir) returned 0x80010011
+[05:58:24.097] |T| [open_dir]: _sceIoDopen: Opening dir ux0:data/yabause/bios (ux0:/data/yabause/bios), fd: 0xC
+[05:58:24.098] |T| [read_dir]: _sceIoDread: Reading entry ux0:data/yabause/bios/eu of fd: 0xC
+[05:58:24.099] |T| [read_dir]: _sceIoDread: Reading entry ux0:data/yabause/bios/jp of fd: 0xC
+[05:58:24.099] |T| [read_dir]: _sceIoDread: Reading entry ux0:data/yabause/bios/saturn_bios.bin of fd: 0xC
+[05:58:24.105] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/bios/saturn_bios.bin
+[05:58:24.124] |T| [open_file]: sceIoOpen: Opening file ux0:data/yabause/bios/saturn_bios.bin (ux0:/data/yabause/bios/saturn_bios.bin), fd: 0xD
+[05:58:24.124] |T| [close_file]: sceIoClose: Closing file fd: 0xD
+[05:58:24.128] |T| [read_dir]: _sceIoDread: Reading entry ux0:data/yabause/bios/sega_bios.bin of fd: 0xC
+[05:58:24.130] |I| [export_sceIoOpen]: Opening file: ux0:data/yabause/bios/sega_bios.bin
+[05:58:24.149] |T| [open_file]: sceIoOpen: Opening file ux0:data/yabause/bios/sega_bios.bin (ux0:/data/yabause/bios/sega_bios.bin), fd: 0xE
+[05:58:24.149] |T| [close_file]: sceIoClose: Closing file fd: 0xE
+[05:58:24.150] |T| [read_dir]: _sceIoDread: Reading entry ux0:data/yabause/bios/us of fd: 0xC
+[05:58:24.151] |T| [close_dir]: sceIoDclose: Closing dir fd: 0xC
+[05:58:24.166] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.167] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF
+[05:58:24.168] |T| [write_file]: sceIoWrite: Writing to fd: 0xF, size: 26
+[05:58:24.168] |T| [close_file]: sceIoClose: Closing file fd: 0xF
+[05:58:24.169] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.170] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10
+[05:58:24.171] |T| [write_file]: sceIoWrite: Writing to fd: 0x10, size: 53
+[05:58:24.171] |T| [close_file]: sceIoClose: Closing file fd: 0x10
+[05:58:24.172] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.172] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11
+[05:58:24.172] |T| [write_file]: sceIoWrite: Writing to fd: 0x11, size: 64
+[05:58:24.172] |T| [close_file]: sceIoClose: Closing file fd: 0x11
+[05:58:24.173] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.174] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12
+[05:58:24.174] |T| [write_file]: sceIoWrite: Writing to fd: 0x12, size: 20
+[05:58:24.174] |T| [close_file]: sceIoClose: Closing file fd: 0x12
+[05:58:24.176] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.176] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13
+[05:58:24.177] |T| [write_file]: sceIoWrite: Writing to fd: 0x13, size: 25
+[05:58:24.177] |T| [close_file]: sceIoClose: Closing file fd: 0x13
+[05:58:24.335] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/roms/Sonic R (Europe).chd
+[05:58:24.351] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabause/roms/Sonic R (Europe).chd (ux0:/data/yabause/roms/Sonic R (Europe).chd), fd: 0x14
+[05:58:24.421] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.422] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15
+[05:58:24.423] |T| [write_file]: sceIoWrite: Writing to fd: 0x15, size: 97
+[05:58:24.423] |T| [close_file]: sceIoClose: Closing file fd: 0x15
+[05:58:24.425] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.425] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16
+[05:58:24.426] |T| [write_file]: sceIoWrite: Writing to fd: 0x16, size: 102
+[05:58:24.426] |T| [close_file]: sceIoClose: Closing file fd: 0x16
+[05:58:24.427] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.427] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x17
+[05:58:24.428] |T| [write_file]: sceIoWrite: Writing to fd: 0x17, size: 104
+[05:58:24.428] |T| [close_file]: sceIoClose: Closing file fd: 0x17
+[05:58:24.428] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.429] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x18
+[05:58:24.429] |T| [write_file]: sceIoWrite: Writing to fd: 0x18, size: 104
+[05:58:24.429] |T| [close_file]: sceIoClose: Closing file fd: 0x18
+[05:58:24.430] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.430] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x19
+[05:58:24.431] |T| [write_file]: sceIoWrite: Writing to fd: 0x19, size: 105
+[05:58:24.431] |T| [close_file]: sceIoClose: Closing file fd: 0x19
+[05:58:24.432] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.432] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1A
+[05:58:24.433] |T| [write_file]: sceIoWrite: Writing to fd: 0x1A, size: 106
+[05:58:24.433] |T| [close_file]: sceIoClose: Closing file fd: 0x1A
+[05:58:24.434] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.434] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1B
+[05:58:24.434] |T| [write_file]: sceIoWrite: Writing to fd: 0x1B, size: 106
+[05:58:24.434] |T| [close_file]: sceIoClose: Closing file fd: 0x1B
+[05:58:24.435] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.436] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1C
+[05:58:24.436] |T| [write_file]: sceIoWrite: Writing to fd: 0x1C, size: 106
+[05:58:24.436] |T| [close_file]: sceIoClose: Closing file fd: 0x1C
+[05:58:24.437] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.437] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1D
+[05:58:24.438] |T| [write_file]: sceIoWrite: Writing to fd: 0x1D, size: 107
+[05:58:24.438] |T| [close_file]: sceIoClose: Closing file fd: 0x1D
+[05:58:24.438] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.439] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1E
+[05:58:24.440] |T| [write_file]: sceIoWrite: Writing to fd: 0x1E, size: 111
+[05:58:24.440] |T| [close_file]: sceIoClose: Closing file fd: 0x1E
+[05:58:24.441] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.441] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x1F
+[05:58:24.442] |T| [write_file]: sceIoWrite: Writing to fd: 0x1F, size: 111
+[05:58:24.442] |T| [close_file]: sceIoClose: Closing file fd: 0x1F
+[05:58:24.443] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.443] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x20
+[05:58:24.445] |T| [write_file]: sceIoWrite: Writing to fd: 0x20, size: 111
+[05:58:24.445] |T| [close_file]: sceIoClose: Closing file fd: 0x20
+[05:58:24.446] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.446] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x21
+[05:58:24.447] |T| [write_file]: sceIoWrite: Writing to fd: 0x21, size: 111
+[05:58:24.447] |T| [close_file]: sceIoClose: Closing file fd: 0x21
+[05:58:24.447] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.448] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x22
+[05:58:24.448] |T| [write_file]: sceIoWrite: Writing to fd: 0x22, size: 111
+[05:58:24.448] |T| [close_file]: sceIoClose: Closing file fd: 0x22
+[05:58:24.450] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.450] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x23
+[05:58:24.451] |T| [write_file]: sceIoWrite: Writing to fd: 0x23, size: 111
+[05:58:24.451] |T| [close_file]: sceIoClose: Closing file fd: 0x23
+[05:58:24.452] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.452] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x24
+[05:58:24.453] |T| [write_file]: sceIoWrite: Writing to fd: 0x24, size: 111
+[05:58:24.453] |T| [close_file]: sceIoClose: Closing file fd: 0x24
+[05:58:24.454] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.454] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x25
+[05:58:24.455] |T| [write_file]: sceIoWrite: Writing to fd: 0x25, size: 111
+[05:58:24.455] |T| [close_file]: sceIoClose: Closing file fd: 0x25
+[05:58:24.455] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.456] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x26
+[05:58:24.456] |T| [write_file]: sceIoWrite: Writing to fd: 0x26, size: 111
+[05:58:24.456] |T| [close_file]: sceIoClose: Closing file fd: 0x26
+[05:58:24.457] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.457] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x27
+[05:58:24.458] |T| [write_file]: sceIoWrite: Writing to fd: 0x27, size: 109
+[05:58:24.458] |T| [close_file]: sceIoClose: Closing file fd: 0x27
+[05:58:24.458] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.459] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x28
+[05:58:24.460] |T| [write_file]: sceIoWrite: Writing to fd: 0x28, size: 109
+[05:58:24.460] |T| [close_file]: sceIoClose: Closing file fd: 0x28
+[05:58:24.461] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.461] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x29
+[05:58:24.462] |T| [write_file]: sceIoWrite: Writing to fd: 0x29, size: 109
+[05:58:24.462] |T| [close_file]: sceIoClose: Closing file fd: 0x29
+[05:58:24.465] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.465] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x2A
+[05:58:24.465] |T| [write_file]: sceIoWrite: Writing to fd: 0x2A, size: 35
+[05:58:24.465] |T| [close_file]: sceIoClose: Closing file fd: 0x2A
+[05:58:24.466] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.467] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x2B
+[05:58:24.467] |T| [write_file]: sceIoWrite: Writing to fd: 0x2B, size: 50
+[05:58:24.467] |T| [close_file]: sceIoClose: Closing file fd: 0x2B
+[05:58:24.569] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabause/bios/saturn_bios.bin
+[05:58:24.570] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabause/bios/saturn_bios.bin (ux0:/data/yabause/bios/saturn_bios.bin), fd: 0x2C
+[05:58:24.576] |T| [close_file]: sceIoClose: Closing file fd: 0x2C
+[05:58:24.585] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.585] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x2D
+[05:58:24.586] |T| [write_file]: sceIoWrite: Writing to fd: 0x2D, size: 34
+[05:58:24.586] |T| [close_file]: sceIoClose: Closing file fd: 0x2D
+[05:58:24.683] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.684] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x2E
+[05:58:24.684] |T| [write_file]: sceIoWrite: Writing to fd: 0x2E, size: 10
+[05:58:24.684] |T| [close_file]: sceIoClose: Closing file fd: 0x2E
+[05:58:24.686] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.686] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x2F
+[05:58:24.689] |T| [write_file]: sceIoWrite: Writing to fd: 0x2F, size: 3
+[05:58:24.689] |T| [close_file]: sceIoClose: Closing file fd: 0x2F
+[05:58:24.690] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.690] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x30
+[05:58:24.691] |T| [write_file]: sceIoWrite: Writing to fd: 0x30, size: 3
+[05:58:24.691] |T| [close_file]: sceIoClose: Closing file fd: 0x30
+[05:58:24.692] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.692] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x31
+[05:58:24.693] |T| [write_file]: sceIoWrite: Writing to fd: 0x31, size: 3
+[05:58:24.693] |T| [close_file]: sceIoClose: Closing file fd: 0x31
+[05:58:24.693] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.694] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x32
+[05:58:24.694] |T| [write_file]: sceIoWrite: Writing to fd: 0x32, size: 3
+[05:58:24.694] |T| [close_file]: sceIoClose: Closing file fd: 0x32
+[05:58:24.695] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.695] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x33
+[05:58:24.696] |T| [write_file]: sceIoWrite: Writing to fd: 0x33, size: 3
+[05:58:24.696] |T| [close_file]: sceIoClose: Closing file fd: 0x33
+[05:58:24.697] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.697] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x34
+[05:58:24.697] |T| [write_file]: sceIoWrite: Writing to fd: 0x34, size: 3
+[05:58:24.697] |T| [close_file]: sceIoClose: Closing file fd: 0x34
+[05:58:24.698] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.699] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x35
+[05:58:24.699] |T| [write_file]: sceIoWrite: Writing to fd: 0x35, size: 3
+[05:58:24.699] |T| [close_file]: sceIoClose: Closing file fd: 0x35
+[05:58:24.700] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.700] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x36
+[05:58:24.701] |T| [write_file]: sceIoWrite: Writing to fd: 0x36, size: 3
+[05:58:24.701] |T| [close_file]: sceIoClose: Closing file fd: 0x36
+[05:58:24.702] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.702] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x37
+[05:58:24.703] |T| [write_file]: sceIoWrite: Writing to fd: 0x37, size: 3
+[05:58:24.703] |T| [close_file]: sceIoClose: Closing file fd: 0x37
+[05:58:24.703] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.704] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x38
+[05:58:24.704] |T| [write_file]: sceIoWrite: Writing to fd: 0x38, size: 3
+[05:58:24.704] |T| [close_file]: sceIoClose: Closing file fd: 0x38
+[05:58:24.705] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.705] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x39
+[05:58:24.706] |T| [write_file]: sceIoWrite: Writing to fd: 0x39, size: 3
+[05:58:24.706] |T| [close_file]: sceIoClose: Closing file fd: 0x39
+[05:58:24.706] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.707] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3A
+[05:58:24.707] |T| [write_file]: sceIoWrite: Writing to fd: 0x3A, size: 3
+[05:58:24.707] |T| [close_file]: sceIoClose: Closing file fd: 0x3A
+[05:58:24.708] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.708] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3B
+[05:58:24.709] |T| [write_file]: sceIoWrite: Writing to fd: 0x3B, size: 3
+[05:58:24.709] |T| [close_file]: sceIoClose: Closing file fd: 0x3B
+[05:58:24.710] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.710] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3C
+[05:58:24.711] |T| [write_file]: sceIoWrite: Writing to fd: 0x3C, size: 3
+[05:58:24.711] |T| [close_file]: sceIoClose: Closing file fd: 0x3C
+[05:58:24.712] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.712] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3D
+[05:58:24.713] |T| [write_file]: sceIoWrite: Writing to fd: 0x3D, size: 3
+[05:58:24.713] |T| [close_file]: sceIoClose: Closing file fd: 0x3D
+[05:58:24.713] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.714] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3E
+[05:58:24.714] |T| [write_file]: sceIoWrite: Writing to fd: 0x3E, size: 3
+[05:58:24.714] |T| [close_file]: sceIoClose: Closing file fd: 0x3E
+[05:58:24.715] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.715] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x3F
+[05:58:24.716] |T| [write_file]: sceIoWrite: Writing to fd: 0x3F, size: 3
+[05:58:24.716] |T| [close_file]: sceIoClose: Closing file fd: 0x3F
+[05:58:24.716] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.717] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x40
+[05:58:24.717] |T| [write_file]: sceIoWrite: Writing to fd: 0x40, size: 3
+[05:58:24.717] |T| [close_file]: sceIoClose: Closing file fd: 0x40
+[05:58:24.718] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.718] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x41
+[05:58:24.719] |T| [write_file]: sceIoWrite: Writing to fd: 0x41, size: 3
+[05:58:24.719] |T| [close_file]: sceIoClose: Closing file fd: 0x41
+[05:58:24.720] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.720] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x42
+[05:58:24.721] |T| [write_file]: sceIoWrite: Writing to fd: 0x42, size: 3
+[05:58:24.721] |T| [close_file]: sceIoClose: Closing file fd: 0x42
+[05:58:24.721] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.722] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x43
+[05:58:24.722] |T| [write_file]: sceIoWrite: Writing to fd: 0x43, size: 3
+[05:58:24.722] |T| [close_file]: sceIoClose: Closing file fd: 0x43
+[05:58:24.723] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.723] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x44
+[05:58:24.724] |T| [write_file]: sceIoWrite: Writing to fd: 0x44, size: 3
+[05:58:24.724] |T| [close_file]: sceIoClose: Closing file fd: 0x44
+[05:58:24.724] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.725] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x45
+[05:58:24.725] |T| [write_file]: sceIoWrite: Writing to fd: 0x45, size: 3
+[05:58:24.725] |T| [close_file]: sceIoClose: Closing file fd: 0x45
+[05:58:24.726] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.726] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x46
+[05:58:24.727] |T| [write_file]: sceIoWrite: Writing to fd: 0x46, size: 3
+[05:58:24.727] |T| [close_file]: sceIoClose: Closing file fd: 0x46
+[05:58:24.728] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.728] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x47
+[05:58:24.729] |T| [write_file]: sceIoWrite: Writing to fd: 0x47, size: 3
+[05:58:24.729] |T| [close_file]: sceIoClose: Closing file fd: 0x47
+[05:58:24.730] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.731] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x48
+[05:58:24.732] |T| [write_file]: sceIoWrite: Writing to fd: 0x48, size: 3
+[05:58:24.732] |T| [close_file]: sceIoClose: Closing file fd: 0x48
+[05:58:24.733] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.733] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x49
+[05:58:24.733] |T| [write_file]: sceIoWrite: Writing to fd: 0x49, size: 3
+[05:58:24.733] |T| [close_file]: sceIoClose: Closing file fd: 0x49
+[05:58:24.734] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.735] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4A
+[05:58:24.735] |T| [write_file]: sceIoWrite: Writing to fd: 0x4A, size: 3
+[05:58:24.735] |T| [close_file]: sceIoClose: Closing file fd: 0x4A
+[05:58:24.736] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.736] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4B
+[05:58:24.737] |T| [write_file]: sceIoWrite: Writing to fd: 0x4B, size: 3
+[05:58:24.737] |T| [close_file]: sceIoClose: Closing file fd: 0x4B
+[05:58:24.737] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.738] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4C
+[05:58:24.738] |T| [write_file]: sceIoWrite: Writing to fd: 0x4C, size: 3
+[05:58:24.738] |T| [close_file]: sceIoClose: Closing file fd: 0x4C
+[05:58:24.739] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.739] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4D
+[05:58:24.740] |T| [write_file]: sceIoWrite: Writing to fd: 0x4D, size: 3
+[05:58:24.740] |T| [close_file]: sceIoClose: Closing file fd: 0x4D
+[05:58:24.742] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.742] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4E
+[05:58:24.743] |T| [write_file]: sceIoWrite: Writing to fd: 0x4E, size: 3
+[05:58:24.743] |T| [close_file]: sceIoClose: Closing file fd: 0x4E
+[05:58:24.743] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.744] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x4F
+[05:58:24.744] |T| [write_file]: sceIoWrite: Writing to fd: 0x4F, size: 3
+[05:58:24.744] |T| [close_file]: sceIoClose: Closing file fd: 0x4F
+[05:58:24.745] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.745] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x50
+[05:58:24.746] |T| [write_file]: sceIoWrite: Writing to fd: 0x50, size: 3
+[05:58:24.746] |T| [close_file]: sceIoClose: Closing file fd: 0x50
+[05:58:24.746] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.747] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x51
+[05:58:24.747] |T| [write_file]: sceIoWrite: Writing to fd: 0x51, size: 3
+[05:58:24.747] |T| [close_file]: sceIoClose: Closing file fd: 0x51
+[05:58:24.748] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.748] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x52
+[05:58:24.749] |T| [write_file]: sceIoWrite: Writing to fd: 0x52, size: 3
+[05:58:24.749] |T| [close_file]: sceIoClose: Closing file fd: 0x52
+[05:58:24.750] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.750] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x53
+[05:58:24.751] |T| [write_file]: sceIoWrite: Writing to fd: 0x53, size: 3
+[05:58:24.751] |T| [close_file]: sceIoClose: Closing file fd: 0x53
+[05:58:24.752] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.752] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x54
+[05:58:24.752] |T| [write_file]: sceIoWrite: Writing to fd: 0x54, size: 3
+[05:58:24.752] |T| [close_file]: sceIoClose: Closing file fd: 0x54
+[05:58:24.753] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.753] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x55
+[05:58:24.754] |T| [write_file]: sceIoWrite: Writing to fd: 0x55, size: 3
+[05:58:24.754] |T| [close_file]: sceIoClose: Closing file fd: 0x55
+[05:58:24.755] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.755] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x56
+[05:58:24.756] |T| [write_file]: sceIoWrite: Writing to fd: 0x56, size: 3
+[05:58:24.756] |T| [close_file]: sceIoClose: Closing file fd: 0x56
+[05:58:24.756] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.756] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x57
+[05:58:24.757] |T| [write_file]: sceIoWrite: Writing to fd: 0x57, size: 3
+[05:58:24.757] |T| [close_file]: sceIoClose: Closing file fd: 0x57
+[05:58:24.757] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.758] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x58
+[05:58:24.758] |T| [write_file]: sceIoWrite: Writing to fd: 0x58, size: 3
+[05:58:24.758] |T| [close_file]: sceIoClose: Closing file fd: 0x58
+[05:58:24.759] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.760] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x59
+[05:58:24.761] |T| [write_file]: sceIoWrite: Writing to fd: 0x59, size: 3
+[05:58:24.761] |T| [close_file]: sceIoClose: Closing file fd: 0x59
+[05:58:24.761] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.762] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5A
+[05:58:24.762] |T| [write_file]: sceIoWrite: Writing to fd: 0x5A, size: 3
+[05:58:24.762] |T| [close_file]: sceIoClose: Closing file fd: 0x5A
+[05:58:24.763] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.763] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5B
+[05:58:24.764] |T| [write_file]: sceIoWrite: Writing to fd: 0x5B, size: 3
+[05:58:24.764] |T| [close_file]: sceIoClose: Closing file fd: 0x5B
+[05:58:24.764] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.765] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5C
+[05:58:24.765] |T| [write_file]: sceIoWrite: Writing to fd: 0x5C, size: 3
+[05:58:24.765] |T| [close_file]: sceIoClose: Closing file fd: 0x5C
+[05:58:24.766] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.766] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5D
+[05:58:24.767] |T| [write_file]: sceIoWrite: Writing to fd: 0x5D, size: 3
+[05:58:24.767] |T| [close_file]: sceIoClose: Closing file fd: 0x5D
+[05:58:24.767] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.768] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5E
+[05:58:24.768] |T| [write_file]: sceIoWrite: Writing to fd: 0x5E, size: 3
+[05:58:24.768] |T| [close_file]: sceIoClose: Closing file fd: 0x5E
+[05:58:24.769] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.770] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x5F
+[05:58:24.771] |T| [write_file]: sceIoWrite: Writing to fd: 0x5F, size: 3
+[05:58:24.771] |T| [close_file]: sceIoClose: Closing file fd: 0x5F
+[05:58:24.772] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.772] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x60
+[05:58:24.773] |T| [write_file]: sceIoWrite: Writing to fd: 0x60, size: 3
+[05:58:24.773] |T| [close_file]: sceIoClose: Closing file fd: 0x60
+[05:58:24.773] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.774] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x61
+[05:58:24.774] |T| [write_file]: sceIoWrite: Writing to fd: 0x61, size: 3
+[05:58:24.774] |T| [close_file]: sceIoClose: Closing file fd: 0x61
+[05:58:24.775] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.776] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x62
+[05:58:24.776] |T| [write_file]: sceIoWrite: Writing to fd: 0x62, size: 3
+[05:58:24.776] |T| [close_file]: sceIoClose: Closing file fd: 0x62
+[05:58:24.777] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.777] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x63
+[05:58:24.778] |T| [write_file]: sceIoWrite: Writing to fd: 0x63, size: 3
+[05:58:24.778] |T| [close_file]: sceIoClose: Closing file fd: 0x63
+[05:58:24.779] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.779] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x64
+[05:58:24.780] |T| [write_file]: sceIoWrite: Writing to fd: 0x64, size: 3
+[05:58:24.780] |T| [close_file]: sceIoClose: Closing file fd: 0x64
+[05:58:24.781] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.781] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x65
+[05:58:24.782] |T| [write_file]: sceIoWrite: Writing to fd: 0x65, size: 3
+[05:58:24.782] |T| [close_file]: sceIoClose: Closing file fd: 0x65
+[05:58:24.782] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.783] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x66
+[05:58:24.783] |T| [write_file]: sceIoWrite: Writing to fd: 0x66, size: 3
+[05:58:24.783] |T| [close_file]: sceIoClose: Closing file fd: 0x66
+[05:58:24.784] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.784] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x67
+[05:58:24.785] |T| [write_file]: sceIoWrite: Writing to fd: 0x67, size: 3
+[05:58:24.785] |T| [close_file]: sceIoClose: Closing file fd: 0x67
+[05:58:24.785] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.786] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x68
+[05:58:24.786] |T| [write_file]: sceIoWrite: Writing to fd: 0x68, size: 3
+[05:58:24.786] |T| [close_file]: sceIoClose: Closing file fd: 0x68
+[05:58:24.787] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.787] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x69
+[05:58:24.788] |T| [write_file]: sceIoWrite: Writing to fd: 0x69, size: 3
+[05:58:24.788] |T| [close_file]: sceIoClose: Closing file fd: 0x69
+[05:58:24.789] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.789] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6A
+[05:58:24.790] |T| [write_file]: sceIoWrite: Writing to fd: 0x6A, size: 3
+[05:58:24.790] |T| [close_file]: sceIoClose: Closing file fd: 0x6A
+[05:58:24.791] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.791] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6B
+[05:58:24.792] |T| [write_file]: sceIoWrite: Writing to fd: 0x6B, size: 3
+[05:58:24.792] |T| [close_file]: sceIoClose: Closing file fd: 0x6B
+[05:58:24.793] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.793] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6C
+[05:58:24.794] |T| [write_file]: sceIoWrite: Writing to fd: 0x6C, size: 3
+[05:58:24.794] |T| [close_file]: sceIoClose: Closing file fd: 0x6C
+[05:58:24.794] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.795] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6D
+[05:58:24.795] |T| [write_file]: sceIoWrite: Writing to fd: 0x6D, size: 3
+[05:58:24.795] |T| [close_file]: sceIoClose: Closing file fd: 0x6D
+[05:58:24.796] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.796] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6E
+[05:58:24.797] |T| [write_file]: sceIoWrite: Writing to fd: 0x6E, size: 3
+[05:58:24.797] |T| [close_file]: sceIoClose: Closing file fd: 0x6E
+[05:58:24.797] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.798] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x6F
+[05:58:24.798] |T| [write_file]: sceIoWrite: Writing to fd: 0x6F, size: 3
+[05:58:24.798] |T| [close_file]: sceIoClose: Closing file fd: 0x6F
+[05:58:24.800] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.800] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x70
+[05:58:24.801] |T| [write_file]: sceIoWrite: Writing to fd: 0x70, size: 3
+[05:58:24.801] |T| [close_file]: sceIoClose: Closing file fd: 0x70
+[05:58:24.801] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.802] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x71
+[05:58:24.802] |T| [write_file]: sceIoWrite: Writing to fd: 0x71, size: 3
+[05:58:24.802] |T| [close_file]: sceIoClose: Closing file fd: 0x71
+[05:58:24.803] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.803] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x72
+[05:58:24.804] |T| [write_file]: sceIoWrite: Writing to fd: 0x72, size: 3
+[05:58:24.804] |T| [close_file]: sceIoClose: Closing file fd: 0x72
+[05:58:24.805] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.805] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x73
+[05:58:24.806] |T| [write_file]: sceIoWrite: Writing to fd: 0x73, size: 3
+[05:58:24.806] |T| [close_file]: sceIoClose: Closing file fd: 0x73
+[05:58:24.806] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.807] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x74
+[05:58:24.807] |T| [write_file]: sceIoWrite: Writing to fd: 0x74, size: 3
+[05:58:24.807] |T| [close_file]: sceIoClose: Closing file fd: 0x74
+[05:58:24.808] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.808] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x75
+[05:58:24.809] |T| [write_file]: sceIoWrite: Writing to fd: 0x75, size: 3
+[05:58:24.809] |T| [close_file]: sceIoClose: Closing file fd: 0x75
+[05:58:24.810] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.811] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x76
+[05:58:24.811] |T| [write_file]: sceIoWrite: Writing to fd: 0x76, size: 3
+[05:58:24.811] |T| [close_file]: sceIoClose: Closing file fd: 0x76
+[05:58:24.812] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.812] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x77
+[05:58:24.813] |T| [write_file]: sceIoWrite: Writing to fd: 0x77, size: 3
+[05:58:24.813] |T| [close_file]: sceIoClose: Closing file fd: 0x77
+[05:58:24.814] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.814] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x78
+[05:58:24.815] |T| [write_file]: sceIoWrite: Writing to fd: 0x78, size: 3
+[05:58:24.815] |T| [close_file]: sceIoClose: Closing file fd: 0x78
+[05:58:24.815] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.816] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x79
+[05:58:24.816] |T| [write_file]: sceIoWrite: Writing to fd: 0x79, size: 3
+[05:58:24.816] |T| [close_file]: sceIoClose: Closing file fd: 0x79
+[05:58:24.817] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.817] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7A
+[05:58:24.818] |T| [write_file]: sceIoWrite: Writing to fd: 0x7A, size: 3
+[05:58:24.818] |T| [close_file]: sceIoClose: Closing file fd: 0x7A
+[05:58:24.818] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.819] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7B
+[05:58:24.820] |T| [write_file]: sceIoWrite: Writing to fd: 0x7B, size: 3
+[05:58:24.820] |T| [close_file]: sceIoClose: Closing file fd: 0x7B
+[05:58:24.820] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.821] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7C
+[05:58:24.822] |T| [write_file]: sceIoWrite: Writing to fd: 0x7C, size: 3
+[05:58:24.822] |T| [close_file]: sceIoClose: Closing file fd: 0x7C
+[05:58:24.822] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.823] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7D
+[05:58:24.823] |T| [write_file]: sceIoWrite: Writing to fd: 0x7D, size: 3
+[05:58:24.823] |T| [close_file]: sceIoClose: Closing file fd: 0x7D
+[05:58:24.824] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.824] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7E
+[05:58:24.825] |T| [write_file]: sceIoWrite: Writing to fd: 0x7E, size: 3
+[05:58:24.825] |T| [close_file]: sceIoClose: Closing file fd: 0x7E
+[05:58:24.826] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.826] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x7F
+[05:58:24.827] |T| [write_file]: sceIoWrite: Writing to fd: 0x7F, size: 3
+[05:58:24.827] |T| [close_file]: sceIoClose: Closing file fd: 0x7F
+[05:58:24.827] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.828] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x80
+[05:58:24.828] |T| [write_file]: sceIoWrite: Writing to fd: 0x80, size: 3
+[05:58:24.828] |T| [close_file]: sceIoClose: Closing file fd: 0x80
+[05:58:24.829] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.830] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x81
+[05:58:24.830] |T| [write_file]: sceIoWrite: Writing to fd: 0x81, size: 3
+[05:58:24.830] |T| [close_file]: sceIoClose: Closing file fd: 0x81
+[05:58:24.831] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.831] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x82
+[05:58:24.832] |T| [write_file]: sceIoWrite: Writing to fd: 0x82, size: 3
+[05:58:24.832] |T| [close_file]: sceIoClose: Closing file fd: 0x82
+[05:58:24.833] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.833] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x83
+[05:58:24.833] |T| [write_file]: sceIoWrite: Writing to fd: 0x83, size: 3
+[05:58:24.833] |T| [close_file]: sceIoClose: Closing file fd: 0x83
+[05:58:24.834] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.834] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x84
+[05:58:24.835] |T| [write_file]: sceIoWrite: Writing to fd: 0x84, size: 3
+[05:58:24.835] |T| [close_file]: sceIoClose: Closing file fd: 0x84
+[05:58:24.836] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.836] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x85
+[05:58:24.837] |T| [write_file]: sceIoWrite: Writing to fd: 0x85, size: 3
+[05:58:24.837] |T| [close_file]: sceIoClose: Closing file fd: 0x85
+[05:58:24.837] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.838] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x86
+[05:58:24.838] |T| [write_file]: sceIoWrite: Writing to fd: 0x86, size: 3
+[05:58:24.838] |T| [close_file]: sceIoClose: Closing file fd: 0x86
+[05:58:24.839] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.840] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x87
+[05:58:24.840] |T| [write_file]: sceIoWrite: Writing to fd: 0x87, size: 3
+[05:58:24.840] |T| [close_file]: sceIoClose: Closing file fd: 0x87
+[05:58:24.841] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.841] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x88
+[05:58:24.842] |T| [write_file]: sceIoWrite: Writing to fd: 0x88, size: 3
+[05:58:24.842] |T| [close_file]: sceIoClose: Closing file fd: 0x88
+[05:58:24.843] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.843] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x89
+[05:58:24.844] |T| [write_file]: sceIoWrite: Writing to fd: 0x89, size: 3
+[05:58:24.844] |T| [close_file]: sceIoClose: Closing file fd: 0x89
+[05:58:24.844] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.845] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8A
+[05:58:24.845] |T| [write_file]: sceIoWrite: Writing to fd: 0x8A, size: 3
+[05:58:24.845] |T| [close_file]: sceIoClose: Closing file fd: 0x8A
+[05:58:24.846] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.846] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8B
+[05:58:24.847] |T| [write_file]: sceIoWrite: Writing to fd: 0x8B, size: 3
+[05:58:24.847] |T| [close_file]: sceIoClose: Closing file fd: 0x8B
+[05:58:24.848] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.848] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8C
+[05:58:24.849] |T| [write_file]: sceIoWrite: Writing to fd: 0x8C, size: 3
+[05:58:24.849] |T| [close_file]: sceIoClose: Closing file fd: 0x8C
+[05:58:24.850] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.850] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8D
+[05:58:24.851] |T| [write_file]: sceIoWrite: Writing to fd: 0x8D, size: 3
+[05:58:24.851] |T| [close_file]: sceIoClose: Closing file fd: 0x8D
+[05:58:24.852] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.852] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8E
+[05:58:24.853] |T| [write_file]: sceIoWrite: Writing to fd: 0x8E, size: 3
+[05:58:24.853] |T| [close_file]: sceIoClose: Closing file fd: 0x8E
+[05:58:24.853] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.854] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x8F
+[05:58:24.854] |T| [write_file]: sceIoWrite: Writing to fd: 0x8F, size: 3
+[05:58:24.854] |T| [close_file]: sceIoClose: Closing file fd: 0x8F
+[05:58:24.855] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.855] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x90
+[05:58:24.856] |T| [write_file]: sceIoWrite: Writing to fd: 0x90, size: 3
+[05:58:24.856] |T| [close_file]: sceIoClose: Closing file fd: 0x90
+[05:58:24.857] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.857] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x91
+[05:58:24.858] |T| [write_file]: sceIoWrite: Writing to fd: 0x91, size: 3
+[05:58:24.858] |T| [close_file]: sceIoClose: Closing file fd: 0x91
+[05:58:24.858] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.859] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x92
+[05:58:24.859] |T| [write_file]: sceIoWrite: Writing to fd: 0x92, size: 3
+[05:58:24.860] |T| [close_file]: sceIoClose: Closing file fd: 0x92
+[05:58:24.860] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.861] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x93
+[05:58:24.861] |T| [write_file]: sceIoWrite: Writing to fd: 0x93, size: 3
+[05:58:24.861] |T| [close_file]: sceIoClose: Closing file fd: 0x93
+[05:58:24.862] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.862] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x94
+[05:58:24.863] |T| [write_file]: sceIoWrite: Writing to fd: 0x94, size: 3
+[05:58:24.863] |T| [close_file]: sceIoClose: Closing file fd: 0x94
+[05:58:24.864] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.864] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x95
+[05:58:24.865] |T| [write_file]: sceIoWrite: Writing to fd: 0x95, size: 3
+[05:58:24.865] |T| [close_file]: sceIoClose: Closing file fd: 0x95
+[05:58:24.865] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.866] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x96
+[05:58:24.866] |T| [write_file]: sceIoWrite: Writing to fd: 0x96, size: 3
+[05:58:24.866] |T| [close_file]: sceIoClose: Closing file fd: 0x96
+[05:58:24.867] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.867] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x97
+[05:58:24.868] |T| [write_file]: sceIoWrite: Writing to fd: 0x97, size: 3
+[05:58:24.868] |T| [close_file]: sceIoClose: Closing file fd: 0x97
+[05:58:24.868] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.869] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x98
+[05:58:24.870] |T| [write_file]: sceIoWrite: Writing to fd: 0x98, size: 3
+[05:58:24.870] |T| [close_file]: sceIoClose: Closing file fd: 0x98
+[05:58:24.871] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.871] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x99
+[05:58:24.872] |T| [write_file]: sceIoWrite: Writing to fd: 0x99, size: 3
+[05:58:24.872] |T| [close_file]: sceIoClose: Closing file fd: 0x99
+[05:58:24.872] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.873] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9A
+[05:58:24.873] |T| [write_file]: sceIoWrite: Writing to fd: 0x9A, size: 3
+[05:58:24.873] |T| [close_file]: sceIoClose: Closing file fd: 0x9A
+[05:58:24.874] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.874] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9B
+[05:58:24.875] |T| [write_file]: sceIoWrite: Writing to fd: 0x9B, size: 3
+[05:58:24.875] |T| [close_file]: sceIoClose: Closing file fd: 0x9B
+[05:58:24.875] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.876] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9C
+[05:58:24.876] |T| [write_file]: sceIoWrite: Writing to fd: 0x9C, size: 3
+[05:58:24.876] |T| [close_file]: sceIoClose: Closing file fd: 0x9C
+[05:58:24.877] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.877] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9D
+[05:58:24.878] |T| [write_file]: sceIoWrite: Writing to fd: 0x9D, size: 3
+[05:58:24.878] |T| [close_file]: sceIoClose: Closing file fd: 0x9D
+[05:58:24.878] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.879] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9E
+[05:58:24.879] |T| [write_file]: sceIoWrite: Writing to fd: 0x9E, size: 3
+[05:58:24.879] |T| [close_file]: sceIoClose: Closing file fd: 0x9E
+[05:58:24.880] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.880] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x9F
+[05:58:24.881] |T| [write_file]: sceIoWrite: Writing to fd: 0x9F, size: 3
+[05:58:24.881] |T| [close_file]: sceIoClose: Closing file fd: 0x9F
+[05:58:24.882] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.882] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA0
+[05:58:24.882] |T| [write_file]: sceIoWrite: Writing to fd: 0xA0, size: 3
+[05:58:24.882] |T| [close_file]: sceIoClose: Closing file fd: 0xA0
+[05:58:24.883] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.883] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA1
+[05:58:24.884] |T| [write_file]: sceIoWrite: Writing to fd: 0xA1, size: 3
+[05:58:24.884] |T| [close_file]: sceIoClose: Closing file fd: 0xA1
+[05:58:24.885] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.885] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA2
+[05:58:24.885] |T| [write_file]: sceIoWrite: Writing to fd: 0xA2, size: 3
+[05:58:24.885] |T| [close_file]: sceIoClose: Closing file fd: 0xA2
+[05:58:24.886] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.886] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA3
+[05:58:24.887] |T| [write_file]: sceIoWrite: Writing to fd: 0xA3, size: 3
+[05:58:24.887] |T| [close_file]: sceIoClose: Closing file fd: 0xA3
+[05:58:24.887] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.888] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA4
+[05:58:24.888] |T| [write_file]: sceIoWrite: Writing to fd: 0xA4, size: 3
+[05:58:24.888] |T| [close_file]: sceIoClose: Closing file fd: 0xA4
+[05:58:24.892] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.892] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA5
+[05:58:24.893] |T| [write_file]: sceIoWrite: Writing to fd: 0xA5, size: 3
+[05:58:24.893] |T| [close_file]: sceIoClose: Closing file fd: 0xA5
+[05:58:24.893] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.894] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA6
+[05:58:24.894] |T| [write_file]: sceIoWrite: Writing to fd: 0xA6, size: 3
+[05:58:24.894] |T| [close_file]: sceIoClose: Closing file fd: 0xA6
+[05:58:24.895] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.895] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA7
+[05:58:24.896] |T| [write_file]: sceIoWrite: Writing to fd: 0xA7, size: 1
+[05:58:24.896] |T| [close_file]: sceIoClose: Closing file fd: 0xA7
+[05:58:24.903] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.903] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA8
+[05:58:24.904] |T| [write_file]: sceIoWrite: Writing to fd: 0xA8, size: 23
+[05:58:24.904] |T| [close_file]: sceIoClose: Closing file fd: 0xA8
+[05:58:24.906] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.906] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xA9
+[05:58:24.908] |T| [write_file]: sceIoWrite: Writing to fd: 0xA9, size: 43
+[05:58:24.908] |T| [close_file]: sceIoClose: Closing file fd: 0xA9
+[05:58:24.908] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.909] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAA
+[05:58:24.912] |T| [write_file]: sceIoWrite: Writing to fd: 0xAA, size: 18
+[05:58:24.912] |T| [close_file]: sceIoClose: Closing file fd: 0xAA
+[05:58:24.913] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.913] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAB
+[05:58:24.915] |T| [write_file]: sceIoWrite: Writing to fd: 0xAB, size: 34
+[05:58:24.915] |T| [close_file]: sceIoClose: Closing file fd: 0xAB
+[05:58:24.917] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.918] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAC
+[05:58:24.921] |T| [write_file]: sceIoWrite: Writing to fd: 0xAC, size: 10
+[05:58:24.921] |T| [close_file]: sceIoClose: Closing file fd: 0xAC
+[05:58:24.922] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.922] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAD
+[05:58:24.923] |T| [write_file]: sceIoWrite: Writing to fd: 0xAD, size: 3
+[05:58:24.923] |T| [close_file]: sceIoClose: Closing file fd: 0xAD
+[05:58:24.923] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.924] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAE
+[05:58:24.924] |T| [write_file]: sceIoWrite: Writing to fd: 0xAE, size: 3
+[05:58:24.924] |T| [close_file]: sceIoClose: Closing file fd: 0xAE
+[05:58:24.925] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.925] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xAF
+[05:58:24.925] |T| [write_file]: sceIoWrite: Writing to fd: 0xAF, size: 3
+[05:58:24.925] |T| [close_file]: sceIoClose: Closing file fd: 0xAF
+[05:58:24.926] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.926] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB0
+[05:58:24.927] |T| [write_file]: sceIoWrite: Writing to fd: 0xB0, size: 3
+[05:58:24.927] |T| [close_file]: sceIoClose: Closing file fd: 0xB0
+[05:58:24.927] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.928] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB1
+[05:58:24.929] |T| [write_file]: sceIoWrite: Writing to fd: 0xB1, size: 3
+[05:58:24.929] |T| [close_file]: sceIoClose: Closing file fd: 0xB1
+[05:58:24.930] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.931] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB2
+[05:58:24.931] |T| [write_file]: sceIoWrite: Writing to fd: 0xB2, size: 3
+[05:58:24.931] |T| [close_file]: sceIoClose: Closing file fd: 0xB2
+[05:58:24.932] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.932] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB3
+[05:58:24.933] |T| [write_file]: sceIoWrite: Writing to fd: 0xB3, size: 3
+[05:58:24.933] |T| [close_file]: sceIoClose: Closing file fd: 0xB3
+[05:58:24.934] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.934] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB4
+[05:58:24.935] |T| [write_file]: sceIoWrite: Writing to fd: 0xB4, size: 3
+[05:58:24.935] |T| [close_file]: sceIoClose: Closing file fd: 0xB4
+[05:58:24.936] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.936] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB5
+[05:58:24.937] |T| [write_file]: sceIoWrite: Writing to fd: 0xB5, size: 3
+[05:58:24.937] |T| [close_file]: sceIoClose: Closing file fd: 0xB5
+[05:58:24.937] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.939] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB6
+[05:58:24.940] |T| [write_file]: sceIoWrite: Writing to fd: 0xB6, size: 3
+[05:58:24.940] |T| [close_file]: sceIoClose: Closing file fd: 0xB6
+[05:58:24.941] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.942] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB7
+[05:58:24.942] |T| [write_file]: sceIoWrite: Writing to fd: 0xB7, size: 3
+[05:58:24.942] |T| [close_file]: sceIoClose: Closing file fd: 0xB7
+[05:58:24.943] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.943] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB8
+[05:58:24.944] |T| [write_file]: sceIoWrite: Writing to fd: 0xB8, size: 3
+[05:58:24.944] |T| [close_file]: sceIoClose: Closing file fd: 0xB8
+[05:58:24.944] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.945] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xB9
+[05:58:24.945] |T| [write_file]: sceIoWrite: Writing to fd: 0xB9, size: 3
+[05:58:24.945] |T| [close_file]: sceIoClose: Closing file fd: 0xB9
+[05:58:24.946] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.946] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBA
+[05:58:24.947] |T| [write_file]: sceIoWrite: Writing to fd: 0xBA, size: 3
+[05:58:24.947] |T| [close_file]: sceIoClose: Closing file fd: 0xBA
+[05:58:24.947] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.948] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBB
+[05:58:24.948] |T| [write_file]: sceIoWrite: Writing to fd: 0xBB, size: 3
+[05:58:24.948] |T| [close_file]: sceIoClose: Closing file fd: 0xBB
+[05:58:24.949] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.950] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBC
+[05:58:24.950] |T| [write_file]: sceIoWrite: Writing to fd: 0xBC, size: 3
+[05:58:24.950] |T| [close_file]: sceIoClose: Closing file fd: 0xBC
+[05:58:24.951] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.951] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBD
+[05:58:24.952] |T| [write_file]: sceIoWrite: Writing to fd: 0xBD, size: 3
+[05:58:24.952] |T| [close_file]: sceIoClose: Closing file fd: 0xBD
+[05:58:24.952] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.953] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBE
+[05:58:24.953] |T| [write_file]: sceIoWrite: Writing to fd: 0xBE, size: 3
+[05:58:24.953] |T| [close_file]: sceIoClose: Closing file fd: 0xBE
+[05:58:24.954] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.954] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xBF
+[05:58:24.955] |T| [write_file]: sceIoWrite: Writing to fd: 0xBF, size: 3
+[05:58:24.955] |T| [close_file]: sceIoClose: Closing file fd: 0xBF
+[05:58:24.955] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.956] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC0
+[05:58:24.956] |T| [write_file]: sceIoWrite: Writing to fd: 0xC0, size: 3
+[05:58:24.956] |T| [close_file]: sceIoClose: Closing file fd: 0xC0
+[05:58:24.957] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.957] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC1
+[05:58:24.958] |T| [write_file]: sceIoWrite: Writing to fd: 0xC1, size: 3
+[05:58:24.958] |T| [close_file]: sceIoClose: Closing file fd: 0xC1
+[05:58:24.958] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.959] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC2
+[05:58:24.959] |T| [write_file]: sceIoWrite: Writing to fd: 0xC2, size: 3
+[05:58:24.959] |T| [close_file]: sceIoClose: Closing file fd: 0xC2
+[05:58:24.960] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.960] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC3
+[05:58:24.961] |T| [write_file]: sceIoWrite: Writing to fd: 0xC3, size: 3
+[05:58:24.961] |T| [close_file]: sceIoClose: Closing file fd: 0xC3
+[05:58:24.962] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.962] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC4
+[05:58:24.962] |T| [write_file]: sceIoWrite: Writing to fd: 0xC4, size: 3
+[05:58:24.962] |T| [close_file]: sceIoClose: Closing file fd: 0xC4
+[05:58:24.963] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.963] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC5
+[05:58:24.964] |T| [write_file]: sceIoWrite: Writing to fd: 0xC5, size: 3
+[05:58:24.964] |T| [close_file]: sceIoClose: Closing file fd: 0xC5
+[05:58:24.965] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.965] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC6
+[05:58:24.966] |T| [write_file]: sceIoWrite: Writing to fd: 0xC6, size: 3
+[05:58:24.966] |T| [close_file]: sceIoClose: Closing file fd: 0xC6
+[05:58:24.966] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.967] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC7
+[05:58:24.967] |T| [write_file]: sceIoWrite: Writing to fd: 0xC7, size: 3
+[05:58:24.967] |T| [close_file]: sceIoClose: Closing file fd: 0xC7
+[05:58:24.968] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.968] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC8
+[05:58:24.969] |T| [write_file]: sceIoWrite: Writing to fd: 0xC8, size: 3
+[05:58:24.969] |T| [close_file]: sceIoClose: Closing file fd: 0xC8
+[05:58:24.970] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.970] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xC9
+[05:58:24.971] |T| [write_file]: sceIoWrite: Writing to fd: 0xC9, size: 3
+[05:58:24.971] |T| [close_file]: sceIoClose: Closing file fd: 0xC9
+[05:58:24.971] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.972] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCA
+[05:58:24.972] |T| [write_file]: sceIoWrite: Writing to fd: 0xCA, size: 3
+[05:58:24.972] |T| [close_file]: sceIoClose: Closing file fd: 0xCA
+[05:58:24.973] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.973] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCB
+[05:58:24.974] |T| [write_file]: sceIoWrite: Writing to fd: 0xCB, size: 3
+[05:58:24.974] |T| [close_file]: sceIoClose: Closing file fd: 0xCB
+[05:58:24.975] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.975] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCC
+[05:58:24.976] |T| [write_file]: sceIoWrite: Writing to fd: 0xCC, size: 3
+[05:58:24.976] |T| [close_file]: sceIoClose: Closing file fd: 0xCC
+[05:58:24.976] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.977] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCD
+[05:58:24.977] |T| [write_file]: sceIoWrite: Writing to fd: 0xCD, size: 3
+[05:58:24.977] |T| [close_file]: sceIoClose: Closing file fd: 0xCD
+[05:58:24.978] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.979] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCE
+[05:58:24.979] |T| [write_file]: sceIoWrite: Writing to fd: 0xCE, size: 3
+[05:58:24.979] |T| [close_file]: sceIoClose: Closing file fd: 0xCE
+[05:58:24.980] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.980] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xCF
+[05:58:24.981] |T| [write_file]: sceIoWrite: Writing to fd: 0xCF, size: 3
+[05:58:24.981] |T| [close_file]: sceIoClose: Closing file fd: 0xCF
+[05:58:24.982] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.982] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD0
+[05:58:24.983] |T| [write_file]: sceIoWrite: Writing to fd: 0xD0, size: 3
+[05:58:24.983] |T| [close_file]: sceIoClose: Closing file fd: 0xD0
+[05:58:24.983] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.984] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD1
+[05:58:24.984] |T| [write_file]: sceIoWrite: Writing to fd: 0xD1, size: 3
+[05:58:24.984] |T| [close_file]: sceIoClose: Closing file fd: 0xD1
+[05:58:24.985] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.985] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD2
+[05:58:24.986] |T| [write_file]: sceIoWrite: Writing to fd: 0xD2, size: 3
+[05:58:24.986] |T| [close_file]: sceIoClose: Closing file fd: 0xD2
+[05:58:24.987] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.987] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD3
+[05:58:24.987] |T| [write_file]: sceIoWrite: Writing to fd: 0xD3, size: 3
+[05:58:24.987] |T| [close_file]: sceIoClose: Closing file fd: 0xD3
+[05:58:24.988] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.989] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD4
+[05:58:24.989] |T| [write_file]: sceIoWrite: Writing to fd: 0xD4, size: 3
+[05:58:24.989] |T| [close_file]: sceIoClose: Closing file fd: 0xD4
+[05:58:24.990] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.990] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD5
+[05:58:24.991] |T| [write_file]: sceIoWrite: Writing to fd: 0xD5, size: 3
+[05:58:24.991] |T| [close_file]: sceIoClose: Closing file fd: 0xD5
+[05:58:24.992] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.992] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD6
+[05:58:24.993] |T| [write_file]: sceIoWrite: Writing to fd: 0xD6, size: 3
+[05:58:24.993] |T| [close_file]: sceIoClose: Closing file fd: 0xD6
+[05:58:24.993] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.994] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD7
+[05:58:24.994] |T| [write_file]: sceIoWrite: Writing to fd: 0xD7, size: 3
+[05:58:24.994] |T| [close_file]: sceIoClose: Closing file fd: 0xD7
+[05:58:24.995] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.995] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD8
+[05:58:24.996] |T| [write_file]: sceIoWrite: Writing to fd: 0xD8, size: 3
+[05:58:24.996] |T| [close_file]: sceIoClose: Closing file fd: 0xD8
+[05:58:24.997] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.997] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xD9
+[05:58:24.997] |T| [write_file]: sceIoWrite: Writing to fd: 0xD9, size: 3
+[05:58:24.998] |T| [close_file]: sceIoClose: Closing file fd: 0xD9
+[05:58:24.998] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:24.999] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDA
+[05:58:24.999] |T| [write_file]: sceIoWrite: Writing to fd: 0xDA, size: 3
+[05:58:24.999] |T| [close_file]: sceIoClose: Closing file fd: 0xDA
+[05:58:25.000] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.000] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDB
+[05:58:25.001] |T| [write_file]: sceIoWrite: Writing to fd: 0xDB, size: 3
+[05:58:25.001] |T| [close_file]: sceIoClose: Closing file fd: 0xDB
+[05:58:25.001] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.002] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDC
+[05:58:25.002] |T| [write_file]: sceIoWrite: Writing to fd: 0xDC, size: 3
+[05:58:25.002] |T| [close_file]: sceIoClose: Closing file fd: 0xDC
+[05:58:25.003] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.003] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDD
+[05:58:25.004] |T| [write_file]: sceIoWrite: Writing to fd: 0xDD, size: 3
+[05:58:25.004] |T| [close_file]: sceIoClose: Closing file fd: 0xDD
+[05:58:25.005] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.005] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDE
+[05:58:25.006] |T| [write_file]: sceIoWrite: Writing to fd: 0xDE, size: 3
+[05:58:25.006] |T| [close_file]: sceIoClose: Closing file fd: 0xDE
+[05:58:25.007] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.007] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xDF
+[05:58:25.007] |T| [write_file]: sceIoWrite: Writing to fd: 0xDF, size: 3
+[05:58:25.008] |T| [close_file]: sceIoClose: Closing file fd: 0xDF
+[05:58:25.008] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.009] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE0
+[05:58:25.009] |T| [write_file]: sceIoWrite: Writing to fd: 0xE0, size: 3
+[05:58:25.009] |T| [close_file]: sceIoClose: Closing file fd: 0xE0
+[05:58:25.010] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.010] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE1
+[05:58:25.011] |T| [write_file]: sceIoWrite: Writing to fd: 0xE1, size: 3
+[05:58:25.011] |T| [close_file]: sceIoClose: Closing file fd: 0xE1
+[05:58:25.012] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.012] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE2
+[05:58:25.013] |T| [write_file]: sceIoWrite: Writing to fd: 0xE2, size: 3
+[05:58:25.013] |T| [close_file]: sceIoClose: Closing file fd: 0xE2
+[05:58:25.013] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.014] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE3
+[05:58:25.014] |T| [write_file]: sceIoWrite: Writing to fd: 0xE3, size: 3
+[05:58:25.014] |T| [close_file]: sceIoClose: Closing file fd: 0xE3
+[05:58:25.015] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.015] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE4
+[05:58:25.016] |T| [write_file]: sceIoWrite: Writing to fd: 0xE4, size: 3
+[05:58:25.016] |T| [close_file]: sceIoClose: Closing file fd: 0xE4
+[05:58:25.016] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.017] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE5
+[05:58:25.017] |T| [write_file]: sceIoWrite: Writing to fd: 0xE5, size: 3
+[05:58:25.017] |T| [close_file]: sceIoClose: Closing file fd: 0xE5
+[05:58:25.018] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.018] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE6
+[05:58:25.019] |T| [write_file]: sceIoWrite: Writing to fd: 0xE6, size: 3
+[05:58:25.019] |T| [close_file]: sceIoClose: Closing file fd: 0xE6
+[05:58:25.020] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.020] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE7
+[05:58:25.021] |T| [write_file]: sceIoWrite: Writing to fd: 0xE7, size: 3
+[05:58:25.021] |T| [close_file]: sceIoClose: Closing file fd: 0xE7
+[05:58:25.021] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.022] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE8
+[05:58:25.022] |T| [write_file]: sceIoWrite: Writing to fd: 0xE8, size: 3
+[05:58:25.022] |T| [close_file]: sceIoClose: Closing file fd: 0xE8
+[05:58:25.023] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.023] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xE9
+[05:58:25.024] |T| [write_file]: sceIoWrite: Writing to fd: 0xE9, size: 3
+[05:58:25.024] |T| [close_file]: sceIoClose: Closing file fd: 0xE9
+[05:58:25.024] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.025] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xEA
+[05:58:25.025] |T| [write_file]: sceIoWrite: Writing to fd: 0xEA, size: 3
+[05:58:25.025] |T| [close_file]: sceIoClose: Closing file fd: 0xEA
+[05:58:25.026] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.026] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xEB
+[05:58:25.027] |T| [write_file]: sceIoWrite: Writing to fd: 0xEB, size: 3
+[05:58:25.027] |T| [close_file]: sceIoClose: Closing file fd: 0xEB
+[05:58:25.027] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.028] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xEC
+[05:58:25.028] |T| [write_file]: sceIoWrite: Writing to fd: 0xEC, size: 3
+[05:58:25.028] |T| [close_file]: sceIoClose: Closing file fd: 0xEC
+[05:58:25.029] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.030] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xED
+[05:58:25.031] |T| [write_file]: sceIoWrite: Writing to fd: 0xED, size: 3
+[05:58:25.031] |T| [close_file]: sceIoClose: Closing file fd: 0xED
+[05:58:25.031] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.032] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xEE
+[05:58:25.032] |T| [write_file]: sceIoWrite: Writing to fd: 0xEE, size: 3
+[05:58:25.032] |T| [close_file]: sceIoClose: Closing file fd: 0xEE
+[05:58:25.033] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.034] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xEF
+[05:58:25.034] |T| [write_file]: sceIoWrite: Writing to fd: 0xEF, size: 3
+[05:58:25.034] |T| [close_file]: sceIoClose: Closing file fd: 0xEF
+[05:58:25.035] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.035] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF0
+[05:58:25.036] |T| [write_file]: sceIoWrite: Writing to fd: 0xF0, size: 3
+[05:58:25.036] |T| [close_file]: sceIoClose: Closing file fd: 0xF0
+[05:58:25.036] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.037] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF1
+[05:58:25.037] |T| [write_file]: sceIoWrite: Writing to fd: 0xF1, size: 3
+[05:58:25.037] |T| [close_file]: sceIoClose: Closing file fd: 0xF1
+[05:58:25.038] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.038] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF2
+[05:58:25.039] |T| [write_file]: sceIoWrite: Writing to fd: 0xF2, size: 3
+[05:58:25.039] |T| [close_file]: sceIoClose: Closing file fd: 0xF2
+[05:58:25.041] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.041] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF3
+[05:58:25.042] |T| [write_file]: sceIoWrite: Writing to fd: 0xF3, size: 3
+[05:58:25.042] |T| [close_file]: sceIoClose: Closing file fd: 0xF3
+[05:58:25.042] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.043] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF4
+[05:58:25.043] |T| [write_file]: sceIoWrite: Writing to fd: 0xF4, size: 3
+[05:58:25.043] |T| [close_file]: sceIoClose: Closing file fd: 0xF4
+[05:58:25.044] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.044] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF5
+[05:58:25.045] |T| [write_file]: sceIoWrite: Writing to fd: 0xF5, size: 3
+[05:58:25.045] |T| [close_file]: sceIoClose: Closing file fd: 0xF5
+[05:58:25.045] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.046] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF6
+[05:58:25.046] |T| [write_file]: sceIoWrite: Writing to fd: 0xF6, size: 3
+[05:58:25.046] |T| [close_file]: sceIoClose: Closing file fd: 0xF6
+[05:58:25.047] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.047] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF7
+[05:58:25.048] |T| [write_file]: sceIoWrite: Writing to fd: 0xF7, size: 3
+[05:58:25.048] |T| [close_file]: sceIoClose: Closing file fd: 0xF7
+[05:58:25.048] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.049] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF8
+[05:58:25.050] |T| [write_file]: sceIoWrite: Writing to fd: 0xF8, size: 3
+[05:58:25.050] |T| [close_file]: sceIoClose: Closing file fd: 0xF8
+[05:58:25.051] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.051] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xF9
+[05:58:25.052] |T| [write_file]: sceIoWrite: Writing to fd: 0xF9, size: 3
+[05:58:25.052] |T| [close_file]: sceIoClose: Closing file fd: 0xF9
+[05:58:25.053] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.053] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFA
+[05:58:25.054] |T| [write_file]: sceIoWrite: Writing to fd: 0xFA, size: 3
+[05:58:25.054] |T| [close_file]: sceIoClose: Closing file fd: 0xFA
+[05:58:25.054] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.055] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFB
+[05:58:25.055] |T| [write_file]: sceIoWrite: Writing to fd: 0xFB, size: 3
+[05:58:25.055] |T| [close_file]: sceIoClose: Closing file fd: 0xFB
+[05:58:25.056] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.056] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFC
+[05:58:25.057] |T| [write_file]: sceIoWrite: Writing to fd: 0xFC, size: 3
+[05:58:25.057] |T| [close_file]: sceIoClose: Closing file fd: 0xFC
+[05:58:25.057] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.057] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFD
+[05:58:25.058] |T| [write_file]: sceIoWrite: Writing to fd: 0xFD, size: 3
+[05:58:25.058] |T| [close_file]: sceIoClose: Closing file fd: 0xFD
+[05:58:25.059] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.059] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFE
+[05:58:25.060] |T| [write_file]: sceIoWrite: Writing to fd: 0xFE, size: 3
+[05:58:25.060] |T| [close_file]: sceIoClose: Closing file fd: 0xFE
+[05:58:25.060] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.061] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0xFF
+[05:58:25.061] |T| [write_file]: sceIoWrite: Writing to fd: 0xFF, size: 3
+[05:58:25.062] |T| [close_file]: sceIoClose: Closing file fd: 0xFF
+[05:58:25.062] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.063] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x100
+[05:58:25.063] |T| [write_file]: sceIoWrite: Writing to fd: 0x100, size: 3
+[05:58:25.063] |T| [close_file]: sceIoClose: Closing file fd: 0x100
+[05:58:25.064] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.064] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x101
+[05:58:25.065] |T| [write_file]: sceIoWrite: Writing to fd: 0x101, size: 3
+[05:58:25.065] |T| [close_file]: sceIoClose: Closing file fd: 0x101
+[05:58:25.066] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.066] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x102
+[05:58:25.066] |T| [write_file]: sceIoWrite: Writing to fd: 0x102, size: 3
+[05:58:25.066] |T| [close_file]: sceIoClose: Closing file fd: 0x102
+[05:58:25.067] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.067] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x103
+[05:58:25.069] |T| [write_file]: sceIoWrite: Writing to fd: 0x103, size: 3
+[05:58:25.069] |T| [close_file]: sceIoClose: Closing file fd: 0x103
+[05:58:25.072] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.073] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x104
+[05:58:25.073] |T| [write_file]: sceIoWrite: Writing to fd: 0x104, size: 3
+[05:58:25.073] |T| [close_file]: sceIoClose: Closing file fd: 0x104
+[05:58:25.074] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.074] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x105
+[05:58:25.075] |T| [write_file]: sceIoWrite: Writing to fd: 0x105, size: 3
+[05:58:25.075] |T| [close_file]: sceIoClose: Closing file fd: 0x105
+[05:58:25.076] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.076] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x106
+[05:58:25.077] |T| [write_file]: sceIoWrite: Writing to fd: 0x106, size: 3
+[05:58:25.077] |T| [close_file]: sceIoClose: Closing file fd: 0x106
+[05:58:25.077] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.080] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x107
+[05:58:25.082] |T| [write_file]: sceIoWrite: Writing to fd: 0x107, size: 3
+[05:58:25.082] |T| [close_file]: sceIoClose: Closing file fd: 0x107
+[05:58:25.082] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.083] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x108
+[05:58:25.083] |T| [write_file]: sceIoWrite: Writing to fd: 0x108, size: 3
+[05:58:25.083] |T| [close_file]: sceIoClose: Closing file fd: 0x108
+[05:58:25.084] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.084] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x109
+[05:58:25.085] |T| [write_file]: sceIoWrite: Writing to fd: 0x109, size: 3
+[05:58:25.085] |T| [close_file]: sceIoClose: Closing file fd: 0x109
+[05:58:25.086] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.087] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10A
+[05:58:25.088] |T| [write_file]: sceIoWrite: Writing to fd: 0x10A, size: 3
+[05:58:25.088] |T| [close_file]: sceIoClose: Closing file fd: 0x10A
+[05:58:25.091] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.091] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10B
+[05:58:25.092] |T| [write_file]: sceIoWrite: Writing to fd: 0x10B, size: 3
+[05:58:25.092] |T| [close_file]: sceIoClose: Closing file fd: 0x10B
+[05:58:25.093] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.093] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10C
+[05:58:25.094] |T| [write_file]: sceIoWrite: Writing to fd: 0x10C, size: 3
+[05:58:25.094] |T| [close_file]: sceIoClose: Closing file fd: 0x10C
+[05:58:25.094] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.095] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10D
+[05:58:25.095] |T| [write_file]: sceIoWrite: Writing to fd: 0x10D, size: 3
+[05:58:25.095] |T| [close_file]: sceIoClose: Closing file fd: 0x10D
+[05:58:25.096] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.096] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10E
+[05:58:25.097] |T| [write_file]: sceIoWrite: Writing to fd: 0x10E, size: 3
+[05:58:25.097] |T| [close_file]: sceIoClose: Closing file fd: 0x10E
+[05:58:25.097] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.098] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x10F
+[05:58:25.098] |T| [write_file]: sceIoWrite: Writing to fd: 0x10F, size: 3
+[05:58:25.098] |T| [close_file]: sceIoClose: Closing file fd: 0x10F
+[05:58:25.099] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.100] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x110
+[05:58:25.101] |T| [write_file]: sceIoWrite: Writing to fd: 0x110, size: 3
+[05:58:25.101] |T| [close_file]: sceIoClose: Closing file fd: 0x110
+[05:58:25.102] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.102] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x111
+[05:58:25.103] |T| [write_file]: sceIoWrite: Writing to fd: 0x111, size: 3
+[05:58:25.103] |T| [close_file]: sceIoClose: Closing file fd: 0x111
+[05:58:25.103] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.104] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x112
+[05:58:25.104] |T| [write_file]: sceIoWrite: Writing to fd: 0x112, size: 3
+[05:58:25.104] |T| [close_file]: sceIoClose: Closing file fd: 0x112
+[05:58:25.105] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.105] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x113
+[05:58:25.106] |T| [write_file]: sceIoWrite: Writing to fd: 0x113, size: 3
+[05:58:25.106] |T| [close_file]: sceIoClose: Closing file fd: 0x113
+[05:58:25.106] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.107] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x114
+[05:58:25.107] |T| [write_file]: sceIoWrite: Writing to fd: 0x114, size: 3
+[05:58:25.107] |T| [close_file]: sceIoClose: Closing file fd: 0x114
+[05:58:25.108] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.108] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x115
+[05:58:25.109] |T| [write_file]: sceIoWrite: Writing to fd: 0x115, size: 3
+[05:58:25.109] |T| [close_file]: sceIoClose: Closing file fd: 0x115
+[05:58:25.109] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.110] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x116
+[05:58:25.111] |T| [write_file]: sceIoWrite: Writing to fd: 0x116, size: 3
+[05:58:25.111] |T| [close_file]: sceIoClose: Closing file fd: 0x116
+[05:58:25.112] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.112] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x117
+[05:58:25.113] |T| [write_file]: sceIoWrite: Writing to fd: 0x117, size: 3
+[05:58:25.113] |T| [close_file]: sceIoClose: Closing file fd: 0x117
+[05:58:25.114] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.114] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x118
+[05:58:25.115] |T| [write_file]: sceIoWrite: Writing to fd: 0x118, size: 3
+[05:58:25.115] |T| [close_file]: sceIoClose: Closing file fd: 0x118
+[05:58:25.115] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.116] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x119
+[05:58:25.116] |T| [write_file]: sceIoWrite: Writing to fd: 0x119, size: 3
+[05:58:25.116] |T| [close_file]: sceIoClose: Closing file fd: 0x119
+[05:58:25.117] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.117] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11A
+[05:58:25.118] |T| [write_file]: sceIoWrite: Writing to fd: 0x11A, size: 3
+[05:58:25.118] |T| [close_file]: sceIoClose: Closing file fd: 0x11A
+[05:58:25.119] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.119] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11B
+[05:58:25.121] |T| [write_file]: sceIoWrite: Writing to fd: 0x11B, size: 3
+[05:58:25.121] |T| [close_file]: sceIoClose: Closing file fd: 0x11B
+[05:58:25.122] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.122] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11C
+[05:58:25.123] |T| [write_file]: sceIoWrite: Writing to fd: 0x11C, size: 3
+[05:58:25.123] |T| [close_file]: sceIoClose: Closing file fd: 0x11C
+[05:58:25.123] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.124] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11D
+[05:58:25.124] |T| [write_file]: sceIoWrite: Writing to fd: 0x11D, size: 3
+[05:58:25.124] |T| [close_file]: sceIoClose: Closing file fd: 0x11D
+[05:58:25.125] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.125] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11E
+[05:58:25.126] |T| [write_file]: sceIoWrite: Writing to fd: 0x11E, size: 3
+[05:58:25.126] |T| [close_file]: sceIoClose: Closing file fd: 0x11E
+[05:58:25.126] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.127] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x11F
+[05:58:25.127] |T| [write_file]: sceIoWrite: Writing to fd: 0x11F, size: 3
+[05:58:25.127] |T| [close_file]: sceIoClose: Closing file fd: 0x11F
+[05:58:25.128] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.129] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x120
+[05:58:25.129] |T| [write_file]: sceIoWrite: Writing to fd: 0x120, size: 3
+[05:58:25.129] |T| [close_file]: sceIoClose: Closing file fd: 0x120
+[05:58:25.130] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.130] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x121
+[05:58:25.131] |T| [write_file]: sceIoWrite: Writing to fd: 0x121, size: 3
+[05:58:25.131] |T| [close_file]: sceIoClose: Closing file fd: 0x121
+[05:58:25.132] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.132] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x122
+[05:58:25.133] |T| [write_file]: sceIoWrite: Writing to fd: 0x122, size: 3
+[05:58:25.133] |T| [close_file]: sceIoClose: Closing file fd: 0x122
+[05:58:25.134] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.134] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x123
+[05:58:25.135] |T| [write_file]: sceIoWrite: Writing to fd: 0x123, size: 3
+[05:58:25.135] |T| [close_file]: sceIoClose: Closing file fd: 0x123
+[05:58:25.136] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.136] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x124
+[05:58:25.137] |T| [write_file]: sceIoWrite: Writing to fd: 0x124, size: 3
+[05:58:25.137] |T| [close_file]: sceIoClose: Closing file fd: 0x124
+[05:58:25.137] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.138] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x125
+[05:58:25.138] |T| [write_file]: sceIoWrite: Writing to fd: 0x125, size: 1
+[05:58:25.138] |T| [close_file]: sceIoClose: Closing file fd: 0x125
+[05:58:25.146] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.147] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x126
+[05:58:25.147] |T| [write_file]: sceIoWrite: Writing to fd: 0x126, size: 34
+[05:58:25.147] |T| [close_file]: sceIoClose: Closing file fd: 0x126
+[05:58:25.149] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.150] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x127
+[05:58:25.150] |T| [write_file]: sceIoWrite: Writing to fd: 0x127, size: 34
+[05:58:25.151] |T| [close_file]: sceIoClose: Closing file fd: 0x127
+[05:58:25.152] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.152] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x128
+[05:58:25.153] |T| [write_file]: sceIoWrite: Writing to fd: 0x128, size: 34
+[05:58:25.153] |T| [close_file]: sceIoClose: Closing file fd: 0x128
+[05:58:25.153] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.154] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x129
+[05:58:25.154] |T| [write_file]: sceIoWrite: Writing to fd: 0x129, size: 34
+[05:58:25.154] |T| [close_file]: sceIoClose: Closing file fd: 0x129
+[05:58:25.158] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.159] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12A
+[05:58:25.159] |T| [write_file]: sceIoWrite: Writing to fd: 0x12A, size: 34
+[05:58:25.159] |T| [close_file]: sceIoClose: Closing file fd: 0x12A
+[05:58:25.161] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.161] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12B
+[05:58:25.162] |T| [write_file]: sceIoWrite: Writing to fd: 0x12B, size: 34
+[05:58:25.162] |T| [close_file]: sceIoClose: Closing file fd: 0x12B
+[05:58:25.170] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.170] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12C
+[05:58:25.171] |T| [write_file]: sceIoWrite: Writing to fd: 0x12C, size: 34
+[05:58:25.171] |T| [close_file]: sceIoClose: Closing file fd: 0x12C
+[05:58:25.172] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.172] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12D
+[05:58:25.173] |T| [write_file]: sceIoWrite: Writing to fd: 0x12D, size: 34
+[05:58:25.173] |T| [close_file]: sceIoClose: Closing file fd: 0x12D
+[05:58:25.174] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.174] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12E
+[05:58:25.175] |T| [write_file]: sceIoWrite: Writing to fd: 0x12E, size: 35
+[05:58:25.175] |T| [close_file]: sceIoClose: Closing file fd: 0x12E
+[05:58:25.175] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.176] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x12F
+[05:58:25.176] |T| [write_file]: sceIoWrite: Writing to fd: 0x12F, size: 35
+[05:58:25.176] |T| [close_file]: sceIoClose: Closing file fd: 0x12F
+[05:58:25.181] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.182] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x130
+[05:58:25.182] |T| [write_file]: sceIoWrite: Writing to fd: 0x130, size: 35
+[05:58:25.182] |T| [close_file]: sceIoClose: Closing file fd: 0x130
+[05:58:25.183] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.184] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x131
+[05:58:25.184] |T| [write_file]: sceIoWrite: Writing to fd: 0x131, size: 35
+[05:58:25.184] |T| [close_file]: sceIoClose: Closing file fd: 0x131
+[05:58:25.185] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.185] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x132
+[05:58:25.186] |T| [write_file]: sceIoWrite: Writing to fd: 0x132, size: 35
+[05:58:25.186] |T| [close_file]: sceIoClose: Closing file fd: 0x132
+[05:58:25.187] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.187] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x133
+[05:58:25.187] |T| [write_file]: sceIoWrite: Writing to fd: 0x133, size: 35
+[05:58:25.187] |T| [close_file]: sceIoClose: Closing file fd: 0x133
+[05:58:25.188] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.189] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x134
+[05:58:25.189] |T| [write_file]: sceIoWrite: Writing to fd: 0x134, size: 35
+[05:58:25.189] |T| [close_file]: sceIoClose: Closing file fd: 0x134
+[05:58:25.190] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.191] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x135
+[05:58:25.191] |T| [write_file]: sceIoWrite: Writing to fd: 0x135, size: 35
+[05:58:25.192] |T| [close_file]: sceIoClose: Closing file fd: 0x135
+[05:58:25.193] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.193] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x136
+[05:58:25.194] |T| [write_file]: sceIoWrite: Writing to fd: 0x136, size: 35
+[05:58:25.194] |T| [close_file]: sceIoClose: Closing file fd: 0x136
+[05:58:25.195] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.195] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x137
+[05:58:25.196] |T| [write_file]: sceIoWrite: Writing to fd: 0x137, size: 35
+[05:58:25.196] |T| [close_file]: sceIoClose: Closing file fd: 0x137
+[05:58:25.200] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.200] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x138
+[05:58:25.201] |T| [write_file]: sceIoWrite: Writing to fd: 0x138, size: 35
+[05:58:25.201] |T| [close_file]: sceIoClose: Closing file fd: 0x138
+[05:58:25.202] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.202] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x139
+[05:58:25.203] |T| [write_file]: sceIoWrite: Writing to fd: 0x139, size: 35
+[05:58:25.203] |T| [close_file]: sceIoClose: Closing file fd: 0x139
+[05:58:25.204] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.204] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13A
+[05:58:25.204] |T| [write_file]: sceIoWrite: Writing to fd: 0x13A, size: 35
+[05:58:25.204] |T| [close_file]: sceIoClose: Closing file fd: 0x13A
+[05:58:25.205] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.205] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13B
+[05:58:25.206] |T| [write_file]: sceIoWrite: Writing to fd: 0x13B, size: 35
+[05:58:25.206] |T| [close_file]: sceIoClose: Closing file fd: 0x13B
+[05:58:25.207] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.207] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13C
+[05:58:25.207] |T| [write_file]: sceIoWrite: Writing to fd: 0x13C, size: 35
+[05:58:25.207] |T| [close_file]: sceIoClose: Closing file fd: 0x13C
+[05:58:25.208] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.208] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13D
+[05:58:25.209] |T| [write_file]: sceIoWrite: Writing to fd: 0x13D, size: 35
+[05:58:25.209] |T| [close_file]: sceIoClose: Closing file fd: 0x13D
+[05:58:25.210] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.211] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13E
+[05:58:25.211] |T| [write_file]: sceIoWrite: Writing to fd: 0x13E, size: 35
+[05:58:25.211] |T| [close_file]: sceIoClose: Closing file fd: 0x13E
+[05:58:25.212] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.213] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x13F
+[05:58:25.213] |T| [write_file]: sceIoWrite: Writing to fd: 0x13F, size: 35
+[05:58:25.213] |T| [close_file]: sceIoClose: Closing file fd: 0x13F
+[05:58:25.221] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.221] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x140
+[05:58:25.221] |T| [write_file]: sceIoWrite: Writing to fd: 0x140, size: 35
+[05:58:25.221] |T| [close_file]: sceIoClose: Closing file fd: 0x140
+[05:58:25.222] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.223] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x141
+[05:58:25.223] |T| [write_file]: sceIoWrite: Writing to fd: 0x141, size: 35
+[05:58:25.223] |T| [close_file]: sceIoClose: Closing file fd: 0x141
+[05:58:25.224] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.225] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x142
+[05:58:25.225] |T| [write_file]: sceIoWrite: Writing to fd: 0x142, size: 35
+[05:58:25.225] |T| [close_file]: sceIoClose: Closing file fd: 0x142
+[05:58:25.226] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.226] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x143
+[05:58:25.227] |T| [write_file]: sceIoWrite: Writing to fd: 0x143, size: 35
+[05:58:25.227] |T| [close_file]: sceIoClose: Closing file fd: 0x143
+[05:58:25.227] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.228] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x144
+[05:58:25.228] |T| [write_file]: sceIoWrite: Writing to fd: 0x144, size: 35
+[05:58:25.228] |T| [close_file]: sceIoClose: Closing file fd: 0x144
+[05:58:25.229] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.230] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x145
+[05:58:25.231] |T| [write_file]: sceIoWrite: Writing to fd: 0x145, size: 35
+[05:58:25.231] |T| [close_file]: sceIoClose: Closing file fd: 0x145
+[05:58:25.231] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.232] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x146
+[05:58:25.232] |T| [write_file]: sceIoWrite: Writing to fd: 0x146, size: 35
+[05:58:25.232] |T| [close_file]: sceIoClose: Closing file fd: 0x146
+[05:58:25.233] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.234] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x147
+[05:58:25.234] |T| [write_file]: sceIoWrite: Writing to fd: 0x147, size: 35
+[05:58:25.234] |T| [close_file]: sceIoClose: Closing file fd: 0x147
+[05:58:25.240] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.241] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x148
+[05:58:25.241] |T| [write_file]: sceIoWrite: Writing to fd: 0x148, size: 35
+[05:58:25.241] |T| [close_file]: sceIoClose: Closing file fd: 0x148
+[05:58:25.242] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.243] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x149
+[05:58:25.243] |T| [write_file]: sceIoWrite: Writing to fd: 0x149, size: 35
+[05:58:25.243] |T| [close_file]: sceIoClose: Closing file fd: 0x149
+[05:58:25.244] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.244] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14A
+[05:58:25.245] |T| [write_file]: sceIoWrite: Writing to fd: 0x14A, size: 35
+[05:58:25.245] |T| [close_file]: sceIoClose: Closing file fd: 0x14A
+[05:58:25.246] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.246] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14B
+[05:58:25.246] |T| [write_file]: sceIoWrite: Writing to fd: 0x14B, size: 35
+[05:58:25.247] |T| [close_file]: sceIoClose: Closing file fd: 0x14B
+[05:58:25.247] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.248] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14C
+[05:58:25.248] |T| [write_file]: sceIoWrite: Writing to fd: 0x14C, size: 35
+[05:58:25.248] |T| [close_file]: sceIoClose: Closing file fd: 0x14C
+[05:58:25.249] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.250] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14D
+[05:58:25.251] |T| [write_file]: sceIoWrite: Writing to fd: 0x14D, size: 35
+[05:58:25.251] |T| [close_file]: sceIoClose: Closing file fd: 0x14D
+[05:58:25.252] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.252] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14E
+[05:58:25.253] |T| [write_file]: sceIoWrite: Writing to fd: 0x14E, size: 35
+[05:58:25.253] |T| [close_file]: sceIoClose: Closing file fd: 0x14E
+[05:58:25.253] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.254] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x14F
+[05:58:25.254] |T| [write_file]: sceIoWrite: Writing to fd: 0x14F, size: 35
+[05:58:25.254] |T| [close_file]: sceIoClose: Closing file fd: 0x14F
+[05:58:25.260] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.261] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x150
+[05:58:25.262] |T| [write_file]: sceIoWrite: Writing to fd: 0x150, size: 35
+[05:58:25.262] |T| [close_file]: sceIoClose: Closing file fd: 0x150
+[05:58:25.263] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.263] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x151
+[05:58:25.264] |T| [write_file]: sceIoWrite: Writing to fd: 0x151, size: 35
+[05:58:25.264] |T| [close_file]: sceIoClose: Closing file fd: 0x151
+[05:58:25.264] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.265] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x152
+[05:58:25.265] |T| [write_file]: sceIoWrite: Writing to fd: 0x152, size: 35
+[05:58:25.265] |T| [close_file]: sceIoClose: Closing file fd: 0x152
+[05:58:25.266] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.266] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x153
+[05:58:25.267] |T| [write_file]: sceIoWrite: Writing to fd: 0x153, size: 35
+[05:58:25.267] |T| [close_file]: sceIoClose: Closing file fd: 0x153
+[05:58:25.267] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.268] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x154
+[05:58:25.268] |T| [write_file]: sceIoWrite: Writing to fd: 0x154, size: 35
+[05:58:25.268] |T| [close_file]: sceIoClose: Closing file fd: 0x154
+[05:58:25.269] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.270] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x155
+[05:58:25.270] |T| [write_file]: sceIoWrite: Writing to fd: 0x155, size: 35
+[05:58:25.270] |T| [close_file]: sceIoClose: Closing file fd: 0x155
+[05:58:25.271] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.272] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x156
+[05:58:25.272] |T| [write_file]: sceIoWrite: Writing to fd: 0x156, size: 35
+[05:58:25.272] |T| [close_file]: sceIoClose: Closing file fd: 0x156
+[05:58:25.273] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.273] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x157
+[05:58:25.274] |T| [write_file]: sceIoWrite: Writing to fd: 0x157, size: 35
+[05:58:25.274] |T| [close_file]: sceIoClose: Closing file fd: 0x157
+[05:58:25.282] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.282] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x158
+[05:58:25.283] |T| [write_file]: sceIoWrite: Writing to fd: 0x158, size: 35
+[05:58:25.283] |T| [close_file]: sceIoClose: Closing file fd: 0x158
+[05:58:25.284] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.284] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x159
+[05:58:25.284] |T| [write_file]: sceIoWrite: Writing to fd: 0x159, size: 35
+[05:58:25.284] |T| [close_file]: sceIoClose: Closing file fd: 0x159
+[05:58:25.285] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.286] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15A
+[05:58:25.286] |T| [write_file]: sceIoWrite: Writing to fd: 0x15A, size: 35
+[05:58:25.286] |T| [close_file]: sceIoClose: Closing file fd: 0x15A
+[05:58:25.287] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.287] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15B
+[05:58:25.288] |T| [write_file]: sceIoWrite: Writing to fd: 0x15B, size: 35
+[05:58:25.288] |T| [close_file]: sceIoClose: Closing file fd: 0x15B
+[05:58:25.289] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.289] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15C
+[05:58:25.290] |T| [write_file]: sceIoWrite: Writing to fd: 0x15C, size: 35
+[05:58:25.290] |T| [close_file]: sceIoClose: Closing file fd: 0x15C
+[05:58:25.291] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.291] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15D
+[05:58:25.292] |T| [write_file]: sceIoWrite: Writing to fd: 0x15D, size: 35
+[05:58:25.292] |T| [close_file]: sceIoClose: Closing file fd: 0x15D
+[05:58:25.292] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.293] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15E
+[05:58:25.293] |T| [write_file]: sceIoWrite: Writing to fd: 0x15E, size: 35
+[05:58:25.293] |T| [close_file]: sceIoClose: Closing file fd: 0x15E
+[05:58:25.294] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.295] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x15F
+[05:58:25.295] |T| [write_file]: sceIoWrite: Writing to fd: 0x15F, size: 35
+[05:58:25.295] |T| [close_file]: sceIoClose: Closing file fd: 0x15F
+[05:58:25.354] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.354] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x160
+[05:58:25.355] |T| [write_file]: sceIoWrite: Writing to fd: 0x160, size: 32
+[05:58:25.355] |T| [close_file]: sceIoClose: Closing file fd: 0x160
+[05:58:25.355] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.356] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x161
+[05:58:25.356] |T| [write_file]: sceIoWrite: Writing to fd: 0x161, size: 15
+[05:58:25.356] |T| [close_file]: sceIoClose: Closing file fd: 0x161
+[05:58:25.358] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.359] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x162
+[05:58:25.360] |T| [write_file]: sceIoWrite: Writing to fd: 0x162, size: 7
+[05:58:25.360] |T| [close_file]: sceIoClose: Closing file fd: 0x162
+[05:58:25.360] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.361] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x163
+[05:58:25.361] |T| [write_file]: sceIoWrite: Writing to fd: 0x163, size: 35
+[05:58:25.361] |T| [close_file]: sceIoClose: Closing file fd: 0x163
+[05:58:25.362] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.362] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x164
+[05:58:25.363] |T| [write_file]: sceIoWrite: Writing to fd: 0x164, size: 13
+[05:58:25.363] |T| [close_file]: sceIoClose: Closing file fd: 0x164
+[05:58:25.364] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.364] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x165
+[05:58:25.365] |T| [write_file]: sceIoWrite: Writing to fd: 0x165, size: 13
+[05:58:25.365] |T| [close_file]: sceIoClose: Closing file fd: 0x165
+[05:58:25.365] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.366] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x166
+[05:58:25.366] |T| [write_file]: sceIoWrite: Writing to fd: 0x166, size: 13
+[05:58:25.366] |T| [close_file]: sceIoClose: Closing file fd: 0x166
+[05:58:25.367] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.367] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x167
+[05:58:25.368] |T| [write_file]: sceIoWrite: Writing to fd: 0x167, size: 13
+[05:58:25.368] |T| [close_file]: sceIoClose: Closing file fd: 0x167
+[05:58:25.368] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.369] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x168
+[05:58:25.369] |T| [write_file]: sceIoWrite: Writing to fd: 0x168, size: 13
+[05:58:25.369] |T| [close_file]: sceIoClose: Closing file fd: 0x168
+[05:58:25.370] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.371] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x169
+[05:58:25.371] |T| [write_file]: sceIoWrite: Writing to fd: 0x169, size: 13
+[05:58:25.371] |T| [close_file]: sceIoClose: Closing file fd: 0x169
+[05:58:25.372] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.372] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16A
+[05:58:25.373] |T| [write_file]: sceIoWrite: Writing to fd: 0x16A, size: 13
+[05:58:25.373] |T| [close_file]: sceIoClose: Closing file fd: 0x16A
+[05:58:25.374] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.374] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16B
+[05:58:25.375] |T| [write_file]: sceIoWrite: Writing to fd: 0x16B, size: 13
+[05:58:25.375] |T| [close_file]: sceIoClose: Closing file fd: 0x16B
+[05:58:25.375] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.376] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16C
+[05:58:25.376] |T| [write_file]: sceIoWrite: Writing to fd: 0x16C, size: 14
+[05:58:25.376] |T| [close_file]: sceIoClose: Closing file fd: 0x16C
+[05:58:25.377] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.377] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16D
+[05:58:25.378] |T| [write_file]: sceIoWrite: Writing to fd: 0x16D, size: 14
+[05:58:25.378] |T| [close_file]: sceIoClose: Closing file fd: 0x16D
+[05:58:25.379] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.379] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16E
+[05:58:25.380] |T| [write_file]: sceIoWrite: Writing to fd: 0x16E, size: 15
+[05:58:25.380] |T| [close_file]: sceIoClose: Closing file fd: 0x16E
+[05:58:25.381] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.382] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x16F
+[05:58:25.382] |T| [write_file]: sceIoWrite: Writing to fd: 0x16F, size: 14
+[05:58:25.382] |T| [close_file]: sceIoClose: Closing file fd: 0x16F
+[05:58:25.384] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:25.384] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x170
+[05:58:25.385] |T| [write_file]: sceIoWrite: Writing to fd: 0x170, size: 58
+[05:58:25.385] |T| [close_file]: sceIoClose: Closing file fd: 0x170
+[05:58:28.174] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:28.176] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x171
+[05:58:28.177] |T| [write_file]: sceIoWrite: Writing to fd: 0x171, size: 50
+[05:58:28.177] |T| [close_file]: sceIoClose: Closing file fd: 0x171
+[05:58:30.477] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:30.477] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x172
+[05:58:30.485] |T| [write_file]: sceIoWrite: Writing to fd: 0x172, size: 10
+[05:58:30.485] |T| [close_file]: sceIoClose: Closing file fd: 0x172
+[05:58:30.486] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:30.487] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x173
+[05:58:30.488] |T| [write_file]: sceIoWrite: Writing to fd: 0x173, size: 88
+[05:58:30.488] |T| [close_file]: sceIoClose: Closing file fd: 0x173
+[05:58:30.489] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:30.489] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x174
+[05:58:30.490] |T| [write_file]: sceIoWrite: Writing to fd: 0x174, size: 146
+[05:58:30.490] |T| [close_file]: sceIoClose: Closing file fd: 0x174
+[05:58:32.514] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:32.514] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x175
+[05:58:32.514] |T| [write_file]: sceIoWrite: Writing to fd: 0x175, size: 50
+[05:58:32.514] |T| [close_file]: sceIoClose: Closing file fd: 0x175
+[05:58:35.534] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:35.534] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x176
+[05:58:35.536] |T| [write_file]: sceIoWrite: Writing to fd: 0x176, size: 10
+[05:58:35.536] |T| [close_file]: sceIoClose: Closing file fd: 0x176
+[05:58:35.536] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:35.537] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x177
+[05:58:35.537] |T| [write_file]: sceIoWrite: Writing to fd: 0x177, size: 91
+[05:58:35.537] |T| [close_file]: sceIoClose: Closing file fd: 0x177
+[05:58:35.538] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:35.539] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x178
+[05:58:35.539] |T| [write_file]: sceIoWrite: Writing to fd: 0x178, size: 65
+[05:58:35.539] |T| [close_file]: sceIoClose: Closing file fd: 0x178
+[05:58:35.540] |I| [export_sceIoOpen]: Opening file: ux0:/data/yabausevita_log.txt
+[05:58:35.541] |T| [open_file]: sceIoOpen: Opening file ux0:/data/yabausevita_log.txt (ux0:/data/yabausevita_log.txt), fd: 0x179
+[05:58:35
