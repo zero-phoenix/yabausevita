@@ -412,6 +412,7 @@ marca como superado si una medición posterior lo contradice.
 | R11 | El `show_fps` en pantalla mide el ROM; el del título de Vita3K mide la app. No citarlos indistintamente. | Ronda 1 |
 | R12 | Un experimento de input se diseña con control sin pulsar y pico de transición, nunca con delta de medianas en escena en movimiento. | A20 |
 | R13 | Todo veredicto declara en qué pantalla se midió; «no cruza» en attract es «no respondió ESTA pantalla». | A21 |
+| R16 | Una corrida también trae **veredicto de sonido** (loopback WASAPI, `listen_audio`): la imagen verificada es la mitad de la evidencia. | Protocolo de ronda verificada de MAGI (`oidos.py`, `ronda_verificada.py`), 31-ago-2026 |
 
 ---
 
