@@ -1216,10 +1216,20 @@ static int sh2dyn_arm_reset(void) {
 /* ══════════════════════════════════════════════════════════════
    MAIN EXECUTION LOOP
    ══════════════════════════════════════════════════════════════ */
+/* Ronda 4: instrucciones ejecutadas por core en SH2DynARM.
+   [0]=MSH2, [1]=SSH2. */
+unsigned long long sh2dyn_instr_total[2] = {0, 0};
+
 static void FASTCALL sh2dyn_arm_exec(SH2_struct *restrict context, u32 cycles)
 {
     if (!context) return;
-    if (__builtin_expect(context->isIdle, 0)) { SH2idleParse(context, cycles); return; }
+    u32 cycles_entrada = context->cycles;
+    int idx = (context == MSH2) ? 0 : 1;
+    if (__builtin_expect(context->isIdle, 0)) {
+        SH2idleParse(context, cycles);
+        sh2dyn_instr_total[idx] += context->cycles - cycles_entrada;
+        return;
+    }
     SH2idleCheck(context, cycles);
 
     u32 last_page = 0xFFFFFFFF;
@@ -1267,6 +1277,7 @@ static void FASTCALL sh2dyn_arm_exec(SH2_struct *restrict context, u32 cycles)
             context->cycles++;
         }
     }
+    sh2dyn_instr_total[idx] += context->cycles - cycles_entrada;
 }
 
 static void sh2dyn_arm_write_notify(u32 start, u32 length) {

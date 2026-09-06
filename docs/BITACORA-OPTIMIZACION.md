@@ -393,6 +393,13 @@ marca como superado si una medición posterior lo contradice.
 | A26 | `SH2LRU` da ~44 FPS en Sonic R, prácticamente lo mismo que `SH2Fast`. Cambiar de intérprete no es la palanca. | R3 |
 | A27 | El TOC construido por `cd_chd.c` marca la pista 1 con `ctrl 0x41` (datos), que es correcto. El TOC no explica A24. | Lectura de `cd_chd.c`, R3 |
 
+### 5.1c Ronda 4 — instrumentación universal SH2 y sonda CDB
+
+| # | Hallazgo | Origen |
+|---|---|---|
+| A28 | `SH2LRU` y `SH2DynARM` instrumentados con el mismo mecanismo de acumulación delta por llamada a `exec` que `SH2Fast`. `main.c` agrega las instrucciones ejecutadas por los tres cores y reporta `msh2_ns/instr` y `ssh2_ns/instr` cada 5 s con independencia del `cpu_mode` activo. | Ronda 4, 6-sep-2026 |
+| A29 | Sonda de comandos CDB (`Cs2Execute`): trazabilidad de los primeros 120 comandos CD Block emitidos por la BIOS/juego con sus registros `CR1..CR4`, `HIRQ` y `FAD` para aislar el punto de abandono de NiGHTS vs Panzer Dragoon. | Ronda 4, 6-sep-2026 |
+
 ### 5.2 Reglas derivadas (lo que no hay que volver a intentar)
 
 | # | Regla | Por qué |
@@ -406,6 +413,7 @@ marca como superado si una medición posterior lo contradice.
 | R7 | No interpretar `GPU timing` como µs por fotograma. Son totales de 5 s. | A8 |
 | R14 | **No volver a sospechar del disco de NiGHTS.** Llega byte-perfecto y su región es válida. La siguiente hipótesis es del lado de la BIOS/CDB: por qué abandona tras 3 sectores del IP.BIN. | A23, A24, A27 |
 | R15 | La palanca no es cambiar de intérprete: `SH2Fast` y `SH2LRU` dan lo mismo. Es el coste por instrucción (51-81 ns). | A25, A26 |
+| R17 | No evaluar el coste por instrucción asumiendo que solo `SH2Fast` está instrumentado: la telemetría periódica de `main.c` ahora suma `sh2fast`, `sh2lru` y `sh2dyn`. | A28 |
 | R8 | La ronda 1 es de **instrumentación**, no de optimización: contadores por subsistema en `YabauseExec` (SH-2, SCU, SCSP/68K, CD). Sin eso, cualquier propuesta apunta al 98,7 % a ciegas. | A7 |
 | R9 | Ninguna corrida se acepta sin **verificación de imagen y movimiento** (capturas continuas + diff %). El FPS por sí solo no es evidencia. | A12, Ronda 1 |
 | R10 | Todo cambio de core (SH2, VDP) se valida con corrida + capturas antes de llamarlo «funciona». El log no puede ver lo que ve el jugador. | A13, A14 |

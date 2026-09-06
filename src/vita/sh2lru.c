@@ -22,6 +22,10 @@ typedef struct {
 
 static BlockEntry block_cache[CACHE_SIZE];
 
+/* Ronda 3/4: instrucciones ejecutadas por core en SH2LRU.
+   [0]=MSH2, [1]=SSH2. */
+unsigned long long sh2lru_instr_total[2] = {0, 0};
+
 static int sh2lru_init(void)
 {
     memset(block_cache, 0, sizeof(block_cache));
@@ -57,8 +61,14 @@ static INLINE int is_branch_term(u16 inst)
 static void FASTCALL sh2lru_exec(SH2_struct *context, u32 cycles)
 {
     if (!context) return;
+    u32 cycles_entrada = context->cycles;
+    int idx = (context == MSH2) ? 0 : 1;
     if (context->isIdle)
-    { SH2idleParse(context, cycles); return; }
+    {
+        SH2idleParse(context, cycles);
+        sh2lru_instr_total[idx] += context->cycles - cycles_entrada;
+        return;
+    }
     SH2idleCheck(context, cycles);
 
     u32 end_cycles = context->cycles + cycles;
@@ -99,6 +109,7 @@ static void FASTCALL sh2lru_exec(SH2_struct *context, u32 cycles)
             if (context->regs.PC != pc + i * 2) break;
         }
     }
+    sh2lru_instr_total[idx] += context->cycles - cycles_entrada;
 }
 
 static void sh2lru_write_notify(u32 start, u32 length)

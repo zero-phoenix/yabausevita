@@ -29,6 +29,8 @@
 #include "smpc.h"
 #include "yui.h"
 
+extern int vita_log(const char *fmt, ...);
+
 #define CDB_HIRQ_CMOK      0x0001
 #define CDB_HIRQ_DRDY      0x0002
 #define CDB_HIRQ_CSCT      0x0004
@@ -857,6 +859,17 @@ void Cs2SetCommandTiming(u8 cmd) {
 
 void Cs2Execute(void) {
   u16 instruction = Cs2Area->reg.CR1 >> 8;
+
+  /* Ronda 4: sonda de comandos CDB emitidos por la BIOS/juego. */
+  {
+      static int s_cdb_cmds = 0;
+      if (s_cdb_cmds < 120) {
+          s_cdb_cmds++;
+          vita_log("CDB_CMD[%d]: cmd=0x%02X CR1=%04X CR2=%04X CR3=%04X CR4=%04X HIRQ=%04X FAD=%u\n",
+                   s_cdb_cmds, instruction, Cs2Area->reg.CR1, Cs2Area->reg.CR2,
+                   Cs2Area->reg.CR3, Cs2Area->reg.CR4, Cs2Area->reg.HIRQ, Cs2Area->FAD);
+      }
+  }
 
   Cs2Area->reg.HIRQ &= ~CDB_HIRQ_CMOK;
 
